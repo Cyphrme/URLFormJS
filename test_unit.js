@@ -1,6 +1,6 @@
 "use strict";
 
-import * as Form from './form.js';
+import * as Form from './urlform.js';
 
 export {
 	TestBrowserJS
@@ -15,7 +15,7 @@ export {
  * @typedef {import('./browsertestjs/test.js').TestBrowserJS} TestBrowserJS
  * 
  * Application imports
- * @typedef {import ('./form.js').FormOptions} FormOptions
+ * @typedef {import ('./urlform.js').FormOptions} FormOptions
  */
 
 /**@type {FormOptions} */

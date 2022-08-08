@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+<head>
+	<script src="./example.js"></script>
+
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#ffffff">
+
+	<title>URLFormJS</title>
+	<link rel="stylesheet" id="bootstrapCSS">
+
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+	<link rel="icon" href="favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+	<link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+
+<body class="d-flex flex-column h-100">
+	<header>
+		<nav class="navbar navbar-light bg-light">
+			<div class="container-fluid">
+				<a class="navbar-brand"></a>
+			</div>
+		</nav>
+	</header>
+
+
+	<main class="flex-shrink-0">
+		<div class="container-xxl text-center">
+
+			<a href="/"><img class="my-2" id="MainImage" src="formjs.png" alt="URLForm JS"></a>
+
+			<div>
+				<form id="ExampleUserForm">
+					<div>
+						<input type="text" id="input_first_name" name="first_name" placeholder="First Name">
+					</div>
+					<div>
+						<input type="text" id="input_middle_name" name="middle_name" placeholder="Middle Name">
+					</div>
+					<div>
+						<input type="text" id="input_last_name" name="last_name" placeholder="Last Name">
+					</div>
+					<div>
+						<input type="text" id="input_email_address" name="email_address" placeholder="Email Address">
+					</div>
+					<div>
+						<input type="text" id="input_phone_number" name="phone_number" placeholder="Phone Number">
+					</div>
+					<div>
+						<label for="input_subscribe_latest_news">Subscribe to the latest news</label>
+						<input type="checkbox" id="input_subscribe_latest_news" name="subscribe_latest_news">
+					</div>
+				</form>
+
+				<button id="ShareURLBtn" class="btn mt-3 btn-primary">Share URL</button>
+				<div>
+					<p><span id="ShareURL"></span></p>
+				</div>
+
+			</div>
+
+		</div>
+	</main>
+
+	<footer class="footer mt-auto py-3 bg-light text-center">
+		<h4><a href="https://github.com/cyphrme/URLFormJS">Source code for URLFormJS</a></h4>
+	</footer>
+</body>
+
+</html>
