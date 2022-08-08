@@ -1,9 +1,6 @@
 "use strict"
 
-import {
-	Init,
-	PopulateFromURI
-} from '@scope./urlform.min.js';
+import * as Form from './urlform.min.js';
 
 // An application may use the prefix "input_" to denote user modifiable fields
 // in the GUI, use a custom id for the ShareURL button, or a custom id for the
@@ -55,6 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	window.history.pushState({}, '', url);
 
 	// Initialize and populate sticky form.
-	Init(FormParameters, FormOptions);
-	PopulateFromURI(FormParameters, FormOptions);
+	Form.Init(FormParameters, FormOptions);
+	Form.PopulateFromURI(FormParameters, FormOptions);
 });
