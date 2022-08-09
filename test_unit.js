@@ -58,14 +58,14 @@ const ExampleValues = {
 /**@type {Test} */
 let t_InitForm = {
 	"name": "Initialize Form",
-	"func": test_InitForm,
+	"func": test_Init,
 	"golden": `https://localhost:8082/?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true`
 };
 
 /**@type {Test} */
 let t_ClearForm = {
 	"name": "Clear Form",
-	"func": test_ClearForm,
+	"func": test_Clear,
 	"golden": true
 };
 
@@ -89,7 +89,7 @@ let t_PopulateFromValues = {
 
 // Testing helper function for checking that the form was populated correctly.
 function checkForm(f) {
-	let parsd = Form.Parse(f);
+	let parsd = Form.Objectify(f);
 	if (parsd.email_address !== "bob@something.com") {
 		return false;
 	}
@@ -112,43 +112,11 @@ function checkForm(f) {
 // Tests
 ////////////////////
 
-// IsFormEmpty, Serialize, and Parse are tests that do not have their own unit
+// IsEmpty, Serialize, and Objectify are tests that do not have their own unit
 // test, but are all tested within the following unit tests.
 
-// Tests InitForm().
-async function test_InitForm() {
-	let wait = async () => Form.InitForm(FormParameters, FormOptions);
-	await wait(); // Ensure it is completed before confinuing.
-	return document.getElementById('ShareURLBtn').formAction;
-};
-
-// Unit test for ClearForm(), as well as a helper function for FormJS testing.
-// This test will be ran as a unit test to make sure that it is working properly,
-// but may also be called from other tests when running TestsToRun.
-async function test_ClearForm() {
-	// Form element used for examples and testing in FormJS.
-	let ExampleForm = document.getElementById('ExampleUserForm');
-	if (Form.IsFormEmpty(ExampleForm)) {
-		// Populate before clearing
-		// Manually set each field, to keep this as a unit test and not have to call
-		// PopulateFromURI or PopulateFromValues, in case one of those two funcs
-		// fail, it can make debugging more difficult.
-		document.getElementById('input_first_name').value = ExampleValues.first_name;
-		document.getElementById('input_middle_name').value = ExampleValues.middle_name;
-		document.getElementById('input_last_name').value = ExampleValues.last_name;
-		document.getElementById('input_email_address').value = ExampleValues.email_address;
-		document.getElementById('input_subscribe_latest_news').checked = true;
-	}
-	Form.ClearForm(FormParameters, FormOptions);
-	if (!Form.IsFormEmpty(ExampleForm)) {
-		return false;
-	}
-
-	return true;
-}
-
-// Tests PopulateFromURI(), as well as Serialize().
-async function test_PopulateFromURI() {
+// Tests Init().
+async function test_Init() {
 	var url = new URL(window.location);
 	url.searchParams.set('first_name', 'Bob');
 	// Optional middle name field not set.
@@ -159,15 +127,46 @@ async function test_PopulateFromURI() {
 
 	// Push new state that updates query params without reloading the page.
 	window.history.pushState({}, '', url);
+	let wait = async () => Form.Init(FormParameters, FormOptions);
+	await wait(); // Ensure it is completed before confinuing.
+	return document.getElementById('ShareURLBtn').formAction;
+};
 
-	Form.PopulateFromURI(FormParameters, FormOptions);
+// Unit test for Clear(), as well as a helper function for URLFormJS testing.
+// This test will be ran as a unit test to make sure that it is working properly,
+// but may also be called from other tests when running TestsToRun.
+async function test_Clear() {
+	// Form element used for examples and testing in FormJS.
+	let ExampleForm = document.getElementById('ExampleUserForm');
+	if (Form.IsEmpty(ExampleForm)) {
+		// Populate before clearing
+		// Manually set each field, to keep this as a unit test and not have to call
+		// PopulateFromURI or PopulateFromValues, in case one of those two funcs
+		// fail, it can make debugging more difficult.
+		document.getElementById('input_first_name').value = ExampleValues.first_name;
+		document.getElementById('input_middle_name').value = ExampleValues.middle_name;
+		document.getElementById('input_last_name').value = ExampleValues.last_name;
+		document.getElementById('input_email_address').value = ExampleValues.email_address;
+		document.getElementById('input_subscribe_latest_news').checked = true;
+	}
+	Form.Clear();
+	if (!Form.IsEmpty(ExampleForm)) {
+		return false;
+	}
+
+	return true;
+}
+
+// Tests PopulateFromURI().
+async function test_PopulateFromURI() {
+	Form.PopulateFromURI();
 	return checkForm(document.getElementById('ExampleUserForm'));
 };
 
-// Tests PopulateFromValues(), as well as Serialize().
+// Tests PopulateFromValues().
 async function test_PopulateFromValues() {
-	Form.ClearForm(FormParameters, FormOptions);
-	Form.PopulateFromValues(FormParameters, ExampleValues, FormOptions);
+	Form.Clear();
+	Form.PopulateFromValues(ExampleValues);
 	return checkForm(document.getElementById('ExampleUserForm'));
 };
 
@@ -194,30 +193,30 @@ let TestsToRun = [
 
 /** @type {TestGUIOptions} **/
 let TestGUIOptions = {
-	footer: `<h1><a href="github.com/cyphrme/formjs">
+	footer: `<h1><a href="https://github.com/cyphrme/URLFormJS">
 	Link to the source code
 	</a></h1>`,
 	html_test_area: `
 	<div>
 	<form id="ExampleUserForm">
 		<div>
-			<input type="text" id="input_first_name" name="first_name" placeholder="First Name">
+			<input type="text" id="input_first_name" name="input_first_name" placeholder="First Name">
 		</div>
 		<div>
-			<input type="text" id="input_middle_name" name="middle_name" placeholder="Middle Name">
+			<input type="text" id="input_middle_name" name="input_middle_name" placeholder="Middle Name">
 		</div>
 		<div>
-			<input type="text" id="input_last_name" name="last_name" placeholder="Last Name">
+			<input type="text" id="input_last_name" name="input_last_name" placeholder="Last Name">
 		</div>
 		<div>
-			<input type="text" id="input_email_address" name="email_address" placeholder="Email Address">
+			<input type="text" id="input_email_address" name="input_email_address" placeholder="Email Address">
 		</div>
 		<div>
-			<input type="text" id="input_phone_number" name="phone_number" placeholder="Phone Number">
+			<input type="text" id="input_phone_number" name="input_phone_number" placeholder="Phone Number">
 		</div>
 		<div>
 			<label for="input_subscribe_latest_news">Subscribe to the latest news</label>
-			<input type="checkbox" id="input_subscribe_latest_news" name="subscribe_latest_news">
+			<input type="checkbox" id="input_subscribe_latest_news" name="input_subscribe_latest_news">
 		</div>
 	</form>
 
@@ -229,10 +228,6 @@ let TestGUIOptions = {
 </div>
 `,
 	main_image: "formjs.png",
-	stylesheet: {
-		href: "cyphrme_bootstrap.min.css"
-	},
-
 };
 
 /** @type {TestBrowserJS} **/

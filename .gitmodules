@@ -1,0 +1,3 @@
+[submodule "BrowserTestJS"]
+	path = BrowserTestJS
+	url = git@github.com:Cyphrme/BrowserTestJS.git

@@ -1,18 +1,37 @@
 "use strict";
 
-// InitForm() must be called first if the page/form is using `Form Options` or
-// if using a `Share URL Button`. 
-
+/**
+ * URLFormJS is used for sticky forms and sharable URL links.
+ *
+ * The following require `Init()` to be called before execution:
+ * - PopulateFromValues
+ * - PopulateFromURI
+ * - Clear
+ * 
+ * If the page is using the `ShareURL Button`, `Init()` must be called with
+ * the FormOptions specifying the id for the `ShareURL Button` element. 
+ *
+ * The following functions do not require `Init()` to be called before
+ * execution:
+ * -IsEmpty
+ * -Serialize
+ * -Objectify **(unless the form is using FormOptions)**
+ * 
+ * DefaultFormOptions is exported, for READ ONLY capabilities of seeing default
+ * `FormOptions`.
+ */
 
 export {
+	// Required for initializing a form.
 	Init,
+
 	PopulateFromValues,
 	PopulateFromURI,
 
 	// Helpers
 	DefaultFormOptions,
 	Serialize,
-	Parse,
+	Objectify,
 	Clear,
 	IsEmpty,
 };
@@ -81,7 +100,17 @@ const DefaultFormOptions = {
 // Global FormOptions state, set by InitForm (which calls sanitizeFormOptions)
 /**@type {FormOptions} */
 var sanitizedFormOptions;
+
+// Global FormParameter state, set by InitForm
+/**@type {FormParameter} */
+var formParameter;
+
+// Global ShareURL Button
+/**@type {HTMLButtonElement} */
 var shareButton;
+
+// Global state for whether or not URLFormJS module has been initialized.
+var formInited = false;
 
 ////////////////////////////
 // Functions
@@ -95,24 +124,28 @@ var shareButton;
  * @returns {void}
  */
 function Init(params, formOptions) {
+	formParameter = params;
 	sanitizedFormOptions = {};
 	sanitizedFormOptions = sanitizeFormOptions(formOptions);
 	shareButton = document.querySelector(sanitizedFormOptions.shareURLBtn);
 	if (shareButton != null) {
-		shareButton.addEventListener('click', () => shareURI(params));
+		shareButton.addEventListener('click', shareURI);
 	}
+	formInited = true;
 }
 
 /**
  * PopulateFromURI populates the GUI from the URI, if any of the form params
  * are supplied in the URI Query.
  *
- * @param   {FormParameter} params          FormParameters object.
- * @param   {FormOptions}        [formOptions]   A form options object.
  * @returns {void}
+ * @throws  {Error} Fails if Init() has not been called for the URLFormJS module.
  */
-async function PopulateFromURI(params, formOptions) {
-	if (isEmpty(params)) {
+async function PopulateFromURI() {
+	if (!formInited) {
+		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
+	}
+	if (isEmpty(formParameter)) {
 		return;
 	}
 
@@ -150,27 +183,23 @@ async function PopulateFromURI(params, formOptions) {
 		return;
 	}
 
-	PopulateFromValues(params, pairs, formOptions);
-	shareURI(params);
+	PopulateFromValues(pairs);
+	shareURI();
 }
 
 /**
- * Populates the GUI from the given values and params.
- * Params describes the model, or what options are available in the form, and
+ * Populates the form initialized in `Init()` from the given values.
  * Values are the given values to populate the form.
  * 
- * An optional formOptions object may be used to specify certain aspects, or how
- * to interpret the form. e.g. `prefix`, so model_name becomes input_model_name
- * if the formOptions prefix setting is set to "input_".
- * 
- * @param   {FormParameter}  params          A Param object.
- * @param   {Object}         values          A values object.
- * @param   {FormOptions}    formOptions     A parsed/sanitized form options object.
+ * @param   {Object}         values          A key:value pair JSON object.
  * @returns {void}
  */
-function PopulateFromValues(params, values, formOptions) {
-	if (!isEmpty(params)) {
-		setGUI(params, values, sanitizeFormOptions(formOptions));
+function PopulateFromValues(values) {
+	if (!formInited) {
+		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
+	}
+	if (!isEmpty(formParameter)) {
+		setGUI(values);
 	}
 }
 
@@ -178,20 +207,19 @@ function PopulateFromValues(params, values, formOptions) {
  * Does the processing and checking for a parameter in the params form.
  * Sets GUI for each param, and executes funcTrue() per param, if applicable.
  *
- * @param   {FormParameter} params          Object. FormParameters object.
- * @param   {Object}        values          Object. Values object that holds a value for the given name.
- * @param   {FormOptions}   formOpts        Object. sanitizeFormOptions.
+ * @param   {Object}        values    Object. key:value pair JSON object.
  * @returns {void}
  */
-function setGUI(params, values, formOpts) {
-	for (const parameter in params) {
-		let name = params[parameter].name;
-		let id = params[parameter].id;
-		let type = params[parameter].type;
+function setGUI(values) {
+	for (const parameter in formParameter) {
+		let name = formParameter[parameter].name;
+		let id = formParameter[parameter].id;
+		let type = formParameter[parameter].type;
 		let value = values[name];
-		let funcTrue = params[parameter].funcTrue;
+		let funcTrue = formParameter[parameter].funcTrue;
+		let func = formParameter[parameter].func;
 
-		name = formOpts.prefix + name;
+		name = sanitizedFormOptions.prefix + name;
 
 		// If id is empty, assume name is the id on the page.
 		if (isEmpty(id)) {
@@ -199,16 +227,15 @@ function setGUI(params, values, formOpts) {
 		}
 
 		// Run func if set
-		if (func !== undefined) {
-			params[parameter].func();
+		if (!isEmpty(func)) {
+			func();
 		}
 
 		// Run funcTrue. Value may be "true", or empty "" if in the URL and with no
 		// value set, but not `undefined`.  Name only is considered a flag and is
 		// interpreted as true.  
 		if (type == "bool" && funcTrue !== undefined && value !== undefined && (value === "" || value === "true" || value === true)) {
-			// console.debug("Running funcTrue for: ", params[parameter]);
-			params[parameter].funcTrue();
+			funcTrue();
 		}
 
 		// Sets the GUI if the value is populated. Checks checkbox elements if
@@ -244,12 +271,18 @@ function setGUI(params, values, formOpts) {
  * @returns {Object}      FormOptions
  */
 function sanitizeFormOptions(formOptions) {
-if (formOptions.FormJs_Sanitized === true){
-	return;
-}
-	let formOpts = { // TODO (Jared) fix this.  No need to ever copy
+	if (formOptions.FormJs_Sanitized === true) {
+		return;
+	}
+	// console.debug({
+	// 	...DefaultFormOptions
+	// })
+	let formOpts = { // Not making a copy will modify the original, even though it's a const.
 		...DefaultFormOptions
 	};
+	// console.debug({
+	// 	...formOpts
+	// })
 	if (isEmpty(formOptions)) {
 		return formOpts;
 	}
@@ -267,6 +300,14 @@ if (formOptions.FormJs_Sanitized === true){
 	}
 
 	formOpts.FormJs_Sanitized = true;
+	// console.debug({
+	// 	...formOpts
+	// })
+	// console.debug({
+	// 	...DefaultFormOptions
+	// })
+
+
 	return formOpts;
 }
 
@@ -274,16 +315,18 @@ if (formOptions.FormJs_Sanitized === true){
 /**
  * Generates a share URL, populates the GUI with it, and returns the URL.
  * 
- * @param   {FormParameter}   params       Form parameters object.
- * @returns {URL}             URL          Object. Javascript URL object.
+ * @returns {URL} URL          Object. Javascript URL object.
  */
-function shareURI(params) {
+function shareURI() {
+	if (isEmpty(formParameter)) {
+		return;
+	}
 	var url = new URL(window.location.href);
 
-	for (const parameter in params) {
-		var name = params[parameter].name;
-		var id = params[parameter].id;
-		var type = params[parameter].type;
+	for (const parameter in formParameter) {
+		var name = formParameter[parameter].name;
+		var id = formParameter[parameter].id;
+		var type = formParameter[parameter].type;
 
 		// `name` is default id for html element. `id` overrides `name` for html
 		// elements ids.
@@ -317,10 +360,8 @@ function shareURI(params) {
 	if (isEmpty(url.hash.substring(1))) {
 		url.hash = "";
 	}
-	// console.log("Share URI Link: ", url.href);
 
 	// URI Link
-
 	let shareUrl = document.querySelector(sanitizedFormOptions.shareURL);
 	if (shareUrl != null) {
 		shareUrl.innerHTML = url.href.link(url.href);
@@ -343,17 +384,17 @@ function shareURI(params) {
  * @throws  {Error}   error       Error. Fails if form is not of type HTMLFormElement.
  */
 function Serialize(form) {
-	return JSON.stringify(Parse(form));
+	return JSON.stringify(Objectify(form));
 };
 
 /**
- * Parse parses a form into a JSON object.
+ * Objectify makes a form into a JSON object.
  * 
  * @param   {HTMLFormElement} form    Object. HTML Form element
- * @returns {Object}  parsd           Object. JSON form.
- * @throws  {Error}   error           Error. Fails if form is not of type HTMLFormElement.
+ * @returns {Object}          parsd   Object. JSON form.
+ * @throws  {Error}           error   Error. Fails if form is not of type HTMLFormElement.
  */
-function Parse(form) { // TODO (Jared) rename objectify
+function Objectify(form) {
 	var formData = new FormData(form); // throws
 	var pairs = {};
 	for (let [name, value] of formData) {
@@ -363,10 +404,14 @@ function Parse(form) { // TODO (Jared) rename objectify
 		if (value == "false" || value == "unchecked") {
 			value = false;
 		}
-		// TODO (Jared) This should probably not be hardcoded and come from a formOptions param.
-		if (name.substring(0, 6) == "input_") {
-			name = name.substring(6);
+		// Handle FormOptions if set.
+		if (!isEmpty(sanitizedFormOptions)) {
+			// Remove prefix, if set.
+			if (!isEmpty(sanitizedFormOptions.prefix)) {
+				name = name.substring(sanitizedFormOptions.prefix.length);
+			}
 		}
+
 		if (!isEmpty(value)) {
 			pairs[name] = value;
 		}
@@ -376,18 +421,22 @@ function Parse(form) { // TODO (Jared) rename objectify
 
 
 /**
- * Clear clears out a form with the given FormParameters and FormOptions.
+ * Clear clears out a form with the FormParameters and FormOptions set at
+ * initialization.
  *
- * @param   {FormParameter} params          Object. FormParameters object.
- * @param   {FormOptions}   formOpts        Object. sanitizeFormOptions.
  * @returns {void}
  */
- function Clear(params, formOpts) {
-	sanitizeFormOptions(formOpts)
-	for (const parameter in params) {
-		let name = formOpts.prefix + params[parameter].name;
-		let id = params[parameter].id;
-		let type = params[parameter].type;
+function Clear() {
+	if (!formInited) {
+		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
+	}
+	if (isEmpty(formParameter)) {
+		return;
+	}
+	for (const parameter in formParameter) {
+		let name = sanitizedFormOptions.prefix + formParameter[parameter].name;
+		let id = formParameter[parameter].id;
+		let type = formParameter[parameter].type;
 
 		// If id is empty, assume name is the id on the page.
 		if (isEmpty(id)) {
@@ -411,19 +460,16 @@ function Parse(form) { // TODO (Jared) rename objectify
 	}
 }
 
-
 /**
  * IsEmpty returns whether or not a given form is empty.
  * 
- * @param   {Element}  form        Object.  HTML Form element
- * @returns {Boolean}  bool        Boolean. Whether or not the form is empty.
- * @throws  {Error}    error       Error.   Fails if form is not of type HTMLFormElement.
+ * @param   {HTMLFormElement}  form    Object.  HTML Form element
+ * @returns {Boolean}          bool    Boolean. Whether or not the form is empty.
+ * @throws  {Error}            error   Error.   Fails if form is not of type HTMLFormElement.
  */
 function IsEmpty(form) {
-	return isEmpty(Parse(form));
+	return isEmpty(Objectify(form));
 }
-
-
 
 /**
  * isEmpty is a helper function to determine if thing is empty. 

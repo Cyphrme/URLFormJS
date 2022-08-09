@@ -8,7 +8,7 @@ import * as Form from './urlform.min.js';
 const FormOptions = {
 	"prefix": 'input_',
 	"shareURLBtn": "#CustomShareURLBtnID",
-	"shareURL": "#ShareURL",
+	"shareURL": "#CustomShareURL",
 };
 
 // Permissable fields within the form for the application.
@@ -34,24 +34,27 @@ const FormParameters = [{
 ];
 
 // Runs when the DOM is loaded. Sets the URL query parameters when the page
-// loads, but before calling PopulateFromURI. This will update the browser's
-// history state without reloading the page (infinitely), while still
+// loads, but before calling PopulateFromURI. If there are no query params set,
+// default values will be set for the browser state. This will update the
+// browser's history state without reloading the page (infinitely), while still
 // demonstrating the sticky form from URI values. Initializes the `URLFormJS`
 // module, and then populates the sticky form from the given URL query
 // parameters.
 document.addEventListener('DOMContentLoaded', () => {
-	var url = new URL(window.location);
-	url.searchParams.set('first_name', 'Bob');
-	// Middle name purposefully not set for demonstation.
-	url.searchParams.set('last_name', 'Smith');
-	url.searchParams.set('email_address', 'bob@something.com');
-	url.searchParams.set('phone_number', "1234567890");
-	url.searchParams.set('subscribe_latest_news', true);
+	if (window.location.search === "") {
+		var url = new URL(window.location);
+		url.searchParams.set('first_name', 'Bob');
+		// Middle name purposefully not set for demonstation.
+		url.searchParams.set('last_name', 'Smith');
+		url.searchParams.set('email_address', 'bob@something.com');
+		url.searchParams.set('phone_number', "1234567890");
+		url.searchParams.set('subscribe_latest_news', true);
 
-	// Push new state that updates query params without reloading the page.
-	window.history.pushState({}, '', url);
+		// Push new state that updates query params without reloading the page.
+		window.history.pushState({}, '', url);
+	}
 
 	// Initialize and populate sticky form.
 	Form.Init(FormParameters, FormOptions);
-	Form.PopulateFromURI(FormParameters, FormOptions);
+	Form.PopulateFromURI();
 });

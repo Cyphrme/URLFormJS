@@ -1,7 +1,30 @@
 # UrlFormJS 
-Sitcky URL Forms forms with sharable links.  
+Sitcky URL Forms forms with sharable links.
 
-Download `form.js` into your project or clone the project.
+URLFormJS can be added directly into a project as a submodule with the following
+command:
+
+``` sh
+git submodule add git@github.com:Cyphrme/URLFormJS.git
+```
+
+To update the submodule
+
+When changes are made to URLFormJS, a project can update the changes by running
+the following command from the directory where the project's .gitmodules lives:
+
+```sh
+git submodule update --remote
+```
+
+
+Alternatively, download `urlform.min.js` or clone the repo into the desired
+project.
+
+`urlform.js` is the human readable code, and can be used/called directly, but it
+is recommended to use `urlform.min.js` (minified) when running production/live
+code.
+
 
 ## Example simple user form
 The following example is a simple user form using FormJS that includes:
@@ -118,7 +141,7 @@ ClearForm will clear the form's values, and set the checkboxes to unchecked.
 IsFormEmpty will return true if the form is empty, and false otherwise.
 
 # Example
-TODO (Jared) make a link to the example Github HTML page. 
+## [See live example](https://cyphrme.github.io/URLFormJS/)
 
 
 # Development, Bug Reporting, and Feature Requests
@@ -139,7 +162,6 @@ Then go to `localhost:8082` and check the results.
 
 Before submitting pull request, please run the tests to make sure that they are
 all passing, and will not break current implementations.
-
 
 
 ## Probably out of scope for this library:
