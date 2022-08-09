@@ -110,38 +110,37 @@ It's as simple as that!  Now your project is setup to use FormJS.
 # FormJS API
 
 The following functions are exposed from FormJS:
-- InitForm
+- Init
 - PopulateFromValues
 - PopulateFromURI
 -	Serialize
--	Parse
-- ClearForm
-- IsFormEmpty
+-	Objectify
+- Clear
+- IsEmpty
 
 `values` in the following context of the functions refers to a Javascript
 key:value object.
 
-FormJS may also refer to this object as `pairs`.
+URLFormJS may also refer to this object as `pairs`.
 
-InitForm is used to initialize the FormOptions you want to use for the form,
-and should be called when the page/DOM is loaded, if the form requires FormOptions
-other than the Defaults.
-InitForm will also set the event listener on the ShareURL button, if it exists
-on the page.
+Init is used to initialize the FormOptions you want to use for the form, and
+should be called when the page/DOM is loaded, if the form requires FormOptions
+other than the Defaults. Init will also set the event listener on the ShareURL
+button, if it exists on the page.
 
 PopulateFromValues will populate the form values on the page, from the given
-FormParameters, Values, and FormOptions.
+Values, while using the form parameters and options used at initialization.
 
 PopulateFromURI will do the same thing as PopulateFromValues, but use uri query
 parameters as the values.
 
 Serialize will return a serialized JSON string from the form.
 
-Parse will return a parsed JSON object from the form.
+Objectify will return a JSON object from the form.
 
-ClearForm will clear the form's values, and set the checkboxes to unchecked.
+Clear will clear the form's values, and set the checkboxes to unchecked.
 
-IsFormEmpty will return true if the form is empty, and false otherwise.
+IsEmpty will return true if the form is empty, and false otherwise.
 
 # Example
 ## [See live example](https://cyphrme.github.io/URLFormJS/)
