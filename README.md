@@ -107,7 +107,7 @@ const FormParameters = [{
 
 It's as simple as that!  Now your project is setup to use FormJS.
 
-# FormJS API
+# URLFormJS API
 
 The following functions are exposed from FormJS:
 - Init
@@ -170,3 +170,7 @@ all passing, and will not break current implementations.
 - Look into JSON Schema validation. 
 - Form validation.  
 - Field requirements/limitations. 
+
+### Logo license
+"you are free to use your logo for promotional purposes"
+https://support.freelogodesign.org/hc/en-us/categories/360003253451-Copyrights

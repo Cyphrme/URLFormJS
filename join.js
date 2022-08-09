@@ -18,4 +18,4 @@
 // esbuild join.js --bundle --format=esm --minify --outfile=urlform.min.js
 // ```
 //
-// export * from './urlform.js';
+export * from './urlform.js';
