@@ -159,22 +159,17 @@ async function PopulateFromURI() {
 
 	var frag = window.location.hash.substring(1); //"#" character is pos [0]
 	if (!isEmpty(frag)) {
-		let p = frag.split('?');
-		// // Anchor: (for debugging)
-		// let anchor = p[0]; 
-		// console.log("Anchor: ", anchor);
-
+		let f = frag.split('?');
 		// Fragment query is after # and ?, separated by "&".
-		if (!isEmpty(p[1])) {
-			let fqs = p[1].split('&');
-			fqs.forEach((q) => {
-				let fqp = q.split('=');
-				if (fqp[1] === undefined) {
-					pairs[fqp[0]] = null;
-					return;
+		if (!isEmpty(f[0])) {
+			f[0].split('&').forEach((q) => {
+				let pair = q.split('=');
+				if (pair[1] === undefined) {
+					pairs[pair[0]] = null;
+					return; // In anonymous func.
 				}
 				// Browsers automatically escape values. Unescape.
-				pairs[fqp[0]] = unescape(fqp[1]);
+				pairs[pair[0]] = unescape(pair[1]);
 			});
 		}
 	}
@@ -263,7 +258,9 @@ function setGUI(values) {
  * Sanitizes a formOptions object, and sets all of the options types to their
  * zero case, if they are not set. Otherwise, the options will be set.
  * 
- * Modifies "in place" as well as returns the object. 
+ * Modifies "in place" as well as returns the object.
+ * 
+ * For new options/setting FormOptions, Init() must be re-called.
  * 
  * Returns a Form Options Object, after being sanitized.
  * 
@@ -271,18 +268,19 @@ function setGUI(values) {
  * @returns {Object}      FormOptions
  */
 function sanitizeFormOptions(formOptions) {
-	if (formOptions.FormJs_Sanitized === true) {
-		return;
-	}
-	// console.debug({
-	// 	...DefaultFormOptions
-	// })
 	let formOpts = { // Not making a copy will modify the original, even though it's a const.
 		...DefaultFormOptions
 	};
-	// console.debug({
-	// 	...formOpts
-	// })
+	// If no options given, use default.
+	if (isEmpty(formOptions)) {
+		formOpts.FormJs_Sanitized = true;
+		return formOpts;
+	}
+	// If FormOptions has already been sanitized, do nothing.
+	if (!isEmpty(formOptions.FormJs_Sanitized) && formOptions.FormJs_Sanitized === true) {
+		return;
+	}
+	// Sanitize
 	if (isEmpty(formOptions)) {
 		return formOpts;
 	}
@@ -298,16 +296,7 @@ function sanitizeFormOptions(formOptions) {
 	if (!isEmpty(formOptions.shareURLBtn)) {
 		formOpts.shareURLBtn = formOptions.shareURLBtn;
 	}
-
 	formOpts.FormJs_Sanitized = true;
-	// console.debug({
-	// 	...formOpts
-	// })
-	// console.debug({
-	// 	...DefaultFormOptions
-	// })
-
-
 	return formOpts;
 }
 

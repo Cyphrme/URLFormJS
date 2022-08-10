@@ -1,6 +1,6 @@
 "use strict"
 
-import * as Form from './urlform.min.js';
+import * as Form from './urlform.js';
 
 // An application may use the prefix "input_" to denote user modifiable fields
 // in the GUI, use a custom id for the ShareURL button, or a custom id for the
@@ -41,7 +41,7 @@ const FormParameters = [{
 // module, and then populates the sticky form from the given URL query
 // parameters.
 document.addEventListener('DOMContentLoaded', () => {
-	if (window.location.search === "") {
+	if (window.location.search === "" && window.location.hash === "") {
 		var url = new URL(window.location);
 		url.searchParams.set('first_name', 'Bob');
 		// Middle name purposefully not set for demonstation.

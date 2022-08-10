@@ -4,6 +4,8 @@
 
 Sitcky URL Forms forms with sharable links.
 
+## [Demo](https://cyphrme.github.io/URLFormJS/)
+
 URLFormJS can be added directly into a project as a submodule with the following
 command:
 
@@ -29,133 +31,21 @@ is recommended to use `urlform.min.js` (minified) when running production/live
 code.
 
 
-## Example simple user form
-The following example is a simple user form using FormJS that includes:
+# Development
+Issue submissions and pull requests are welcome.
 
-- First name
-- Middle name
-- Last name
-- Email address
-- Phone number
-- Subscribe to latest news 
-
-## HTML
-
-``` HTML
-	<div>
-	<form id="ExampleUserForm">
-		<div>
-			<input type="text" id="input_first_name" name="first_name" placeholder="First Name">
-		</div>
-		<div>
-			<input type="text" id="input_middle_name" name="middle_name" placeholder="Middle Name">
-		</div>
-		<div>
-			<input type="text" id="input_last_name" name="last_name" placeholder="Last Name">
-		</div>
-		<div>
-			<input type="text" id="input_email_address" name="email_address" placeholder="Email Address">
-		</div>
-		<div>
-			<input type="text" id="input_phone_number" name="phone_number" placeholder="Phone Number">
-		</div>
-		<div>
-			<label for="input_subscribe_latest_news">Subscribe to the latest news</label>
-			<input type="checkbox" id="input_subscribe_latest_news" name="subscribe_latest_news">
-		</div>
-	</form>
-
-	<button id="ShareURLBtn" class="btn mt-3 btn-primary">Share URL</button>
-	<div>
-		<p><span id="ShareURL"></span></p>
-	</div>
-
-</div>
+To generate the minified file, you must first have `esbuild` installed on your
+local machine, then run the following:
+```sh
+esbuild urlform.js --format=esm --minify --outfile=urlform.min.js
 ```
-
-## Javascript
-
-``` Javascript 
-const FormOptions = {
-	"prefix": 'input_',
-	"shareURLBtn": "#ShareURLBtn",
-	"shareURL": "#ShareURL",
-	}
-
-const FormParameters = [{
-		"name": "first_name",
-	},
-	{
-		"name": "middle_name",
-	},
-	{
-		"name": "last_name",
-	},
-	{
-		"name": "email_address",
-	},
-	{
-		"name": "phone_number",
-	},
-		{
-		"name": "subscribe_latest_news",
-		"type":"bool",
-	},
-];
-
-```
-
-It's as simple as that!  Now your project is setup to use FormJS.
-
-# URLFormJS API
-
-The following functions are exposed from FormJS:
-- Init
-- PopulateFromValues
-- PopulateFromURI
--	Serialize
--	Objectify
-- Clear
-- IsEmpty
-
-`values` in the following context of the functions refers to a Javascript
-key:value object.
-
-URLFormJS may also refer to this object as `pairs`.
-
-Init is used to initialize the FormOptions you want to use for the form, and
-should be called when the page/DOM is loaded, if the form requires FormOptions
-other than the Defaults. Init will also set the event listener on the ShareURL
-button, if it exists on the page.
-
-PopulateFromValues will populate the form values on the page, from the given
-Values, while using the form parameters and options used at initialization.
-
-PopulateFromURI will do the same thing as PopulateFromValues, but use uri query
-parameters as the values.
-
-Serialize will return a serialized JSON string from the form.
-
-Objectify will return a JSON object from the form.
-
-Clear will clear the form's values, and set the checkboxes to unchecked.
-
-IsEmpty will return true if the form is empty, and false otherwise.
-
-# Example
-## [See live example](https://cyphrme.github.io/URLFormJS/)
-
-
-# Development, Bug Reporting, and Feature Requests
-Issue submissions and pull requests are welcome.  
-
 
 ## Testing
 To run the example/testing server, you must first have Go installed on your local
 machine and run the following two commands:
 
 ```
-cd /urlformjs/browsertestjs/
+cd /URLFormJS/BrowserTestJS/
 go run server.go
 ```
 
@@ -174,3 +64,10 @@ all passing, and will not break current implementations.
 ### Logo license
 "you are free to use your logo for promotional purposes"
 https://support.freelogodesign.org/hc/en-us/categories/360003253451-Copyrights
+
+----------------------------------------------------------------------
+# Attribution, Trademark notice, and License
+URLFormJS is released under The 3-Clause BSD License. 
+
+"Cyphr.me" is a trademark of Cypherpunk, LLC. The Cyphr.me logo is all rights
+reserved Cypherpunk, LLC and may not be used without permission.
