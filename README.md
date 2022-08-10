@@ -4,7 +4,7 @@
 
 Sitcky URL Forms forms with sharable links.
 
-## [Demo](https://cyphrme.github.io/URLFormJS/)
+## [Demo](https://cyphrme.github.io/URLFormJS/?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true)
 
 URLFormJS can be added directly into a project as a submodule with the following
 command:
