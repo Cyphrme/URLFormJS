@@ -10,7 +10,7 @@ URLFormJS can be added directly into a project as a submodule with the following
 command:
 
 ``` sh
-git submodule add git@github.com:Cyphrme/URLFormJS.git
+git submodule add git@github.com:Cyphrme/URLFormJS.git urlformjs
 ```
 
 To update the submodule

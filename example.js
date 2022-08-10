@@ -38,8 +38,6 @@ const FormParameters = [{
 document.addEventListener('DOMContentLoaded', () => {
 	// What if I wanted to see an empty form?  When testing the demo, this behavior is not clear.  
 	// Instead of this, the link should include the options.  
-
-
 	// if (window.location.search === "" && window.location.hash === "") {
 	// 	var url = new URL(window.location);
 	// 	url.searchParams.set('first_name', 'Bob');
