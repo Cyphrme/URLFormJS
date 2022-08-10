@@ -37,7 +37,7 @@ Issue submissions and pull requests are welcome.
 To generate the minified file, you must first have `esbuild` installed on your
 local machine, then run the following:
 ```sh
-esbuild urlform.js --format=esm --minify --outfile=urlform.min.js
+esbuild urlform.js --bundle --format=esm --minify --outfile=urlform.min.js
 ```
 
 ## Testing

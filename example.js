@@ -1,6 +1,6 @@
 "use strict"
 
-import * as Form from './urlform.js';
+import * as Form from './urlform.min.js';
 
 // An application may use the prefix "input_" to denote user modifiable fields
 // in the GUI, use a custom id for the ShareURL button, or a custom id for the
