@@ -32,7 +32,7 @@ In the URL:
 
 Where `nose?name=bob` is the fragment, `nose` is the fragment anchor, and
 `?name=bob` is the fragment query.  In this example, since the query parameter
-and the fragment query parameter have the same key name of "name", the URL form
+and the fragment query parameter have the same key name of "name", the 
 value of "bob" will take precedence over "ferret".  
 
 See [RFC 3986 for query
@@ -59,16 +59,15 @@ git submodule update --remote
 Alternatively, download `urlform.min.js` or `urlform.js`.
 
 # Development
-Issue submissions and pull requests are welcome.
+Issue submissions and pull requests are welcome.  Before submitting pull
+request, please ensure tests are passing and that the test form behavior is
+correct.
 
 To generate the minified file, use `esbuild` to run the following:
 
 ```sh
 esbuild urlform.js --bundle --format=esm --minify --outfile=urlform.min.js
 ```
-
-Before submitting pull request, please ensure tests are passing and the form
-behavior is correct.
 
 ## Testing
 Testing uses (BrowserTestJS)[https://github.com/Cyphrme/BrowserTestJS]:
@@ -78,7 +77,7 @@ cd /URLFormJS/BrowserTestJS/
 go run server.go
 ```
 
-Then go to `localhost:8082` and check the results.
+Then go to `localhost:8082` for the results.
 
 
 ## Probably out of scope for this library:
