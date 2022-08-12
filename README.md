@@ -17,8 +17,8 @@ which makes fragments ideal for sensitive information.  We recommend
 applications use fragment query parameters over query parameters when
 possible.   
 
-If query parameter and fragment query parameter are set to the same value, the
-fragment query parameter takes precedence.  
+If query parameter and fragment query parameter are set to the same key name,
+the fragment query parameter takes precedence.  
 
 Fragment query parameters are located after the first `#`, then after the next
 `?` and before any additional `:~:` (text fragments should have the '?'
@@ -33,8 +33,8 @@ In the URL:
 
 Where `nose?name=bob` is the fragment, `nose` is the fragment anchor, and
 `?name=bob` is the fragment query.  In this example, since the query parameter
-and the fragment query parameter have the same key name of "name", the URL form
-value of "bob" will take precedence over "ferret".  
+and the fragment query parameter have the same key name of "name", the value of
+"bob" will take precedence over "ferret".  
 
 See [RFC 3986 for query
 parameters](https://www.rfc-editor.org/rfc/rfc3986#section-3.5)
@@ -63,16 +63,15 @@ Alternatively, download `urlform.min.js` or `urlform.js`.
 
 
 # Development
-Issue submissions and pull requests are welcome.
+Issue submissions and pull requests are welcome.  Before submitting pull
+request, please ensure tests are passing and that the test form behavior is
+correct.
 
 To generate the minified file, use `esbuild` to run the following:
 
 ```sh
 esbuild urlform.js --bundle --format=esm --minify --outfile=urlform.min.js
 ```
-
-Before submitting pull request, please ensure tests are passing and the form
-behavior is correct.
 
 ## Testing
 Testing uses (BrowserTestJS)[https://github.com/Cyphrme/BrowserTestJS]:
@@ -82,7 +81,7 @@ cd /URLFormJS/BrowserTestJS/
 go run server.go
 ```
 
-Then go to `localhost:8082` and check the results.
+Then go to `localhost:8082` for the results.
 
 
 ## Probably out of scope for this library:
