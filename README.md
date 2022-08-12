@@ -17,8 +17,8 @@ which makes fragments ideal for sensitive information.  We recommend
 applications use fragment query parameters over query parameters when
 possible.   
 
-If query parameter and fragment query parameter are set to the same value, the
-fragment query parameter takes precedence.  
+If query parameter and fragment query parameter are set to the same key name,
+the fragment query parameter takes precedence.  
 
 Fragment query parameters are located after the first `#`, then after the next
 `?` and before any additional `:~:`
@@ -32,8 +32,8 @@ In the URL:
 
 Where `nose?name=bob` is the fragment, `nose` is the fragment anchor, and
 `?name=bob` is the fragment query.  In this example, since the query parameter
-and the fragment query parameter have the same key name of "name", the 
-value of "bob" will take precedence over "ferret".  
+and the fragment query parameter have the same key name of "name", the value of
+"bob" will take precedence over "ferret".  
 
 See [RFC 3986 for query
 parameters](https://www.rfc-editor.org/rfc/rfc3986#section-3.5)
