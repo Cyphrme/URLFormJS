@@ -2,10 +2,45 @@
 
 ![URLFormJS](./urlformjs.png)
 
-Sitcky URL Forms forms with sharable links.
+Sitcky URL Forms forms with sharable links.  Supports query parameters and
+fragment query parameters
 
 ## [Demo](https://cyphrme.github.io/URLFormJS/?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true)
 
+
+# Query Parameters, Fragment Anchors, and Fragment Query Parameters
+UrlFormJS supports normal URL query parameters for stickiness.  It also supports
+fragment query parameters.
+
+Unlike query parameters, fragments are not sent to the server from the browser.
+This makes fragments ideal for sensitive information.  We recommend applications
+use fragment query parameters over of query parameters when possible.
+
+
+		foo://example.com:8042/over/there?name=ferret#nose?name=bob
+		\_/   \______________/\_________/ \_________/ \___________/
+		|           |            |            |            |
+	scheme     authority       path        query       fragment
+		|   _____________________|__
+		/ \ /                        \
+		urn:example:animal:ferret:nose
+
+
+Where `nose?name=bob` is the fragment, `nose` is the fragment anchor, and
+`?name=bob` is the fragment query.
+
+Fragment query parameters are located after the first `#`, then after the first
+`?` and before any additional `:~:`
+
+Fragment query parameters are "non-standard", but we hope if enough people find
+it useful to standardize them through an RFC or other means.  
+
+See [RFC 3986 for Query
+parameters](https://www.rfc-editor.org/rfc/rfc3986#section-3.5)
+https://en.wikipedia.org/wiki/URI_fragment
+
+
+# Install
 URLFormJS can be added directly into a project as a submodule with the following
 command:
 
@@ -22,7 +57,6 @@ the following command from the directory where the project's .gitmodules lives:
 git submodule update --remote
 ```
 
-
 Alternatively, download `urlform.min.js` or clone the repo into the desired
 project.
 
@@ -34,8 +68,8 @@ code.
 # Development
 Issue submissions and pull requests are welcome.
 
-To generate the minified file, you must first have `esbuild` installed on your
-local machine, then run the following:
+To generate the minified file, use `esbuild` to run the following:
+
 ```sh
 esbuild urlform.js --bundle --format=esm --minify --outfile=urlform.min.js
 ```
@@ -48,7 +82,6 @@ machine and run the following two commands:
 cd /URLFormJS/BrowserTestJS/
 go run server.go
 ```
-
 
 Then go to `localhost:8082` and check the results.
 
