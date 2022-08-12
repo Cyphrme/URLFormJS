@@ -13,18 +13,22 @@ export {
  * @typedef {import('./browsertestjs/test.js').TestsToRun} TestsToRun
  * @typedef {import('./browsertestjs/test.js').TestGUIOptions} TestGUIOptions
  * @typedef {import('./browsertestjs/test.js').TestBrowserJS} TestBrowserJS
+ *
  * 
  * Application imports
  * @typedef {import ('./urlform.js').FormOptions} FormOptions
+ * @typedef {import ('./urlform.js').FormParameters} FormParameters
  */
 
 /**@type {FormOptions} */
 const FormOptions = {
+	"id": "ExampleUserForm",
 	"prefix": 'input_',
 	"shareURLBtn": "#ShareURLBtn",
 	"shareURL": "#ShareURL",
 };
 
+/**@type {FormParameters} */
 const FormParameters = [{
 		"name": "first_name",
 	},
@@ -88,8 +92,8 @@ let t_PopulateFromValues = {
 ////////////////////////////////////////////////////////////////////////////////
 
 // Testing helper function for checking that the form was populated correctly.
-function checkForm(f) {
-	let parsd = Form.Objectify(f);
+function checkForm() {
+	let parsd = Form.Objectify();
 	if (parsd.email_address !== "bob@something.com") {
 		return false;
 	}
@@ -136,9 +140,7 @@ async function test_Init() {
 // This test will be ran as a unit test to make sure that it is working properly,
 // but may also be called from other tests when running TestsToRun.
 async function test_Clear() {
-	// Form element used for examples and testing in FormJS.
-	let ExampleForm = document.getElementById('ExampleUserForm');
-	if (Form.IsEmpty(ExampleForm)) {
+	if (Form.IsEmpty()) {
 		// Populate before clearing
 		// Manually set each field, to keep this as a unit test and not have to call
 		// PopulateFromURI or PopulateFromValues, in case one of those two funcs
@@ -150,7 +152,7 @@ async function test_Clear() {
 		document.getElementById('input_subscribe_latest_news').checked = true;
 	}
 	Form.Clear();
-	if (!Form.IsEmpty(ExampleForm)) {
+	if (!Form.IsEmpty()) {
 		return false;
 	}
 
@@ -160,14 +162,14 @@ async function test_Clear() {
 // Tests PopulateFromURI().
 async function test_PopulateFromURI() {
 	Form.PopulateFromURI();
-	return checkForm(document.getElementById('ExampleUserForm'));
+	return checkForm();
 };
 
 // Tests PopulateFromValues().
 async function test_PopulateFromValues() {
 	Form.Clear();
 	Form.PopulateFromValues(ExampleValues);
-	return checkForm(document.getElementById('ExampleUserForm'));
+	return checkForm();
 };
 
 

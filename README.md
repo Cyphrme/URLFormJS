@@ -21,7 +21,8 @@ If query parameter and fragment query parameter are set to the same value, the
 fragment query parameter takes precedence.  
 
 Fragment query parameters are located after the first `#`, then after the next
-`?` and before any additional `:~:`
+`?` and before any additional `:~:` (text fragments should have the '?'
+character URL escaped).
 
 In the URL:
 
@@ -57,6 +58,9 @@ git submodule update --remote
 ```
 
 Alternatively, download `urlform.min.js` or `urlform.js`.
+
+# How to use
+
 
 # Development
 Issue submissions and pull requests are welcome.
