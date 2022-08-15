@@ -172,6 +172,14 @@ async function test_PopulateFromValues() {
 	return checkForm();
 };
 
+// TODO
+// Tests behavior for the share URL link from different fragments in the URL.
+async function test_Fragment() {
+	//// TODO scenarios to test:
+	//
+	// https://localhost:8082/#:~:text=hello?first_name=asdf&last_name=hello
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////

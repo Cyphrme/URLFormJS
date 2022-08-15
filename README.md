@@ -26,10 +26,10 @@ character URL escaped).
 
 In the URL:
 
-		foo://example.com:8042/over/there?name=ferret#nose?name=bob
-		\_/   \______________/\_________/ \_________/ \___________/
-		|           |            |            |            |
-	scheme     authority       path        query       fragment
+   foo://example.com:8042/over/there?name=ferret#nose?name=bob
+   \_/   \______________/\_________/ \_________/ \___________/
+    |           |            |            |            |
+  scheme     authority      path         query       fragment
 
 Where `nose?name=bob` is the fragment, `nose` is the fragment anchor, and
 `?name=bob` is the fragment query.  In this example, since the query parameter
