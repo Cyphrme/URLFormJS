@@ -1,20 +1,50 @@
 "use strict";
 
-// NOTE: JSDoc will use the '@alias' when a variable is typed with '@type', and
-// exported. This will reference the typedef, and classify the type as a member
-// of the typedef. Exporting a variable that shares the name with a typedef will
-// show an alias for both the typedef, and variable, and also carry the
-// typedef's docs when accessing the variable outside of the module. For some
-// reason, exporting 'DefaultFormOptions' will properly type the object, but the
-// typedef docs are not carried with it. I can't find a clear explanation for
-// why this is the case. The closest I can find is the following: When using the
-// 'exports' object in modules, the '@module' tag is not needed, and
-// automatically recognizes the object's members are being exported:
-// https://jsdoc.app/tags-exports.html
-//
-// JSDoc reference: https://jsdoc.app/index.html
 
-// TODO Use as examples:
+// URLFormJS is used for sticky forms and sharable URL links.
+// URLFormJS also use `Fragments` heavily. See README.
+//
+// `Init()` must be called with the `FormOptions` object.
+//
+// Certain elements, such as the ShareURL Button, if being used, must specify
+// the Element's id on the page in `FormOptions`, before calling `Init()`.
+//
+// `id` is required in `FormOptions` for `Init()` to properly initialize the
+// form with all of the exported functions from this module that require the
+// HTMLFormElement.
+//
+// All functions require `Init()` to be called before execution:
+// *
+// DefaultFormOptions is exported, for READ ONLY capabilities of seeing default
+// `FormOptions`.
+//
+// FormOptions shows the `FormOptions` for the initialized form.
+//
+// FormParameters shows the `FormParameters` for the initialized form.
+//
+// TODO:
+// Long term: make this library work with many instances of form.  
+
+
+// NOTE - Problems with JSDOC: The JSDOc type "any" is a bug on anything with
+// the type Object.  This bug does not appear to be ever fixed. See
+// https://github.com/microsoft/TypeScript/issues/18396
+//
+// Also, JSDoc will use the '@alias' when a variable is typed with '@type' and
+// exported. The "hover over" outside this module will reference this typedef
+// and classifies the type as a member of the typedef. Any export that shares a
+// name with a typedef will show jsdoc "alias" for both the typedef and the
+// variable.  The typedef's docs works as expected outside of the module. 
+//
+// For some reason, exporting 'DefaultFormOptions' will properly type the object
+// but the typedef docs are not carried with it. (Jared) I can't find a clear
+// explanation for why this is the case. The closest I can find is the
+// following: When using the 'exports' object in modules, the '@module' tag is
+// not needed, and automatically recognizes the object's members are being
+// exported: https://jsdoc.app/tags-exports.html
+
+
+// Useful examples:
 //
 // https://localhost:8082/#a:~:text=Hello&text=World&text=!%20news&?first_name=Hello&last_name=World&phone_number=!
 // demonstrating where '!' needs to be percent encoded to work properly in the
@@ -26,31 +56,6 @@
 // Correct text fragment (present '&').
 // https://localhost:8082/#anchor:~:text=hello&?first_name=Hello&last_name=World
 
-
-
-
-/**
- * URLFormJS is used for sticky forms and sharable URL links.
- * URLFormJS also use `Fragments` heavily. See README.
- * 
- * `Init()` must be called with the `FormOptions` object.
- * 
- * Certain elements, such as the ShareURL Button, if being used, must specify
- * the Element's id on the page in `FormOptions`, before calling `Init()`.
- * 
- * `id` is required in `FormOptions` for `Init()` to properly initialize the
- * form with all of the exported functions from this module that require the
- * HTMLFormElement.
- * 
- * All functions require `Init()` to be called before execution:
- *
- * DefaultFormOptions is exported, for READ ONLY capabilities of seeing default
- * `FormOptions`.
- * 
- * FormOptions shows the `FormOptions` for the initialized form.
- * 
- * FormParameters shows the `FormParameters` for the initialized form.
- */
 
 export {
 	// Required for initializing a form.
@@ -155,21 +160,53 @@ export {
  */
 
 /**
- * Fragment Holds the fragment portion/components of the URL.
- *
- * - string:   Fragment string is everything after '#' (full fragment).
- * - before:   Fragment before is everything after '#' and before the first '?'.
- * - after:    Fragment after is everything after '#', '?' and ':~:text='.
- * - query:    Fragment query is everything after '#' and '?'.
- * - pairs:    Fragment pairs is a key:value object, containing the fragment
- *             queries.
- * @typedef  {Object}    Fragment
- * @property {String}    string
- * @property {String}    before
- * @property {String}    after
- * @property {String}    query
- * @property {Object}    pairs
+ * Query is the Query string.  Everything after first ? and before first #.
+ * @typedef  {String}    Query
  */
+
+/**
+ * Fragment is the Fragment string without `#`.  Everything after the first #.
+ * @typedef  {String}    Fragment
+ */
+
+/**
+ * QuagPairs is an Object of key:value pairs for both Query Parameters and
+ * Fragment Query Parameters. `quag` is the superset of `query` and `fragment`.
+ * @typedef   {Object}   QuagPairs
+ **/
+
+/**
+ * FragmentParts holds the fragment parts from the URL. All parts may be nil.   
+ * 
+ * - before:   Everything after '#' and if exists everything before the first '?'.
+ * - query:    Everything after `before` and before the next ':~:' (or other fragment scheme delimiter).
+ * - after:    Everything after `query`.
+ * 
+ * @typedef  {Object}    FragmentParts
+ * @property {String}    before
+ * @property {String}    query
+ * @property {String}    after
+ */
+
+/**
+ * QuagParts holds the parsed query and fragment portion of the URL.  See README on `quag`.
+ *
+ * - query:           The string URL query component.  Does not contain any fragment.
+ * - queryPairs:      key:value object containing the queries.
+ * - fragment:        Fragment string is everything after '#' (full fragment).
+ * - fragmentParts:   FragmentParts object containing fragment string, before, query, and after.  
+ * - fragmentPairs:   key:value object containing the fragment queries.
+ * - query:           All key:value pairs from query and fragment.  
+ *
+ * @typedef  {Object}           QuagParts
+ * @property {Query}            query
+ * @property {QuagPairs}        queryPairs
+ * @property {Fragment}         fragment
+ * @property {QuagPairs}        fragmentPairs
+ * @property {FragmentParts}    fragmentParts
+ * @property {QuagPairs}        pairs
+ */
+
 
 /**
  * ExtraParameters holds the extra fields given in a URL that are not in the
@@ -186,6 +223,7 @@ export {
  * @property  {Object}        frag
  * @property  {Array<String>} fragKeys
  */
+
 
 // DefaultFormOptions where all options are set to their default case.
 /**@type {FormOptions} */
@@ -220,11 +258,6 @@ var formElement;
 // Global state for whether or not URLFormJS module has been initialized.
 var formInited = false;
 
-////////////////////////////
-// Functions
-///////////////////////////
-
-
 /**
  * Initializes the globals and event listeners for the URLFormJS module.
  * @param   {FormParameters} params          FormParameters object.
@@ -257,207 +290,74 @@ function PopulateFromURI() {
 	if (!formInited) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
-	if (isEmpty(FormParameters)) {
-		return;
-	}
 
-	// Add fragment queries to query params.
-	let fragQuery = getFragment(getQueryParams());
-	if (isEmpty(fragQuery.pairs)) {
-		return;
-	}
-	PopulateFromValues(fragQuery.pairs);
-	shareURI(fragQuery);
+	let qp = getQuagParts();
+	PopulateFromValues(qp.pairs);
+	shareURI(qp);
 }
 
 /**
- * Populates the form initialized in `Init()` from the given values.
- * Values are the given values to populate the form.
+ * Populates the form initialized in `Init()` from the given values. Values are
+ * the given values to populate the form.
  * 
- * @param   {Object} values          A key:value pair JSON object.
+ * @param   {QuagPairs} values          A key:value pair JSON object.
  * @returns {void}
  */
 function PopulateFromValues(values) {
 	if (!formInited) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
-	if (!isEmpty(FormParameters)) {
-		setGUI(values);
-	}
+	setGUI(values);
 }
 
 /**
- * Serialize serializes the initialized form into a JSON string.
+ * getQueryParts returns QueryParts generated from the current URL.
  * 
- * @returns {String}  serialized  String. Stringed form.
- * @throws  {Error}   error       Error. Fails if form is not of type HTMLFormElement.
+ * @returns {QuagParts}
  */
-function Serialize() {
-	return JSON.stringify(Objectify());
-};
+function getQuagParts() {
+	let QuagParts = {};
+	QuagParts.query = window.location.search;
+	QuagParts.queryPairs = getQueryPairs();
 
-/**
- * Objectify makes the initialized form into a JSON object.
- * 
- * @returns {Object} parsd   Object. JSON form.
- * @throws  {Error}  error   Error. Fails if form is not of type HTMLFormElement.
- */
-function Objectify() {
-	if (!formInited) {
-		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
-	}
-	var formData = new FormData(formElement); // throws
-	var pairs = {};
-	for (let [name, value] of formData) {
-		if (value == "true" || value == "on") {
-			value = true;
-		}
-		if (value == "false" || value == "unchecked") {
-			value = false;
-		}
-		// Handle FormOptions if set.
-		if (!isEmpty(FormOptions)) {
-			// Remove prefix, if set.
-			if (!isEmpty(FormOptions.prefix)) {
-				name = name.substring(FormOptions.prefix.length);
-			}
-		}
+	QuagParts.fragment = getFragment();
+	QuagParts.fragmentParts = getFragmentParts();
+	QuagParts.fragmentPairs = getFragmentQueryPairs();
 
-		if (!isEmpty(value)) {
-			pairs[name] = value;
-		}
-	}
-	return pairs;
-};
-
-
-/**
- * Clear clears out a form with the FormParameters and FormOptions set at
- * initialization.
- *
- * @returns {void}
- */
-function Clear() {
-	if (!formInited) {
-		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
-	}
-	if (isEmpty(FormParameters)) {
-		return;
-	}
-	for (let p in FormParameters) {
-		let fp = getFormParamCopy(p);
-		fp.name = FormOptions.prefix + fp.name;
-
-		// If id is empty, assume name is the id on the page.
-		if (isEmpty(fp.id)) {
-			fp.id = fp.name;
-		}
-
-		// Clears the GUI. Unchecks checkbox elements if type=bool and otherwise
-		// sets the value of the element to "";
-		if (fp.type == "bool") {
-			let e = document.getElementById(fp.id);
-			if (e != null) {
-				e.checked = false;
-			}
-			continue;
-		}
-
-		let e = document.getElementById(fp.id);
-		if (e != null) {
-			e.value = "";
-		}
-	}
-}
-
-/**
- * IsEmpty returns whether or not the initialized form is empty.
- * 
- * @returns {Boolean} bool    Boolean. Whether or not the form is empty.
- * @throws  {Error}   error   Error.   Fails if form is not of type HTMLFormElement.
- */
-function IsEmpty() {
-	return isEmpty(Objectify());
-}
-
-/**
- * Returns a 'Fragment' object. If no 'pairs' object is given/is empty, an
- * empty 'pairs' object will be created in the 'Fragment' object. If there
- * are no fragment queries, the 'pairs' object is returned either as an empty
- * object (if created in this func), or unmodified. Fragment queries will
- * override a field if already set.
- * @param   {Object}        [pairs]       Object. A key:value pair JSON object.
- * @returns {Fragment}      frag          Object. A Fragment object.
- */
-function getFragment(pairs) {
-	// Chrome removes ':~:text=' (text fragments), and anything after the text
-	// fragment. Thus, calilng 'window.location.hash' with a URL of:
-	// https://localhost:8082/#:~:text=hello?first_name=asdf&last_name=hello
-	// will result: '#a'.
-	// And calling 'window.location.hash' with a URL of:
-	// https://localhost:8082/#?first_name=asdf&last_name=hello:~:text=hello
-	// will result: '#?first_name=asdf&last_name=hello'.
-	// Firefox sees and preserves the text fragment.
-	// See: 
-	// https://stackoverflow.com/questions/67039633/get-the-text-fragment-part-of-current-url-from-window-location
-	// and
-	// https://github.com/WICG/scroll-to-text-fragment/issues
-	//
-	// By default, we support FireFox's way of handling the text fragment using
-	// 'window.location', but will also perform a secnodary check for Chrome,
-	// and other browsers that do not support text fragments in 'window.location'.
-
-	// Set 'before', 'after', 'query', and 'string' before calculating fragment
-	// query pairs.
-	let query = "";
-	let splits = window.location.hash.split("#");
-	let after = "";
-	let before = "";
-
-	// Use 'performance' package for browsers other than 'Firefox', to properly
-	// handle text fragments NOTE: MDN recommends never using user agent or
-	// browsers to determine logic, but this seems to be the best way until text
-	// fragments are properly handled.
-	if (!navigator.userAgent.includes('Firefox')) {
-		splits = performance.getEntriesByType('navigation')[0].name.split("#");
-	}
-
-	// Check if URL has fragment/hash.
-	if (splits.length > 1) {
-		let ss = splits[1].split('?');
-		// Check if URL has fragment 'query' and 'before'.
-		if (ss.length > 1) {
-			before = ss[0];
-			query = "?" + ss[1];
-		} else {
-			// If fragment does not contain '?', entire fragment is put into 'before'.
-			before = ss[0];
-		}
-	}
-
-	if (!isEmpty(query)) {
-		let s = query.split(':~:text=');
-		if (s.length > 1) {
-			after = ":~:text=" + s[1].split('?')[0];
-			query = s[0];
-		}
-	}
-
-	/**@type {Fragment} */
-	let fragment = {
-		string: before + query + after, // Everything after "#".
-		query: query, // Everything after "#" and "?".
-		before: before, // Everything after "#" and before "?".
-		after: after, // Everything after "#", "?", and ":~:text=".
-		pairs: {} // Holds key:value fragment pairs.
+	QuagParts.pairs =  {
+		...QuagParts.queryPairs,
+		...QuagParts.fragmentPairs,
 	};
 
-	//// Set fragment query pairs.
-	if (!isEmpty(pairs)) {
-		fragment.pairs = pairs;
+	return QuagParts;
+}
+
+
+/**
+ * getQueryPairs returns URL query parameters as a key:value pair object.
+ *
+ * @returns {QuagPairs}       Object. key:value pairs.
+ */
+function getQueryPairs() {
+	var url = new URL(window.location.href);
+	let pairs = {};
+	for (var pair of url.searchParams.entries()) {
+		pairs[pair[0]] = pair[1];
 	}
-	if (!isEmpty(fragment.query)) {
-		let f = fragment.query.split('?');
+	return pairs;
+}
+
+
+/**
+ * Returns URL fragment query parameters as a key:value pair object.
+ *
+ * @returns {QuagPairs}       Object. key:value pairs.
+ */
+function getFragmentQueryPairs() {
+	var fq = getFragmentParts().query;
+	var pairs = {};
+	if (!isEmpty(fq)) {
+		let f = fq.split('?');
 
 		// Fragment query is empty or malformed.
 		if (f.length < 2) {
@@ -471,45 +371,109 @@ function getFragment(pairs) {
 		f[1].split('&').forEach((q) => {
 			let pair = q.split('=');
 			if (pair[1] === undefined) {
-				fragment.pairs[pair[0]] = null;
+				pairs[pair[0]] = null;
 				return; // In anonymous func.
 			}
 			// Browsers automatically escape values. 'unescape' deprecated.
-			fragment.pairs[pair[0]] = decodeURI(pair[1]);
+			pairs[pair[0]] = decodeURI(pair[1]);
 		});
-	}
-	return fragment;
-}
-
-/**
- * Returns URL query parameters as a key:value pair object.
- *
- * @returns {Object} pairs    Object. key:value object.
- */
-function getQueryParams() {
-	var url = new URL(window.location.href);
-	// Put parts into an object since searchParams needs to be combined with fragment queries. 
-	let pairs = {};
-	// Convert the entries into an object.
-	for (var pair of url.searchParams.entries()) {
-		pairs[pair[0]] = pair[1];
 	}
 	return pairs;
 }
 
 /**
+ * getFragment returns URL fragment.  See notes in function. 
+ *
+ * @returns {string}         Object. key:value pairs.
+ */
+function getFragment() {
+	var frag = window.location.hash.split("#"); // May not work in chrome, see note below.  
+
+	// Chrome removes ':~:' (fragment directives (for text fragments)), and
+	// anything after the text fragment. Thus, calling 'window.location.hash' with
+	// a URL of:
+	// https://localhost:8082/#:~:text=hello?first_name=asdf&last_name=hello will
+	// result: '#a'. And calling 'window.location.hash' with a URL of:
+	// https://localhost:8082/#?first_name=asdf&last_name=hello:~:text=hello will
+	// result: '#?first_name=asdf&last_name=hello'. Firefox sees and preserves the
+	// text fragment. See:
+	// https://stackoverflow.com/questions/67039633/get-the-text-fragment-part-of-current-url-from-window-location
+	// and https://github.com/WICG/scroll-to-text-fragment/issues
+	//
+	// FireFox's way of handling the text fragment using 'window.location'is
+	// correct and the following performs a secondary check for other browsers
+	// (Chrome) that have changed the behavior of 'window.location'.
+	//
+	// Use 'performance' package for browsers other than 'Firefox', to properly
+	// handle text fragments MDN recommends never using user agent or browsers to
+	// determine logic, but this is the only way in Chrome to guaranteed to be
+	// given the full URL now that Chrome may remove parts of the URL.  (WTF).  
+	if (!navigator.userAgent.includes('Firefox')) {
+		frag = performance.getEntriesByType('navigation')[0].name.split("#");
+	}
+
+	if (frag.length < 2){
+		return "";
+	}
+	return frag[1];
+}
+
+/**
+ * getFragmentParts returns before, query, and after from the URL fragment.  
+ *
+ * @returns {FragmentParts}         Object. key:value pairs.
+ */
+function getFragmentParts() {
+	let parts = { // Initialize to avoid "undefined"
+		before: "",
+		query: "",
+		after: "",
+	};
+	let frag = getFragment();
+
+	let ss = frag.split('?');
+	// Check if fragment has 'query' and 'before'.
+	if (ss.length > 1) {
+		parts.before = ss[0];
+		parts.query = ss[1];
+	} else {
+		parts.before = ss[0];
+		return parts;
+	}
+
+	// Check for after. Fragment queries supports ending delimiters for other
+	// common schemes, such as the delimiter of `:~:` for fragment directives .
+	// Ignore anything after these ending delimiters.  
+	// TODO future: support other scheme starting delimiters and perhaps `?` for
+	// fragment queries.  
+	if (!isEmpty(parts.query)) {
+		let s = parts.query.split(':~:');
+		if (s.length > 1) {
+			parts.query = ss[0];
+			parts.after = ss[1];
+		}
+	}
+
+	return parts
+}
+
+
+
+/**
  * Does the processing and checking for a parameter in the params form.
  * Sets GUI for each param, and executes funcTrue() per param, if applicable.
  *
- * @param   {Object} values    Object. key:value pair JSON object.
+ * @param   {QuagPairs} kv    Object. key:value pair JSON object.
  * @returns {void}
  */
-function setGUI(values) {
+function setGUI(kv) {
 	try {
-		// Process form paramters
-		for (let p in FormParameters) {
-			let fp = getFormParamCopy(p);
-			let value = values[fp.name];
+		let fps = [ // copy
+			...FormParameters
+		]
+		
+		for (let fp of fps) {
+			let value = kv[fp.name];
 
 			// If id is empty, assume name is the id on the page.
 			if (isEmpty(fp.id)) {
@@ -547,27 +511,11 @@ function setGUI(values) {
 			}
 		}
 	} finally {
-		// Process form
+		// Callback if any.
 		if (!isEmpty(FormOptions.callback)) {
 			FormOptions.callback();
 		}
 	}
-}
-
-/**
- * Returns a copy of the FormParameter object for the given paramter key.
- * 
- * @param   {String}         param     String. Form parameter key/index.
- * @returns {FormParameter}            Object. FormParameter object.
- */
-function getFormParamCopy(param) {
-	return /**@type {FormParameter} */ {
-		name: FormParameters[param].name,
-		id: FormParameters[param].id,
-		type: FormParameters[param].type,
-		func: FormParameters[param].func,
-		funcTrue: FormParameters[param].funcTrue,
-	};
 }
 
 /**
@@ -579,7 +527,7 @@ function getFormParamCopy(param) {
  * For new options/setting FormOptions, Init() must be re-called.
  * 
  * @param   {FormOptions} formOptions  A form options object.
- * @returns {Object}      FormOptions
+ * @returns {FormOptions}              FormOptions
  * @throws  {Error}       fails if FormOptions or 'id' in options is empty.
  */
 function sanitizeFormOptions(formOptions) {
@@ -631,31 +579,22 @@ function sanitizeFormOptions(formOptions) {
 }
 
 /**
- * Generates a share URL, populates the GUI with it, and returns the URL.
+ * Generates a share URL, populates the GUI, and returns the URL.
  * 
  * Fragment queries will take precedence over query parameters.
  *
- * @param   {Fragment}  [frag]    Object. Fragment object.
- * @returns {URL}       URL       Object. Javascript URL object.
+ * @param   {QuagParts}  q    Object. Fragment object.
+ * @returns {URL}             Object. Javascript URL object.
  */
-function shareURI(frag) {
-	if (isEmpty(FormParameters)) {
-		return;
-	}
+function shareURI(quagParts) {
+	console.log("shareURI");
 
-	// Get fragment queries.
-	let fragKeys = [];
-	if (isEmpty(frag)) {
-		frag = getFragment();
+	let q = {
+		...quagParts
 	}
-	if (!isEmpty(frag.pairs)) {
-		fragKeys = Object.keys(frag.pairs);
-	}
-
+	let fragKeys =  Object.keys(q.fragmentPairs);
 	var url = new URL(window.location.origin);
-	for (let p in FormParameters) {
-		let fp = getFormParamCopy(p);
-
+	for (let fp in FormParameters) {
 		// `name` is default id for html element. `id` overrides `name` for html
 		// elements ids.
 		let htmlID = fp.name;
@@ -667,7 +606,7 @@ function shareURI(frag) {
 		let value;
 		if (elem !== null) {
 			value = elem.value;
-			if (fp.type == "bool") {
+			if (fp.type === "bool") {
 				if (elem.checked) {
 					value = "true";
 				} else {
@@ -679,8 +618,9 @@ function shareURI(frag) {
 		// If 'queryLocation' is set to "fragment" on a form wide basis, all values
 		// will be part of the fragment query.
 		let e = isEmpty(value);
+		
 		if (!e && (FormOptions.queryLocation == "fragment") || (fragKeys.includes(fp.name) || fp.queryLocation === "fragment")) {
-			frag.pairs[fp.name] = value;
+			q.pairs[fp.name] = value;
 		} else if (!e) {
 			url.searchParams.set(fp.name, value);
 		} else {
@@ -698,10 +638,10 @@ function shareURI(frag) {
 	}
 
 	// Rebuild fragment query in case new form fields were set.
-	url.hash = fragQueryToURLHash(frag, extras);
+	url.hash = fragQueryToURLHash(q, extras);
 
 	//Remove hash if there's nothing in it."#" character is pos [0]
-	if (isEmpty(frag.string)) {
+	if (isEmpty(q.string)) {
 		url.hash = "";
 	}
 
@@ -724,11 +664,10 @@ function shareURI(frag) {
  * Returns the extra fields that are not specified in the initialized form
  * from both query params and fragment queries.
  * 
- * @returns {ExtraParameters} extras   Object. ExtraParameters object.
+ * @returns {ExtraParameters}      Object. ExtraParameters object.
  */
 function getExtraParameters() {
-	let fq = getFragment();
-	let qp = getQueryParams();
+	let qp = getQuagParts();
 
 	/** @type {ExtraParameters} */
 	let extras = {
@@ -738,8 +677,8 @@ function getExtraParameters() {
 		fragKeys: [],
 	};
 
-	let queryKeys = Object.keys(qp);
-	let fragKeys = Object.keys(fq.pairs);
+	let queryKeys = Object.keys(qp.queryPairs);
+	let fragKeys = Object.keys(qp.fragmentPairs);
 
 	let params = [];
 	for (let p of FormParameters) {
@@ -814,6 +753,99 @@ function fragQueryToURLHash(frag, extras) {
 
 	return fqs;
 }
+
+/**
+ * Objectify makes the initialized form into a JSON object.
+ * 
+ * @returns {Object} parsd   Object. JSON form.
+ * @throws  {Error}  error   Error. Fails if form is not of type HTMLFormElement.
+ */
+function Objectify() {
+	if (!formInited) {
+		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
+	}
+	var formData = new FormData(formElement); // throws
+	var pairs = {};
+	for (let [name, value] of formData) {
+		if (value == "true" || value == "on") {
+			value = true;
+		}
+		if (value == "false" || value == "unchecked") {
+			value = false;
+		}
+		// Handle FormOptions if set.
+		if (!isEmpty(FormOptions)) {
+			// Remove prefix, if set.
+			if (!isEmpty(FormOptions.prefix)) {
+				name = name.substring(FormOptions.prefix.length);
+			}
+		}
+
+		if (!isEmpty(value)) {
+			pairs[name] = value;
+		}
+	}
+	return pairs;
+};
+
+/**
+ * Serialize serializes the initialized form into a JSON string.
+ * 
+ * @returns {String}  serialized  String. Stringed form.
+ * @throws  {Error}   error       Error. Fails if form is not of type HTMLFormElement.
+ */
+function Serialize() {
+	return JSON.stringify(Objectify());
+};
+
+
+/**
+ * Clear clears out a form with the FormParameters and FormOptions set at
+ * initialization.
+ *
+ * @returns {void}
+ */
+function Clear() {
+	if (!formInited) {
+		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
+	}
+
+	for (fp  in FormParameters) {
+		let name = FormOptions.prefix + fp.name;
+		let id = fp.id
+		// If id is empty, assume name is the id on the page.
+		if (isEmpty(id)) {
+			id = name;
+		}
+
+		// Clears the GUI. Unchecks checkbox elements if type=bool and otherwise
+		// sets the value of the element to "";
+		if (fp.type == "bool") {
+			let e = document.getElementById(id);
+			if (e != null) {
+				e.checked = false;
+			}
+			continue;
+		}
+
+		let e = document.getElementById(id);
+		if (e != null) {
+			e.value = "";
+		}
+	}
+}
+
+/**
+ * IsEmpty returns whether or not the initialized form is empty.
+ * 
+ * @returns {Boolean} bool    Boolean. Whether or not the form is empty.
+ * @throws  {Error}   error   Error.   Fails if form is not of type HTMLFormElement.
+ */
+function IsEmpty() {
+	return isEmpty(Objectify());
+}
+
+
 
 /**
  * isEmpty is a helper function to determine if thing is empty. 

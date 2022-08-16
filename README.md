@@ -26,10 +26,11 @@ character URL escaped).
 
 In the URL:
 
-   foo://example.com:8042/over/there?name=ferret#nose?name=bob
-   \_/   \______________/\_________/ \_________/ \___________/
-    |           |            |            |            |
-  scheme     authority      path         query       fragment
+    foo://example.com:8042/over/there?name=ferret#nose?name=bob
+    \_/   \______________/\_________/ \_________/ \___________/
+     |           |            |            |            |
+    scheme    authority      path         query      fragment
+
 
 Where `nose?name=bob` is the fragment, `nose` is the fragment anchor, and
 `?name=bob` is the fragment query.  In this example, since the query parameter
@@ -59,13 +60,18 @@ git submodule update --remote
 
 Alternatively, download `urlform.min.js` or `urlform.js`.
 
-# How to use
-
 
 # Development
 Issue submissions and pull requests are welcome.  Before submitting pull
 request, please ensure tests are passing and that the test form behavior is
 correct.
+
+We have a single page test that's useful.  Since it uses js modules it needs an
+http server.  Use server.go for this.
+
+```
+go run server.go
+```
 
 To generate the minified file, use `esbuild` to run the following:
 
@@ -73,7 +79,7 @@ To generate the minified file, use `esbuild` to run the following:
 esbuild urlform.js --bundle --format=esm --minify --outfile=urlform.min.js
 ```
 
-## Testing
+## Tests
 Testing uses (BrowserTestJS)[https://github.com/Cyphrme/BrowserTestJS]:
 
 ```
@@ -83,6 +89,19 @@ go run server.go
 
 Then go to `localhost:8082` for the results.
 
+
+# Quag
+
+We found it useful to name a super set of query and fragment, dubbed `quag`.
+The quag includes `?` and `#`.
+
+    foo://example.com:8042/over/there?name=ferret#nose?name=bob
+    \_/   \______________/\_________/ \_________/ \___________/
+     |           |            |            |            |
+    scheme    authority      path         query       fragment
+                                     \_________________________/
+                                                  | 
+                                                 quag
 
 ## Probably out of scope for this library:
 - JSON Schema validation. 
