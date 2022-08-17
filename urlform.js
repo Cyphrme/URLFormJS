@@ -635,7 +635,7 @@ function shareURI() {
 
 		// Inherit default query location if empty, not set, or not a recognized
 		// 'QueryLocation'.
-		if ((fp.queryLocation === "" || isEmpty(qp.queryLocation) || (fp.queryLocation !== "fragment" || fp.queryLocation !== "query"))) {
+		if ((fp.queryLocation === "" || isEmpty(fp.queryLocation) || (fp.queryLocation !== "fragment" || fp.queryLocation !== "query"))) {
 			fp.queryLocation = FormOptions.defaultQueryLocation;
 		}
 
