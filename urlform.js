@@ -435,7 +435,7 @@ function getFragmentParts() {
 		let s = parts.query.split(':~:');
 		if (s.length > 1) {
 			parts.query = s[0];
-			parts.after = s[1];
+			parts.after = ':~:' + s[1];
 		}
 	}
 

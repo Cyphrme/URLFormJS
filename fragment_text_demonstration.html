@@ -26,25 +26,26 @@
 
 <script>
 	// https://localhost:8082/fragment_text_demonstration.html
+	let root = window.location.origin + window.location.pathname;
 	let urls = [
 		// Where '!' needs to be percent encoded to work properly in the text fragment.
 		{
-			url: 'https://localhost:8082/fragment_text_demonstation.html/#a:~:text=Hello&text=World&text=!%20news&?first_name=Hello&last_name=World&phone_number=!',
+			url: root + '/#a:~:text=Hello&text=World&text=!%20news&?first_name=Hello&last_name=World&phone_number=!',
 			golden: '#a:~:text=Hello&text=World&text=!%20news&?first_name=Hello&last_name=World&phone_number=!'
 		},
 		// Malformed text fragment (missing '&').
 		{
-			url: 'https://localhost:8082/#anchor:~:text=hello?first_name=Hello&last_name=World',
+			url: root + '/#anchor:~:text=hello?first_name=Hello&last_name=World',
 			golden: '#anchor:~:text=hello?first_name=Hello&last_name=World'
 		},
 		// Correct text fragment (present '&').
 		{
-			url: 'https://localhost:8082/#anchor:~:text=hello&?first_name=Hello&last_name=World',
+			url: root + '/#anchor:~:text=hello&?first_name=Hello&last_name=World',
 			golden: '#anchor:~:text=hello&?first_name=Hello&last_name=World'
 		},
 	];
 	let url;
-	window.onload = (event) => {
+	window.onload = () => {
 		for (let u of urls) {
 			url = new URL(u.url);
 			history.pushState({}, '', url);
@@ -55,7 +56,7 @@
 			});
 		}
 		// Set back to original URL after running tests.
-		url = new URL('https://localhost:8082/fragment_text_demonstration.html');
+		url = new URL(root);
 		history.pushState({}, '', url);
 	};
 </script>
