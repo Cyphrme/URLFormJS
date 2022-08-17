@@ -582,7 +582,7 @@ function sanitizeFormOptions(formOptions) {
 	if (!isEmpty(formOptions.defaultQueryLocation)) {
 		formOpts.defaultQueryLocation = formOptions.defaultQueryLocation;
 	}
-	if (formOpts.defaultQueryLocation !== "fragment" || formOpts.defaultQueryLocation !== "query") {
+	if (formOpts.defaultQueryLocation !== "query") {
 		formOpts.defaultQueryLocation = DefaultFormOptions.defaultQueryLocation;
 	}
 	if (!isEmpty(formOptions.preserveExtra)) {
