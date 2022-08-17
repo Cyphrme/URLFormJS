@@ -102,14 +102,37 @@ export {
  *                  ToggleVisible(document.querySelector("#advancedOptions"))};`
  *
  * - queryLocation: Option for overriding the param in the URL link to either
- *                  be a query parameter, or a fragment query.
- * @typedef  {Object}     FormParameter
- * @property {String}     name
- * @property {String}     [id]
- * @property {String}     [type=string]
- * @property {Function}   [func]
- * @property {Function}   [funcTrue]
- * @property {String}     [queryLocation="fragment"]
+ *                  be a query parameter, or a fragment query. Defaults to empty
+ *                  string, which will inherit the 'defaultQueryLocation' from
+ *                  the form wide options.
+ * @typedef  {Object}        FormParameter
+ * @property {String}        name
+ * @property {String}        [id]
+ * @property {String}        [type=string]
+ * @property {Function}      [func]
+ * @property {Function}      [funcTrue]
+ * @property {QueryLocation} [queryLocation=""]
+ */
+
+/**
+ * QueryLocation is the option for what kind of query a form and/or form
+ * parameter will be.
+ *
+ * A QueryLocation may be one of the following:
+ * - "fragment": The query is preceeded by '#' and '?'.
+ * - "query":    The query is preceeded by '?'.
+ * - "":         Empty will inherit the form wide option for 'queryLocation'.
+ * @typedef {"fragment" | "query" | ""} QueryLocation
+ */
+
+/**
+ * DefaultQueryLocation is the option for setting the form's default query
+ * location.
+ * 
+ * A DefaultQueryLocation may be one of the following:
+ * - "fragment": The query is preceeded by '#' and '?'.
+ * - "query":    The query is preceeded by '?'.
+ * @typedef {"fragment" | "query"} DefaultQueryLocation
  */
 
 /**
@@ -135,28 +158,38 @@ export {
  * 
  * ** Optional fields:
  * 
- * - prefix:        Form input prefix which will be prepended to name.
- * - shareURLBtn:   Button element for sharing the form in the URL.
- * - shareURL:      Will share the link as a URL.
- * - shareURLArea:  Will share the link as a text.
- * - queryLocation: Whether form link generates as a fragment query, or a
- *                  regular query. Defaults to fragment query, which is the
- *                  recommended use, if possible.
- * - preserveExtra: Whether or not to preserve extra query parameters. Default
- *                  is set to false, and does not preserve extra parameters.
- * - callback:      Function that's executed each time the form is processed.
- * - cleanURL:      If set to `true`, does not preserve any extra information
- *                  from the URL that is not in the initialized form.
- * @typedef  {Object}    FormOptions
- * @property {String}    id
- * @property {String}    [prefix]
- * @property {String}    [shareURLBtn]
- * @property {String}    [shareURL]
- * @property {String}    [shareURLArea]
- * @property {String}    [queryLocation="fragment"]
- * @property {Boolean}   [preserveExtra=false]
- * @property {Function}  [callback]
- * @property {Boolean}   [cleanURL]
+ * - prefix:               Form input prefix which will be prepended to name.
+ * 
+ * - shareURLBtn:          Button element for sharing the form in the URL.
+ * 
+ * - shareURL:             Will share the link as a URL.
+ * 
+ * - shareURLArea:         Will share the link as a text.
+ * 
+ * - defaultQueryLocation: Whether form link generates as a fragment query, or a
+ *                         regular query. Defaults to fragment query, which is
+ *                         the recommended use, if possible.
+ * 
+ * - preserveExtra:        Whether or not to preserve extra query parameters.
+ *                         Default is set to false, and does not preserve extra
+ *                         parameters.
+ * 
+ * - callback:             Function that's executed each time the form is
+ *                         processed.
+ * 
+ * - cleanURL:             If set to `true`, does not preserve any extra
+ *                         information from the URL that is not in the
+ *                         initialized form.
+ * @typedef  {Object}               FormOptions
+ * @property {String}               id
+ * @property {String}               [prefix]
+ * @property {String}               [shareURLBtn]
+ * @property {String}               [shareURL]
+ * @property {String}               [shareURLArea]
+ * @property {DefaultQueryLocation} [defaultQueryLocation="fragment"]
+ * @property {Boolean}              [preserveExtra=false]
+ * @property {Function}             [callback]
+ * @property {Boolean}              [cleanURL] 
  */
 
 /**
@@ -232,7 +265,7 @@ const DefaultFormOptions = {
 	shareURLBtn: "#shareURLBtn",
 	shareURL: "#shareURL",
 	shareURLArea: "#shareURLArea",
-	queryLocation: "fragment",
+	defaultQueryLocation: "fragment",
 	preserveExtra: false,
 	callback: null,
 	cleanURL: false,
@@ -546,8 +579,11 @@ function sanitizeFormOptions(formOptions) {
 	if (!isEmpty(formOptions.shareURLBtn)) {
 		formOpts.shareURLBtn = formOptions.shareURLBtn;
 	}
-	if (!isEmpty(formOptions.queryLocation)) {
-		formOpts.queryLocation = formOptions.queryLocation;
+	if (!isEmpty(formOptions.defaultQueryLocation)) {
+		formOpts.defaultQueryLocation = formOptions.defaultQueryLocation;
+	}
+	if (formOpts.defaultQueryLocation !== "fragment" || formOpts.defaultQueryLocation !== "query") {
+		formOpts.defaultQueryLocation = DefaultFormOptions.defaultQueryLocation;
 	}
 	if (!isEmpty(formOptions.preserveExtra)) {
 		formOpts.preserveExtra = formOptions.preserveExtra;
@@ -597,11 +633,17 @@ function shareURI() {
 			}
 		}
 
+		// Inherit default query location if empty, not set, or not a recognized
+		// 'QueryLocation'.
+		if ((fp.queryLocation === "" || isEmpty(qp.queryLocation) || (fp.queryLocation !== "fragment" || fp.queryLocation !== "query"))) {
+			fp.queryLocation = FormOptions.defaultQueryLocation;
+		}
+
 		// Sets value if populated, otherwise removes the name from the query param.
 		// If 'queryLocation' is set to "fragment" on a form wide basis, all values
 		// will be part of the fragment query.
 		let e = isEmpty(value);
-		if (!e && (FormOptions.queryLocation == "fragment") || (fragKeys.includes(name) || fp.queryLocation === "fragment")) {
+		if (!e && (fp.queryLocation === "fragment" || fragKeys.includes(name))) {
 			q.fragmentPairs[name] = value;
 		} else if (!e) {
 			url.searchParams.set(name, value);

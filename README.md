@@ -5,7 +5,7 @@
 Sitcky URL Forms forms with sharable links.  Supports query parameters and
 fragment query parameters
 
-## [Demo](https://cyphrme.github.io/URLFormJS/?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true)
+## [Demo](https://cyphrme.github.io/URLFormJS/#?first_name=Bob&last_name=Smith&email_address=bob@something.com&phone_number=1234567890&subscribe_latest_news=true:~:text=Bob)
 
 
 # Query Parameters, Fragment Anchors, and Fragment Query Parameters
@@ -88,6 +88,12 @@ go run server.go
 
 Then go to `localhost:8082` for the results.
 
+# Potential browser bugs
+Chrome and potentially other browsers are removing anything after fragment
+directives from the URL when using 'window.location'.
+
+[This link demonstrates Firefox working and Chrome breaking](https://cyphrme.github.io/URLFormJS/fragment_text_demonstration.html)
+
 
 # Quag
 
@@ -102,7 +108,7 @@ The quag includes `?` and `#`.
                                                   | 
                                                  quag
 
-## Probably out of scope for this library:
+# Probably out of scope for this library:
 - JSON Schema validation. 
 - Form validation.  
 - Field requirements/limitations. 
