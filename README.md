@@ -38,8 +38,7 @@ and the fragment query parameter have the same key name of "name", the value of
 "bob" will take precedence over "ferret".  
 
 See [RFC 3986 for query
-parameters](https://www.rfc-editor.org/rfc/rfc3986#section-3.5)
-https://en.wikipedia.org/wiki/URI_fragment
+parameters](https://www.rfc-editor.org/rfc/rfc3986#section-3.5) and [Wikipedia](https://en.wikipedia.org/wiki/URI_fragment).
 
 Fragment query parameters are "non-standard", but we hope if enough people find
 it useful to standardize them through an RFC or other means.  
@@ -80,7 +79,7 @@ esbuild urlform.js --bundle --format=esm --minify --outfile=urlform.min.js
 ```
 
 ## Tests
-Testing uses (BrowserTestJS)[https://github.com/Cyphrme/BrowserTestJS]:
+Testing uses [BrowserTestJS](https://github.com/Cyphrme/BrowserTestJS]):
 
 ```
 cd /urlformjs/browsertestjs/
@@ -109,8 +108,7 @@ The quag includes `?` and `#`.
 - Field requirements/limitations. 
 
 ### Logo license
-"you are free to use your logo for promotional purposes"
-https://support.freelogodesign.org/hc/en-us/categories/360003253451-Copyrights
+["you are free to use your logo for promotional purposes"](https://support.freelogodesign.org/hc/en-us/categories/360003253451-Copyrights)
 
 ----------------------------------------------------------------------
 # Attribution, Trademark notice, and License
