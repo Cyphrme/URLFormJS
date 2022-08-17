@@ -19,7 +19,7 @@ func serveFiles(w http.ResponseWriter, r *http.Request) {
 	if filePath == "" {
 		// On empty path display home/index (`test.html`)
 		filePath = "index.html"
-	} else if filePath == "test_run.js" || filePath == "test.js" || filePath == "example.js" || filePath == "urlform.js" {
+	} else if filePath == "test_run.js" || filePath == "test.js" || filePath == "example.js" || filePath == "urlform.js" || filePath == "fragment_text_demonstration.html" {
 		// Do nothing, serve filepath unmodified.
 	} else {
 		filePath = "../" + filePath

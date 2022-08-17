@@ -83,7 +83,7 @@ esbuild urlform.js --bundle --format=esm --minify --outfile=urlform.min.js
 Testing uses (BrowserTestJS)[https://github.com/Cyphrme/BrowserTestJS]:
 
 ```
-cd /URLFormJS/BrowserTestJS/
+cd /urlformjs/browsertestjs/
 go run server.go
 ```
 

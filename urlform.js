@@ -41,12 +41,10 @@
 /**
  * Useful examples:
  * 
+ * Where '!' needs to be percent encoded to work properly in the text fragment.
  * https://localhost:8082/#a:~:text=Hello&text=World&text=!%20news&?first_name=Hello&last_name=World&phone_number=!
- * demonstrating where '!' needs to be percent encoded to work properly in the
- * text fragment.
  * 
  * Malformed text fragment (missing '&').
- * 
  * https://localhost:8082/#anchor:~:text=hello?first_name=Hello&last_name=World
  * 
  * Correct text fragment (present '&').

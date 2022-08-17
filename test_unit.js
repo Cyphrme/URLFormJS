@@ -121,7 +121,7 @@ function checkForm() {
 // test, but are all tested within the following unit tests.
 
 // Tests Init().
-async function test_Init() {
+function test_Init() {
 	var url = new URL(window.location.origin);
 	url.searchParams.set('first_name', 'Bob');
 	// Optional middle name field not set.
@@ -139,7 +139,7 @@ async function test_Init() {
 // Unit test for Clear(), as well as a helper function for URLFormJS testing.
 // This test will be ran as a unit test to make sure that it is working properly,
 // but may also be called from other tests when running TestsToRun.
-async function test_Clear() {
+function test_Clear() {
 	if (Form.IsEmpty()) {
 		// Populate before clearing
 		// Manually set each field, to keep this as a unit test and not have to call
@@ -160,13 +160,13 @@ async function test_Clear() {
 }
 
 // Tests PopulateFromURI().
-async function test_PopulateFromURI() {
+function test_PopulateFromURI() {
 	Form.PopulateFromURI();
 	return checkForm();
 };
 
 // Tests PopulateFromValues().
-async function test_PopulateFromValues() {
+function test_PopulateFromValues() {
 	Form.Clear();
 	Form.PopulateFromValues(ExampleValues);
 	return checkForm();

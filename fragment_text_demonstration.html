@@ -1,44 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta name="keywords" content="HTML template">
 	<meta name="author" content="UrlFormJS">
-	<title>Simple HTML Template Starter Page (Boilerplate)</title>
+	<title>Browser Demo</title>
 
-	<link rel="stylesheet" href="style.css">
-	<script>
-	
-
-
-// TODO for loop with various test URLs
-// Print the test URL in the console.
-// Set the url via window.history.pushstate
-// print out the test console. 
-// Demonstrate chrome breaking while Firefox is valid. 
-
-	console.log(window.location);
-	console.log(window.location.href);
-	console.log(document.location);
-	console.log(document.url);
-
-
-
-
-
-
-	</script>
 </head>
 
 <body>
-	<p>Body</p>
+	<p>This demonstrates different behaviors for 'window.location' across various
+		browsers. Firefox will correctly log all of the URL components, while Chrome
+		(and potentially others) will remove parts of the URL that come after
+		fragment directives.
+	</p>
+	<p>See browser's console for logs.
+	</p>
+	<p>The 'Correct' field in each printout will show 'true' if the browser is
+		properly interpreting the URL, and 'false' if it is not.
+	</p>
 </body>
 
 
-<footer>
-  <p>Footer</p>
-</footer>
+<script>
+	// https://localhost:8082/fragment_text_demonstration.html
+	let urls = [
+		// Where '!' needs to be percent encoded to work properly in the text fragment.
+		{
+			url: 'https://localhost:8082/fragment_text_demonstation.html/#a:~:text=Hello&text=World&text=!%20news&?first_name=Hello&last_name=World&phone_number=!',
+			golden: '#a:~:text=Hello&text=World&text=!%20news&?first_name=Hello&last_name=World&phone_number=!'
+		},
+		// Malformed text fragment (missing '&').
+		{
+			url: 'https://localhost:8082/#anchor:~:text=hello?first_name=Hello&last_name=World',
+			golden: '#anchor:~:text=hello?first_name=Hello&last_name=World'
+		},
+		// Correct text fragment (present '&').
+		{
+			url: 'https://localhost:8082/#anchor:~:text=hello&?first_name=Hello&last_name=World',
+			golden: '#anchor:~:text=hello&?first_name=Hello&last_name=World'
+		},
+	];
+	let url;
+	window.onload = (event) => {
+		for (let u of urls) {
+			url = new URL(u.url);
+			history.pushState({}, '', url);
+			console.log({
+				url: url.href,
+				window_location_hash: window.location.hash,
+				correct: window.location.hash === u.golden
+			});
+		}
+		// Set back to original URL after running tests.
+		url = new URL('https://localhost:8082/fragment_text_demonstration.html');
+		history.pushState({}, '', url);
+	};
+</script>
 
 </html>
