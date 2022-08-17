@@ -24,7 +24,9 @@
  * the type Object.  This bug does not appear to be ever fixed. See
  * https://github.com/microsoft/TypeScript/issues/18396
  * 
- * Also: https://github.com/microsoft/TypeScript/issues/50321#issuecomment-1217224937
+ * Since 'object' is diluted in meaning by JSDoc, '{}' is used to denote a 
+ * key:value object in JSDoc.
+ * See: https://github.com/microsoft/TypeScript/issues/50321#issuecomment-1217224937
  * 
  * Also, JSDoc will use the '@alias' when a variable is typed with '@type' and
  * exported. The "hover over" outside this module will reference this typedef
@@ -288,10 +290,8 @@ function PopulateFromURI() {
 	if (!formInited) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
-
-	let qp = getQuagParts();
-	PopulateFromValues(qp.pairs);
-	shareURI(qp);
+	PopulateFromValues(getQuagParts().pairs);
+	shareURI();
 }
 
 /**
@@ -566,13 +566,10 @@ function sanitizeFormOptions(formOptions) {
 /**
  * Generates a share URL, populates the GUI, and returns the URL.
  * Fragment queries will take precedence over query parameters.
- * @param   {QuagParts}  q        Object. Fragment object.
- * @returns {URL}                 Object. Javascript URL object.
+ * @returns {URL}                   Object. Javascript URL object.
  */
-function shareURI(q) {
-	if (isEmpty(q)) {
-		q = getQuagParts();
-	}
+function shareURI() {
+	let q = getQuagParts();
 	let fragKeys = Object.keys(q.fragmentPairs);
 	var url = new URL(window.location.origin + window.location.pathname);
 
@@ -626,12 +623,7 @@ function shareURI(q) {
 		}
 	}
 	// Rebuild fragment query in case new form fields were set.
-	url.hash = fragQueryToURLHash(q, extras);
-
-	//Remove hash if there's nothing in it."#" character is pos [0]
-	if (isEmpty(q.fragmentPairs)) {
-		url.hash = "";
-	}
+	url.hash = quagPartsToURLHash(q, extras);
 
 	// URI Link
 	let shareUrl = document.querySelector(FormOptions.shareURL);
@@ -690,18 +682,17 @@ function getExtraParameters() {
 
 /**
  * Returns a fragment query string from a fragment query key:value object.
- * 
- * Returns "#" if the given fragment query object is empty.
+ * Returns empty string if 'qp.fragmentParts' object is empty.
  * 
  * @param   {QuagParts}       qp          Object. QuagParts
  * @param   {ExtraParameters} extras      Object. ExtraParameters.
- * @returns {String}          fqs         String. Fragment query string (#?...).
+ * @returns {String}                      String. Fragment query string (#?...).
  */
-function fragQueryToURLHash(qp, extras) {
-	let fqs = "#";
+function quagPartsToURLHash(qp, extras) {
 	if (isEmpty(qp.fragmentParts)) {
-		return fqs;
+		return "";
 	}
+	let fqs = "#";
 	if (!isEmpty(qp.fragmentParts.before)) {
 		fqs += qp.fragmentParts.before;
 	}
