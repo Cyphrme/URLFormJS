@@ -57,8 +57,4 @@ document.addEventListener('DOMContentLoaded', () => {
 	// Initialize and populate sticky form.
 	Form.Init(FormParameters, FormOptions);
 	Form.PopulateFromURI();
-	console.debug(Form.DefaultFormOptions);
-	console.debug(Form.FormOptions);
-	console.debug(Form.FormParameters);
-
 });

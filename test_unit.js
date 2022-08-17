@@ -79,6 +79,7 @@ let t_PopulateFromURI = {
 	"func": test_PopulateFromURI,
 	"golden": true
 };
+
 /**@type {Test} */
 let t_PopulateFromValues = {
 	"name": "Populate From Values",
@@ -121,18 +122,17 @@ function checkForm() {
 
 // Tests Init().
 async function test_Init() {
-	var url = new URL(window.location);
+	var url = new URL(window.location.origin);
 	url.searchParams.set('first_name', 'Bob');
 	// Optional middle name field not set.
 	url.searchParams.set('last_name', 'Smith');
 	url.searchParams.set('email_address', 'bob@something.com');
 	url.searchParams.set('phone_number', "1234567890");
 	url.searchParams.set('subscribe_latest_news', true);
-
 	// Push new state that updates query params without reloading the page.
 	window.history.pushState({}, '', url);
-	let wait = async () => Form.Init(FormParameters, FormOptions);
-	await wait(); // Ensure it is completed before confinuing.
+
+	Form.Init(FormParameters, FormOptions);
 	return document.getElementById('ShareURLBtn').formAction;
 };
 
@@ -171,15 +171,6 @@ async function test_PopulateFromValues() {
 	Form.PopulateFromValues(ExampleValues);
 	return checkForm();
 };
-
-// TODO
-// Tests behavior for the share URL link from different fragments in the URL.
-async function test_Fragment() {
-	//// TODO scenarios to test:
-	//
-	// https://localhost:8082/#:~:text=hello?first_name=asdf&last_name=hello
-}
-
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
