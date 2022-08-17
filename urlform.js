@@ -24,6 +24,8 @@
  * the type Object.  This bug does not appear to be ever fixed. See
  * https://github.com/microsoft/TypeScript/issues/18396
  * 
+ * Also: https://github.com/microsoft/TypeScript/issues/50321#issuecomment-1217224937
+ * 
  * Also, JSDoc will use the '@alias' when a variable is typed with '@type' and
  * exported. The "hover over" outside this module will reference this typedef
  * and classifies the type as a member of the typedef. Any export that shares a
@@ -168,6 +170,8 @@ export {
 /**
  * QuagPairs is an Object of key:value pairs for both Query Parameters and
  * Fragment Query Parameters. `quag` is the superset of `query` and `fragment`.
+ * 'object' is diluted in meaning by JSDoc, and using '{}' will denote a key:val
+ * object. See: https://github.com/microsoft/TypeScript/issues/50321#issuecomment-1217224937
  * @typedef {{}}   QuagPairs
  */
 
