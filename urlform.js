@@ -570,7 +570,7 @@ function shareURI(q) {
 		q = getQuagParts();
 	}
 	let fragKeys = Object.keys(q.fragmentPairs);
-	var url = new URL(window.location.origin);
+	var url = new URL(window.location.origin + window.location.pathname);
 
 	for (let fp of FormParameters) {
 		let name = fp.name;
