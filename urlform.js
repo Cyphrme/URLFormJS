@@ -157,18 +157,18 @@ export {
 
 /**
  * Query is the Query string.  Everything after first ? and before first #.
- * @typedef  {String}    Query
+ * @typedef {String}    Query
  */
 
 /**
  * Fragment is the Fragment string without `#`.  Everything after the first #.
- * @typedef  {String}    Fragment
+ * @typedef {String}    Fragment
  */
 
 /**
  * QuagPairs is an Object of key:value pairs for both Query Parameters and
  * Fragment Query Parameters. `quag` is the superset of `query` and `fragment`.
- * @typedef   {Object}   QuagPairs
+ * @typedef {{}}   QuagPairs
  */
 
 /**
@@ -211,9 +211,9 @@ export {
  * - frag:      Object. Extra fragment query parameters given in the URL, not in the form.
  * - fragKeys:  Array.  Extra Frag query parameter keys from the `frag` object.
  * @typedef   {Object}        ExtraParameters
- * @property  {Object}        query
+ * @property  {QuagPairs}     query
  * @property  {Array<String>} queryKeys
- * @property  {Object}        frag
+ * @property  {QuagPairs}     frag
  * @property  {Array<String>} fragKeys
  */
 
@@ -741,8 +741,8 @@ function fragQueryToURLHash(qp, extras) {
 /**
  * Objectify makes the initialized form into a JSON object.
  * 
- * @returns {Object} parsd   Object. JSON form.
- * @throws  {Error}  error   Error. Fails if form is not of type HTMLFormElement.
+ * @returns {QuagPairs}
+ * @throws  {Error}        Fails if form is not of type HTMLFormElement.
  */
 function Objectify() {
 	if (!formInited) {
