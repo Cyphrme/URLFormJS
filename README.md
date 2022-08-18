@@ -2,20 +2,19 @@
 
 ![URLFormJS](./urlformjs.png)
 
-Sitcky URL Forms forms with sharable links.  Supports query parameters and
-fragment query parameters
+Sitcky URL Forms forms with sharable links.  Supports **query** parameters and
+**fragment query** parameters.
 
 ## [Demo](https://cyphrme.github.io/URLFormJS/#?first_name=Bob&last_name=Smith&email_address=bob@something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1:~:text=Bob)
 
 
 # Query Parameters, Fragment Anchors, and Fragment Query Parameters
-UrlFormJS supports normal URL query parameters for stickiness.  It also supports
-fragment query parameters.  
+UrlFormJS supports normal URL **query** parameters for stickiness.  
 
-Unlike query parameters, fragments are not sent to the server from the browser,
-which makes fragments ideal for sensitive information.  We recommend
-applications use fragment query parameters over query parameters when
-possible.   
+It also supports **fragment query** parameters.  Unlike query parameters,
+fragments are not sent to the server from the browser, which makes fragments
+**ideal for sensitive information**.  We recommend applications use fragment
+query parameters over query parameters when possible.   
 
 If query parameter and fragment query parameter are set to the same key name,
 the fragment query parameter takes precedence.  
@@ -92,7 +91,7 @@ Then go to `localhost:8082` for the results.
 Chrome and potentially other browsers are removing anything after fragment
 directives from the URL when using 'window.location'.  This library gracefully
 handles this bug.  See notes on getFragment and [stack
-overflow](https://stackoverflow.com/questions/67039633/get-the-text-fragment-part-of-current-url-from-window-location).
+overflow](https://stackoverflow.com/a/73366996/1923095).
 
 [Demonstrates of Firefox working and Chrome
 breaking](https://cyphrme.github.io/URLFormJS/fragment_text_demonstration.html)
