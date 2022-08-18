@@ -88,11 +88,14 @@ go run server.go
 
 Then go to `localhost:8082` for the results.
 
-# Potential browser bugs
+# Fragment Directive/Text Fragment Chrome bugs
 Chrome and potentially other browsers are removing anything after fragment
-directives from the URL when using 'window.location'.
+directives from the URL when using 'window.location'.  This library gracefully
+handles this bug.  See notes on getFragment and [stack
+overflow](https://stackoverflow.com/questions/67039633/get-the-text-fragment-part-of-current-url-from-window-location).
 
-[This link demonstrates Firefox working and Chrome breaking](https://cyphrme.github.io/URLFormJS/fragment_text_demonstration.html)
+[Demonstrates of Firefox working and Chrome
+breaking](https://cyphrme.github.io/URLFormJS/fragment_text_demonstration.html)
 
 
 # Quag
