@@ -18,8 +18,17 @@
 	</p>
 	<p>See browser's console for logs.
 	</p>
-	<p>The 'Correct' field in each printout will show 'true' if the browser is
+	<p>The 'golden' field in each printout will show the expected results from the
+		browser.
+	</p>
+	<p>The 'window_location_hash' field in each printout will show what the
+		browser is interpreting.
+	</p>
+	<p>The 'correct' field in each printout will show 'true' if the browser is
 		properly interpreting the URL, and 'false' if it is not.
+	</p>
+	<p>The 'url' field in each printout will show what the url was used to produce
+		the results for the object.
 	</p>
 </body>
 
@@ -52,7 +61,8 @@
 			console.log({
 				url: url.href,
 				window_location_hash: window.location.hash,
-				correct: window.location.hash === u.golden
+				golden: u.golden,
+				correct: window.location.hash === u.golden,
 			});
 		}
 		// Set back to original URL after running tests.

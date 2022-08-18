@@ -6,9 +6,7 @@ import * as Form from './urlform.js';
 // in the GUI, use a custom id for the ShareURL button, or a custom id for the
 // share URL link.
 const FormOptions = {
-	// Required
 	"id": "ExampleUserForm",
-	// Optional
 	"prefix": 'input_',
 	"shareURLBtn": "#CustomShareURLBtnID",
 	"shareURL": "#CustomShareURL",
@@ -33,6 +31,9 @@ const FormParameters = [{
 	{
 		"name": "subscribe_latest_news",
 		"type": "bool",
+	},
+	{
+		"name": "country_select",
 	},
 ];
 

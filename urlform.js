@@ -2,12 +2,13 @@
 
 /**
  * URLFormJS is used for sticky forms and sharable URL links. URLFormJS also use
- * `Fragments` heavily. See README. `Init()` must be called with the
- * `FormOptions` object. Certain elements, such as the ShareURL Button, if being
+ * `Fragments` heavily. See README. `Init()` must be called to initialize the 
+ * module. Certain elements, such as the ShareURL Button, if being
  * used, must specify the Element's id on the page in `FormOptions`, before
- * calling `Init()`. `id` is required in `FormOptions` for `Init()` to properly
- * initialize the form with all of the exported functions from this module that
- * require the HTMLFormElement.
+ * calling `Init()`.
+ * 
+ * Calling 'ObjectifyForm' and 'SerializeForm' requires 'id' to be set in
+ * 'FormOptions', which should be the HTMLFormElement's id in the GUI.
  *
  * `DefaultFormOptions` is exported, for READ ONLY capabilities of seeing
  * default `FormOptions`.
@@ -70,8 +71,11 @@ export {
 	PopulateFromURI,
 
 	Serialize,
+	SerializeForm,
 	Objectify,
+	ObjectifyForm,
 	Clear,
+	ClearForm,
 	IsEmpty,
 };
 
@@ -108,10 +112,20 @@ export {
  * @typedef  {Object}        FormParameter
  * @property {String}        name
  * @property {String}        [id]
- * @property {String}        [type=string]
+ * @property {ParamType}     [type=string]
  * @property {Function}      [func]
  * @property {Function}      [funcTrue]
  * @property {QueryLocation} [queryLocation=""]
+ */
+
+/**
+ * ParamType is the type for a given FormParameter.
+ *
+ * A ParamType may be one of the following:
+ * - "string":  The parameter is a string. Default.
+ * - "bool":    The parameter is a boolean. Used for checkboxes.
+ * - "":        The parameter uses the default.
+ * @typedef {"string" | "bool" | ""} ParamType
  */
 
 /**
@@ -141,12 +155,10 @@ export {
  * "id":"ExampleUserForm",
  * "prefix": "input_"
  * }
- *
- * ** Required fields:
  * 
- * - id:            HTMLFormElement ID on the page for the initialized form.
+ * Fields:
  * 
- * ** Optional fields:
+ * - id:                   HTMLFormElement ID on the page for the initialized form.
  * 
  * - prefix:               Form input prefix which will be prepended to name.
  * 
@@ -172,7 +184,7 @@ export {
  *                         information from the URL that is not in the
  *                         initialized form.
  * @typedef  {Object}               FormOptions
- * @property {String}               id
+ * @property {String}               [id]
  * @property {String}               [prefix]
  * @property {String}               [shareURLBtn]
  * @property {String}               [shareURL]
@@ -180,7 +192,22 @@ export {
  * @property {QueryLocation}        [defaultQueryLocation="fragment"]
  * @property {Boolean}              [preserveExtra=false]
  * @property {Function}             [callback]
- * @property {Boolean}              [cleanURL] 
+ * @property {Boolean}              [cleanURL]
+ *
+ * 
+ * Properties that are intended for use within this module.
+ * 
+ * The following definitions preclude 'URLFormJS_' for brevity.
+ * - Sanitized:          Whether 'FormOptions' has been sanitized.
+ * - Inited:             Whether URLFormJS module was initialized.
+ * - HasForm:            Whether 'FormOptions' includes a form 'id' and is found in the GUI.
+ * - FormElement:        Form element in GUI, specified by 'id' in 'FormOptions'.
+ * - ShareURLBtnElement: Share URL button element in GUI.
+ * @protected {Boolean}             URLFormJS_Sanitized=false
+ * @protected {Boolean}             URLFormJS_Inited=false
+ * @protected {Boolean}             URLFormJS_HasForm=false
+ * @protected {HTMLFormElement}     URLFormJS_FormElement
+ * @protected {HTMLButtonElement}   URLFormJS_ShareURLBtnElement
  */
 
 /**
@@ -236,10 +263,10 @@ export {
  * initialized form.
  * Object properties will be in key:value objects.
  * 
- * - query:     Object. Extra query parameters given in the URL, not in the form.
- * - queryKeys: Array.  Extra Query parameter keys from the `query` object.
- * - frag:      Object. Extra fragment query parameters given in the URL, not in the form.
- * - fragKeys:  Array.  Extra Frag query parameter keys from the `frag` object.
+ * - query:     Extra query parameters given in the URL, not in the form.
+ * - queryKeys: Extra Query parameter keys from the `query` object.
+ * - frag:      Extra fragment query parameters given in the URL, not in the form.
+ * - fragKeys:  Extra Frag query parameter keys from the `frag` object.
  * @typedef   {Object}        ExtraParameters
  * @property  {QuagPairs}     query
  * @property  {Array<String>} queryKeys
@@ -260,29 +287,43 @@ const DefaultFormOptions = {
 	preserveExtra: false,
 	callback: null,
 	cleanURL: false,
+
+	// Module protected fields
+	/**
+	 * Global state for whether FormOptions has been sanitized.
+	 * @protected */
+	URLFormJS_Sanitized: false,
+	/**
+	 * Global state for whether URLFormJS module has been initialized.
+	 * @protected */
+	URLFormJS_Inited: false,
+	/**
+	 * Global state for whether FormOptions has 'id' set, and the HTMLFormElement
+	 * was found in the GUI.
+	 * @protected */
+	URLFormJS_HasForm: false,
+	/**
+	 * Global HTMLFormElement per FormOptions.
+	 * @protected */
+	URLFormJS_FormElement: HTMLFormElement,
+	/**
+	 * Global Share URL Button per FormOptions.
+	 * @protected */
+	URLFormJS_ShareURLBtnElement: HTMLButtonElement,
 };
 
-// Global FormOptions state, set by InitForm (which calls sanitizeFormOptions)
-/**@type {FormOptions} */
+/** Global FormOptions state, set by InitForm (which calls sanitizeFormOptions)
+ * @type {FormOptions} */
 var FormOptions;
 
-// Global FormParameters state, set by InitForm
-/**@type {FormParameters} */
+/** Global FormParameters state, set by InitForm
+ * @type {FormParameters} */
 var FormParameters;
-
-// Global ShareURL Button
-/**@type {HTMLButtonElement} */
-var shareButton;
-
-// Global HTMLFormElement
-/**@type {HTMLFormElement} */
-var formElement;
-
-// Global state for whether or not URLFormJS module has been initialized.
-var formInited = false;
 
 /**
  * Initializes the globals and event listeners for the URLFormJS module.
+ * If 'formOptions' is empty, the default options will be used.
+ * 
  * @param   {FormParameters} params          FormParameters object.
  * @param   {FormOptions}    [formOptions]   FormOptions object.
  * @returns {void}
@@ -291,16 +332,17 @@ function Init(params, formOptions) {
 	FormParameters = params;
 	FormOptions = {};
 	FormOptions = sanitizeFormOptions(formOptions);
-	shareButton = document.querySelector(FormOptions.shareURLBtn);
-	if (shareButton != null) {
-		shareButton.addEventListener('click', () => shareURI()); // Must be anonymous, otherwise passes pointer event object.
+	FormOptions.URLFormJS_ShareURLBtnElement = document.querySelector(FormOptions.shareURLBtn);
+	if (FormOptions.URLFormJS_ShareURLBtnElement != null) {
+		FormOptions.URLFormJS_ShareURLBtnElement.addEventListener('click', () => shareURI()); // Must be anonymous, otherwise passes pointer event object.
 	}
-	formElement = document.getElementById(FormOptions.id);
-	if (formElement === null) {
-		// Zami review, should this throw instead?
-		console.warn("URLFormJS: Could not find the form for the given 'id' in 'FormOptions'.");
+	if (!isEmpty(FormOptions.id)) {
+		FormOptions.URLFormJS_FormElement = document.getElementById(FormOptions.id);
+		if (FormOptions.URLFormJS_FormElement !== null) {
+			FormOptions.URLFormJS_HasForm = true;
+		}
 	}
-	formInited = true;
+	FormOptions.URLFormJS_Inited = true;
 }
 
 /**
@@ -311,7 +353,7 @@ function Init(params, formOptions) {
  * @throws  {Error} Fails if Init() has not been called for the URLFormJS module.
  */
 function PopulateFromURI() {
-	if (!formInited) {
+	if (!FormOptions.URLFormJS_Inited) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
 	PopulateFromValues(getQuagParts().pairs);
@@ -326,7 +368,7 @@ function PopulateFromURI() {
  * @returns {void}
  */
 function PopulateFromValues(values) {
-	if (!formInited) {
+	if (!FormOptions.URLFormJS_Inited) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
 	setGUI(values);
@@ -541,59 +583,59 @@ function setGUI(kv) {
  */
 function sanitizeFormOptions(formOptions) {
 	// Not making a copy will modify the original, even though it's a const.
-	let formOpts = {
+	let defaultFormOpts = {
 		...DefaultFormOptions
 	};
 	// If no options given, use default.
-	if (isEmpty(formOptions) || isEmpty(formOptions.id)) {
-		throw new Error("URLFormJS: `FormOptions` is not properly set, see README.");
+	if (isEmpty(formOptions)) {
+		return defaultFormOpts;
 	}
 	// If FormOptions has already been sanitized, do nothing.
-	if (!isEmpty(formOptions.FormJs_Sanitized) && formOptions.FormJs_Sanitized === true) {
+	if (!isEmpty(formOptions.URLFormJS_Sanitized) && formOptions.URLFormJS_Sanitized === true) {
 		return;
 	}
 
 	//// Sanitize
-
-	// `id` is required.
-	formOpts.id = formOptions.id;
-
+	if (!isEmpty(formOptions.id)) {
+		defaultFormOpts.id = formOptions.id;
+	}
 	if (!isEmpty(formOptions.prefix)) {
-		formOpts.prefix = formOptions.prefix;
+		defaultFormOpts.prefix = formOptions.prefix;
 	}
 	if (!isEmpty(formOptions.shareURLArea)) {
-		formOpts.shareURLArea = formOptions.shareURLArea;
+		defaultFormOpts.shareURLArea = formOptions.shareURLArea;
 	}
 	if (!isEmpty(formOptions.shareURL)) {
-		formOpts.shareURL = formOptions.shareURL;
+		defaultFormOpts.shareURL = formOptions.shareURL;
 	}
 	if (!isEmpty(formOptions.shareURLBtn)) {
-		formOpts.shareURLBtn = formOptions.shareURLBtn;
+		defaultFormOpts.shareURLBtn = formOptions.shareURLBtn;
 	}
 	if (!isEmpty(formOptions.defaultQueryLocation)) {
-		formOpts.defaultQueryLocation = formOptions.defaultQueryLocation;
+		defaultFormOpts.defaultQueryLocation = formOptions.defaultQueryLocation;
 	}
-	if (formOpts.defaultQueryLocation !== "query") {
-		formOpts.defaultQueryLocation = DefaultFormOptions.defaultQueryLocation;
+	if (defaultFormOpts.defaultQueryLocation !== "query") {
+		defaultFormOpts.defaultQueryLocation = DefaultFormOptions.defaultQueryLocation;
 	}
 	if (!isEmpty(formOptions.preserveExtra)) {
-		formOpts.preserveExtra = formOptions.preserveExtra;
+		defaultFormOpts.preserveExtra = formOptions.preserveExtra;
 	}
 	if (!isEmpty(formOptions.callback)) {
-		formOpts.callback = formOptions.callback;
+		defaultFormOpts.callback = formOptions.callback;
 	}
 	if (!isEmpty(formOptions.cleanURL)) {
-		formOpts.cleanURL = formOptions.cleanURL;
+		defaultFormOpts.cleanURL = formOptions.cleanURL;
 	}
-
-	formOpts.FormJs_Sanitized = true;
-	return formOpts;
+	/** @protected */
+	defaultFormOpts.URLFormJS_Sanitized = true;
+	return defaultFormOpts;
 }
 
 /**
  * Generates a share URL, populates the GUI, and returns the URL.
  * Fragment queries will take precedence over query parameters.
- * @returns {URL}                   Object. Javascript URL object.
+ * 
+ * @returns {URL}             Javascript URL object.
  */
 function shareURI() {
 	let q = getQuagParts();
@@ -642,9 +684,7 @@ function shareURI() {
 			// Cleans out value from string in case it is set in the URI already.
 			// (e.g. bools on false will not be cleared)
 			url.searchParams.delete(name);
-			// FUTURE NOTE: if fragments are not properly being updated/removed on
-			// live updates for the form, this is where the logic would go.
-			// (jared) I do not think we need the logic, but I may be wrong.
+			delete q.fragmentPairs[name];
 		}
 	}
 
@@ -660,13 +700,13 @@ function shareURI() {
 
 	// URI Link
 	let shareUrl = document.querySelector(FormOptions.shareURL);
-	if (shareUrl != null) {
+	if (shareUrl !== null) {
 		shareUrl.innerHTML = url.href.link(url.href);
 	}
 
 	// Text Area 
 	let shareArea = document.querySelector(FormOptions.shareURLArea);
-	if (shareArea != null) {
+	if (shareArea !== null) {
 		shareArea.innerHTML = url.href;
 	}
 
@@ -766,17 +806,74 @@ function quagPartsToURLHash(qp, extras) {
 	return fqs;
 }
 
+
 /**
- * Objectify makes the initialized form into a JSON object.
+ * Serialize serializes the initialized FormParameters that are populated in the
+ * GUI into a JSON string.
  * 
+ * @returns {String}
+ */
+function Serialize() {
+	return JSON.stringify(Objectify());
+};
+
+/**
+ * SerializeForm serializes the initialized 'HTMLFormelement' into a JSON
+ * string.
+ *
+ * @returns {String}
+ * @throws  {Error}   Fails if form is not of type HTMLFormElement.
+ */
+function SerializeForm() {
+	return JSON.stringify(ObjectifyForm());
+};
+
+/**
+ * Objectify makes the initialized FormParameters that are populated in the GUI
+ * into a JSON object.
+ * 
+ * @returns {QuagPairs}
+ */
+function Objectify() {
+	if (!FormOptions.URLFormJS_Inited) {
+		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
+	}
+	var pairs = {};
+	for (let fp of FormParameters) {
+		let htmlID = fp.name;
+		if (!isEmpty(fp.id)) {
+			htmlID = fp.id;
+		}
+		var elem = document.getElementById(FormOptions.prefix + htmlID);
+		let value;
+		if (elem !== null) {
+			value = elem.value;
+			if (fp.type === "bool") {
+				value = elem.checked;
+			}
+		}
+		if (!isEmpty(value)) {
+			pairs[fp.name] = value;
+		}
+	}
+	return pairs;
+};
+
+/**
+ * ObjectifyForm makes the initialized formElement in the GUI into a JSON
+ * object.
+ *
  * @returns {QuagPairs}
  * @throws  {Error}        Fails if form is not of type HTMLFormElement.
  */
-function Objectify() {
-	if (!formInited) {
+function ObjectifyForm() {
+	if (!FormOptions.URLFormJS_Inited) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
-	var formData = new FormData(formElement); // throws
+	if (!FormOptions.URLFormJS_HasForm) {
+		throw new Error("URLFormJS: Could not find the HTMLFormElement in the GUI. Current 'id' in 'FormOptions': " + FormOptions.id);
+	}
+	var formData = new FormData(FormOptions.URLFormJS_FormElement); // throws
 	var pairs = {};
 	for (let [name, value] of formData) {
 		if (value == "true" || value == "on") {
@@ -801,23 +898,13 @@ function Objectify() {
 };
 
 /**
- * Serialize serializes the initialized form into a JSON string.
- * 
- * @returns {String}  serialized  String. Stringed form.
- * @throws  {Error}   error       Error. Fails if form is not of type HTMLFormElement.
- */
-function Serialize() {
-	return JSON.stringify(Objectify());
-};
-
-/**
  * Clear clears out a form with the FormParameters and FormOptions set at
  * initialization.
  *
  * @returns {void}
  */
 function Clear() {
-	if (!formInited) {
+	if (!FormOptions.URLFormJS_Inited) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
 
@@ -847,10 +934,37 @@ function Clear() {
 }
 
 /**
+ * ClearForm clears out a form from the HTMLFormElement set at initialization.
+ * 
+ * Form elements:
+ * https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements
+ * Alternative to using HTMLFormElements.elements:
+ * https://stackoverflow.com/questions/4431162/get-all-the-elements-of-a-particular-form/4431190#4431190
+ * @returns {void}
+ * @throws  {Error}        Fails if form is not of type HTMLFormElement.
+ */
+function ClearForm() {
+	if (!FormOptions.URLFormJS_Inited) {
+		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
+	}
+	if (!FormOptions.URLFormJS_HasForm) {
+		throw new Error("URLFormJS: Could not find the HTMLFormElement in the GUI. Current 'id' in 'FormOptions': " + FormOptions.id);
+	}
+
+	for (let e of FormOptions.URLFormJS_FormElement.elements) {
+		if (e.type === "checkbox") {
+			e.checked = false;
+		} else {
+			e.value = "";
+		}
+	}
+}
+
+/**
  * IsEmpty returns whether or not the initialized form is empty.
  * 
- * @returns {Boolean} bool    Boolean. Whether or not the form is empty.
- * @throws  {Error}   error   Error.   Fails if form is not of type HTMLFormElement.
+ * @returns {Boolean}  Boolean. Whether or not the form is empty.
+ * @throws  {Error}    Error.   Fails if form is not of type HTMLFormElement.
  */
 function IsEmpty() {
 	return isEmpty(Objectify());

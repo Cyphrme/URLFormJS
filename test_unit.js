@@ -48,6 +48,9 @@ const FormParameters = [{
 		"name": "subscribe_latest_news",
 		"type": "bool",
 	},
+	{
+		"name": "country_select",
+	},
 ];
 
 // Example Parsed JSON object for the example user form.
@@ -56,20 +59,28 @@ const ExampleValues = {
 	"last_name": "Smith",
 	"email_address": "bob@something.com",
 	"phone_number": "1234567890",
-	"subscribe_latest_news": true
+	"subscribe_latest_news": true,
+	"country_select": "1",
 };
 
 /**@type {Test} */
 let t_InitForm = {
 	"name": "Initialize Form",
 	"func": test_Init,
-	"golden": `https://localhost:8082/?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true`
+	"golden": `https://localhost:8082/?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1`
+};
+
+/**@type {Test} */
+let t_Clear = {
+	"name": "Clear Form",
+	"func": test_Clear,
+	"golden": true
 };
 
 /**@type {Test} */
 let t_ClearForm = {
 	"name": "Clear Form",
-	"func": test_Clear,
+	"func": test_ClearForm,
 	"golden": true
 };
 
@@ -87,14 +98,31 @@ let t_PopulateFromValues = {
 	"golden": true
 };
 
+/**@type {Test} */
+let t_ObjectifyForm = {
+	"name": "Objectify Form",
+	"func": test_ObjectifyForm,
+	"golden": true
+};
+
+/**@type {Test} */
+let t_SerializeForm = {
+	"name": "Serialize Form",
+	"func": test_SerializeForm,
+	"golden": `{"first_name":"Bob","last_name":"Smith","email_address":"bob@something.com","phone_number":"1234567890","subscribe_latest_news":true,"country_select":"1"}`
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////    Testing Variables    /////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
-// Testing helper function for checking that the form was populated correctly.
-function checkForm() {
-	let parsd = Form.Objectify();
+/**
+ * Testing helper function for checking that the form was populated correctly.
+ * @param   {()}      parsd   Object with FormParameters populated. 
+ * @returns {Boolean}
+ */
+function checkForm(parsd) {
 	if (parsd.email_address !== "bob@something.com") {
 		return false;
 	}
@@ -113,6 +141,16 @@ function checkForm() {
 	return true;
 }
 
+// Testing helper function for populating the form in the GUI with testing values.
+function populateGUI() {
+	document.getElementById('input_first_name').value = ExampleValues.first_name;
+	document.getElementById('input_middle_name').value = ExampleValues.middle_name;
+	document.getElementById('input_last_name').value = ExampleValues.last_name;
+	document.getElementById('input_email_address').value = ExampleValues.email_address;
+	document.getElementById('input_subscribe_latest_news').checked = ExampleValues.subscribe_latest_news;
+	document.getElementById('input_country_select').value = ExampleValues.country_select;
+}
+
 ////////////////////
 // Tests
 ////////////////////
@@ -129,6 +167,7 @@ function test_Init() {
 	url.searchParams.set('email_address', 'bob@something.com');
 	url.searchParams.set('phone_number', "1234567890");
 	url.searchParams.set('subscribe_latest_news', true);
+	url.searchParams.set('country_select', "1");
 	// Push new state that updates query params without reloading the page.
 	window.history.pushState({}, '', url);
 
@@ -145,13 +184,22 @@ function test_Clear() {
 		// Manually set each field, to keep this as a unit test and not have to call
 		// PopulateFromURI or PopulateFromValues, in case one of those two funcs
 		// fail, it can make debugging more difficult.
-		document.getElementById('input_first_name').value = ExampleValues.first_name;
-		document.getElementById('input_middle_name').value = ExampleValues.middle_name;
-		document.getElementById('input_last_name').value = ExampleValues.last_name;
-		document.getElementById('input_email_address').value = ExampleValues.email_address;
-		document.getElementById('input_subscribe_latest_news').checked = true;
+		populateGUI();
 	}
 	Form.Clear();
+	if (!Form.IsEmpty()) {
+		return false;
+	}
+
+	return true;
+}
+
+// Tests ClearForm().
+function test_ClearForm() {
+	if (Form.IsEmpty()) {
+		populateGUI();
+	}
+	Form.ClearForm();
 	if (!Form.IsEmpty()) {
 		return false;
 	}
@@ -162,15 +210,26 @@ function test_Clear() {
 // Tests PopulateFromURI().
 function test_PopulateFromURI() {
 	Form.PopulateFromURI();
-	return checkForm();
+	return checkForm(Form.Objectify());
 };
 
 // Tests PopulateFromValues().
 function test_PopulateFromValues() {
 	Form.Clear();
 	Form.PopulateFromValues(ExampleValues);
-	return checkForm();
+	return checkForm(Form.Objectify());
 };
+
+// Tests ObjectifyForm().
+function test_ObjectifyForm() {
+	return checkForm(Form.ObjectifyForm());
+}
+
+// Tests SerializeForm().
+function test_SerializeForm() {
+	return Form.SerializeForm();
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -187,9 +246,12 @@ function test_PopulateFromValues() {
  **/
 let TestsToRun = [
 	t_InitForm,
+	t_Clear,
 	t_ClearForm,
 	t_PopulateFromURI,
 	t_PopulateFromValues,
+	t_ObjectifyForm,
+	t_SerializeForm,
 ];
 
 /** @type {TestGUIOptions} **/
@@ -218,6 +280,18 @@ let TestGUIOptions = {
 		<div>
 			<label for="input_subscribe_latest_news">Subscribe to the latest news</label>
 			<input type="checkbox" id="input_subscribe_latest_news" name="input_subscribe_latest_news">
+		</div>
+		<div class="d-flex justify-content-center">
+		<div class="form-floating w-40">
+			<select title="Example country codes for (alphabetically) first,last, and United States." 
+			class="form-select" id="input_country_select" name="input_country_select">
+			<option disabled selected value> -- select a country -- </option>
+			<option value="1">United States</option>
+			<option value="93">Afghanistan</option>
+			<option value="263">Zimbabwe</option>
+			</select>
+			<label class="text-start" for="input_country_select">Country</label>
+		</div>
 		</div>
 	</form>
 
