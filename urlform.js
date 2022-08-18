@@ -409,7 +409,7 @@ function getFragment() {
 	// result: '#?first_name=asdf&last_name=hello'. Firefox sees and preserves the
 	// text fragment. See:
 	// https://stackoverflow.com/a/73366996/1923095
-	// and https://github.com/WICG/scroll-to-text-fragment/issues
+	// and https://github.com/WICG/scroll-to-text-fragment/issues/193#issuecomment-1219640246
 	//
 	// FireFox's way of handling the text fragment using 'window.location'is
 	// correct and the following performs a secondary check for other browsers

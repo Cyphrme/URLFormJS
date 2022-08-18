@@ -2,20 +2,19 @@
 
 ![URLFormJS](./urlformjs.png)
 
-Sitcky URL Forms forms with sharable links.  Supports query parameters and
-fragment query parameters
+Sitcky URL Forms forms with sharable links.  Supports **query** parameters and
+**fragment query** parameters.
 
 ## [Demo](https://cyphrme.github.io/URLFormJS/#?first_name=Bob&last_name=Smith&email_address=bob@something.com&phone_number=1234567890&subscribe_latest_news=true:~:text=Bob)
 
 
 # Query Parameters, Fragment Anchors, and Fragment Query Parameters
-UrlFormJS supports normal URL query parameters for stickiness.  It also supports
-fragment query parameters.  
+UrlFormJS supports normal URL **query** parameters for stickiness.  
 
-Unlike query parameters, fragments are not sent to the server from the browser,
-which makes fragments ideal for sensitive information.  We recommend
-applications use fragment query parameters over query parameters when
-possible.   
+It also supports **fragment query** parameters.  Unlike query parameters,
+fragments are not sent to the server from the browser, which makes fragments
+**ideal for sensitive information**.  We recommend applications use fragment
+query parameters over query parameters when possible.   
 
 If query parameter and fragment query parameter are set to the same key name,
 the fragment query parameter takes precedence.  
