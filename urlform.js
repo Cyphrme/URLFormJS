@@ -126,16 +126,6 @@ export {
  */
 
 /**
- * DefaultQueryLocation is the option for setting the form's default query
- * location.
- * 
- * A DefaultQueryLocation may be one of the following:
- * - "fragment": The query is preceeded by '#' and '?'.
- * - "query":    The query is preceeded by '?'.
- * @typedef {"fragment" | "query"} DefaultQueryLocation
- */
-
-/**
  * FormParameters is the main form object (Array) that holds the different
  * `FormParameter` field objects.
  * @typedef {Array<FormParameter>} FormParameters
@@ -168,7 +158,8 @@ export {
  * 
  * - defaultQueryLocation: Whether form link generates as a fragment query, or a
  *                         regular query. Defaults to fragment query, which is
- *                         the recommended use, if possible.
+ *                         the recommended use, if possible. Can only be either
+ *                         'fragment' or 'query', and not empty.
  * 
  * - preserveExtra:        Whether or not to preserve extra query parameters.
  *                         Default is set to false, and does not preserve extra
@@ -186,7 +177,7 @@ export {
  * @property {String}               [shareURLBtn]
  * @property {String}               [shareURL]
  * @property {String}               [shareURLArea]
- * @property {DefaultQueryLocation} [defaultQueryLocation="fragment"]
+ * @property {QueryLocation}        [defaultQueryLocation="fragment"]
  * @property {Boolean}              [preserveExtra=false]
  * @property {Function}             [callback]
  * @property {Boolean}              [cleanURL] 
