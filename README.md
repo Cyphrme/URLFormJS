@@ -16,14 +16,23 @@ fragments are not sent to the server from the browser, which makes fragments
 **ideal for sensitive information**.  We recommend applications use fragment
 query parameters over query parameters when possible.   
 
+    https://example.com:8042/over/there?name=ferret#nose?name=bob
+    \_____________________________________________/\____________/
+               |                                          |
+       Sent to the server                            Kept local
+
+For example, if a browser is given the URL `https://example.com#test` the browser
+makes a request only to `https://example.com` and does not include `#test` in the
+request.  Example.com would be unaware of `#test`.
+
+Fragment query parameters are located after the first `#`, then after the next
+`?`.  It is ended by the end of the URL, by the next `?`, or other fragment
+scheme like the delimiter `:~:`.  
+
 If query parameter and fragment query parameter are set to the same key name,
 the fragment query parameter takes precedence.  
 
-Fragment query parameters are located after the first `#`, then after the next
-`?` and before any additional `:~:` (text fragments should have the '?'
-character URL escaped).
-
-In the URL:
+Parts of the URL:
 
     foo://example.com:8042/over/there?name=ferret#nose?name=bob
     \_/   \______________/\_________/ \_________/ \___________/
@@ -35,6 +44,7 @@ Where `nose?name=bob` is the fragment, `nose` is the fragment anchor, and
 `?name=bob` is the fragment query.  In this example, since the query parameter
 and the fragment query parameter have the same key name of "name", the value of
 "bob" will take precedence over "ferret".  
+
 
 See [RFC 3986 for query
 parameters](https://www.rfc-editor.org/rfc/rfc3986#section-3.5) and [Wikipedia](https://en.wikipedia.org/wiki/URI_fragment).
@@ -100,14 +110,30 @@ go run server.go
 
 Then go to `localhost:8082` for the results.
 
+
+#### Demonstration that fragment is not sent off.  
+The test server logs requests and can be used to demonstrated that
+fragment is not sent to the server by the browser by visiting
+`https://localhost:8082?name=bob#test` or using curl:
+
+```
+curl -k https://localhost:8082?name=bob#test
+```
+
+Note that `?name=bob` appears in the log but `#test` does not.  
+
 # Fragment Directive/Text Fragment Chrome bugs
 Chrome and potentially other browsers are removing anything after fragment
 directives from the URL when using 'window.location'.  This library gracefully
 handles this bug.  See notes on getFragment and [stack
 overflow](https://stackoverflow.com/a/73366996/1923095).
 
+Note that fragment directives, including text fragments, should have the '?'
+character URL escaped.
+
 [Demonstrates of Firefox working and Chrome
 breaking](https://cyphrme.github.io/URLFormJS/fragment_text_demonstration.html)
+
 
 
 # Quag

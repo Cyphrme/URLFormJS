@@ -13,7 +13,7 @@ func main() {
 }
 
 func serveFiles(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Request: %s\n", r.URL.Path)
+	log.Printf("Request: %s\n", r.URL)
 
 	var filePath = r.URL.Path[1:] //remove slash
 	if filePath == "" {
