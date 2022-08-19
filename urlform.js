@@ -453,8 +453,8 @@ function getFragment() {
 	// https://localhost:8082/#?first_name=asdf&last_name=hello:~:text=hello will
 	// result: '#?first_name=asdf&last_name=hello'. Firefox sees and preserves the
 	// text fragment. See:
-	// https://stackoverflow.com/questions/67039633/get-the-text-fragment-part-of-current-url-from-window-location
-	// and https://github.com/WICG/scroll-to-text-fragment/issues
+	// https://stackoverflow.com/a/73366996/1923095
+	// and https://github.com/WICG/scroll-to-text-fragment/issues/193#issuecomment-1219640246
 	//
 	// FireFox's way of handling the text fragment using 'window.location'is
 	// correct and the following performs a secondary check for other browsers
