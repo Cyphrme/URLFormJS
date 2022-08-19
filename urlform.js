@@ -97,6 +97,10 @@ export {
  *                  URI parameter "retrieve" and html id "Retrieve"
  *
  * - type:          Type of the parameter (bool/string). Defaults to string.
+ *                  For 'bool', if the parameter is present in the URL and has
+ *                  a function set in 'funcTrue', the function will be executed.
+ *                  (e.g. https://localhost/?send_news_and_updates) using the
+ *                  example above will execute the 'ToggleVisible' function.
  *
  * - func:          Gets called if set on each call to setGUI
  *                  (PopulateFromValues and PopulateFromURI).
@@ -183,17 +187,6 @@ export {
  * - cleanURL:             If set to `true`, does not preserve any extra
  *                         information from the URL that is not in the
  *                         initialized form.
- * @typedef  {Object}               FormOptions
- * @property {String}               [id]
- * @property {String}               [prefix]
- * @property {String}               [shareURLBtn]
- * @property {String}               [shareURL]
- * @property {String}               [shareURLArea]
- * @property {QueryLocation}        [defaultQueryLocation="fragment"]
- * @property {Boolean}              [preserveExtra=false]
- * @property {Function}             [callback]
- * @property {Boolean}              [cleanURL]
- *
  * 
  * Properties that are intended for use within this module.
  * 
@@ -203,11 +196,21 @@ export {
  * - HasForm:            Whether 'FormOptions' includes a form 'id' and is found in the GUI.
  * - FormElement:        Form element in GUI, specified by 'id' in 'FormOptions'.
  * - ShareURLBtnElement: Share URL button element in GUI.
- * @protected {Boolean}             URLFormJS_Sanitized=false
- * @protected {Boolean}             URLFormJS_Inited=false
- * @protected {Boolean}             URLFormJS_HasForm=false
- * @protected {HTMLFormElement}     URLFormJS_FormElement
- * @protected {HTMLButtonElement}   URLFormJS_ShareURLBtnElement
+ * @typedef   {Object}               FormOptions
+ * @property  {String}               [id]
+ * @property  {String}               [prefix]
+ * @property  {String}               [shareURLBtn]
+ * @property  {String}               [shareURL]
+ * @property  {String}               [shareURLArea]
+ * @property  {QueryLocation}        [defaultQueryLocation="fragment"]
+ * @property  {Boolean}              [preserveExtra=false]
+ * @property  {Function}             [callback]
+ * @property  {Boolean}              [cleanURL]
+ * @protected {Boolean}              URLFormJS_Sanitized=false
+ * @protected {Boolean}              URLFormJS_Inited=false
+ * @protected {Boolean}              URLFormJS_HasForm=false
+ * @protected {HTMLFormElement}      URLFormJS_FormElement
+ * @protected {HTMLButtonElement}    URLFormJS_ShareURLBtnElement
  */
 
 /**
@@ -450,8 +453,8 @@ function getFragment() {
 	// https://localhost:8082/#?first_name=asdf&last_name=hello:~:text=hello will
 	// result: '#?first_name=asdf&last_name=hello'. Firefox sees and preserves the
 	// text fragment. See:
-	// https://stackoverflow.com/a/73366996/1923095
-	// and https://github.com/WICG/scroll-to-text-fragment/issues/193#issuecomment-1219640246
+	// https://stackoverflow.com/questions/67039633/get-the-text-fragment-part-of-current-url-from-window-location
+	// and https://github.com/WICG/scroll-to-text-fragment/issues
 	//
 	// FireFox's way of handling the text fragment using 'window.location'is
 	// correct and the following performs a secondary check for other browsers
@@ -508,9 +511,11 @@ function getFragmentParts() {
 	return parts;
 }
 
+
 /**
  * Does the processing and checking for a parameter in the params form.
- * Sets GUI for each param, and executes funcTrue() per param, if applicable.
+ * Sets GUI for each parameter, and executes funcTrue() per parameter, if
+ * applicable. See docs in 'FormOptions'.
  * Form wide options are also executed (e.g. 'callback' in 'FormOptions').
  *
  * @param   {QuagPairs} kv    Object. key:value pair JSON object.
@@ -536,8 +541,8 @@ function setGUI(kv) {
 
 			// Run funcTrue. Value may be "true", or empty "" if in the URL and with no
 			// value set, but not `undefined`.  Name only is considered a flag and is
-			// interpreted as true.  
-			if (fp.type == "bool" && fp.funcTrue !== undefined && value !== undefined && value !== "" && (value === "true" || value === true)) {
+			// interpreted as true.
+			if (!isEmpty(fp.funcTrue) && ((fp.type == "bool" && value !== undefined) || (value === "true" || value === true))) {
 				fp.funcTrue();
 			}
 
