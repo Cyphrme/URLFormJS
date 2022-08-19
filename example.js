@@ -1,7 +1,5 @@
 "use strict"
 
-import * as Form from './urlform.js';
-
 // An application may use the prefix "input_" to denote user modifiable fields
 // in the GUI, use a custom id for the ShareURL button, or a custom id for the
 // share URL link.
@@ -10,6 +8,7 @@ const FormOptions = {
 	"prefix": 'input_',
 	"shareURLBtn": "#CustomShareURLBtnID",
 	"shareURL": "#CustomShareURL",
+	"clearBtn": "#CustomClearBtnID"
 };
 
 // Permissable fields within the form for the application.
@@ -56,6 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	// }
 
 	// Initialize and populate sticky form.
-	Form.Init(FormParameters, FormOptions);
-	Form.PopulateFromURI();
+	window.urlformjs.Init(FormParameters, FormOptions);
+	window.urlformjs.PopulateFromURI();
 });

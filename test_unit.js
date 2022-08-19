@@ -1,6 +1,8 @@
 "use strict";
 
-import * as Form from './urlform.js';
+// Import 'UMD'format as 'ESM' format. 'UMD' exports are globals accessed
+// through 'window', and not the 'export' object.
+import * as _ from './urlform.js';
 
 export {
 	TestBrowserJS
@@ -170,8 +172,7 @@ function test_Init() {
 	url.searchParams.set('country_select', "1");
 	// Push new state that updates query params without reloading the page.
 	window.history.pushState({}, '', url);
-
-	Form.Init(FormParameters, FormOptions);
+	window.urlformjs.Init(FormParameters, FormOptions);
 	return document.getElementById('ShareURLBtn').formAction;
 };
 
@@ -179,15 +180,15 @@ function test_Init() {
 // This test will be ran as a unit test to make sure that it is working properly,
 // but may also be called from other tests when running TestsToRun.
 function test_Clear() {
-	if (Form.IsEmpty()) {
+	if (window.urlformjs.IsEmpty()) {
 		// Populate before clearing
 		// Manually set each field, to keep this as a unit test and not have to call
 		// PopulateFromURI or PopulateFromValues, in case one of those two funcs
 		// fail, it can make debugging more difficult.
 		populateGUI();
 	}
-	Form.Clear();
-	if (!Form.IsEmpty()) {
+	window.urlformjs.Clear();
+	if (!window.urlformjs.IsEmpty()) {
 		return false;
 	}
 
@@ -196,11 +197,11 @@ function test_Clear() {
 
 // Tests ClearForm().
 function test_ClearForm() {
-	if (Form.IsEmpty()) {
+	if (window.urlformjs.IsEmpty()) {
 		populateGUI();
 	}
-	Form.ClearForm();
-	if (!Form.IsEmpty()) {
+	window.urlformjs.ClearForm();
+	if (!window.urlformjs.IsEmpty()) {
 		return false;
 	}
 
@@ -209,25 +210,25 @@ function test_ClearForm() {
 
 // Tests PopulateFromURI().
 function test_PopulateFromURI() {
-	Form.PopulateFromURI();
-	return checkForm(Form.Objectify());
+	window.urlformjs.PopulateFromURI();
+	return checkForm(window.urlformjs.Objectify());
 };
 
 // Tests PopulateFromValues().
 function test_PopulateFromValues() {
-	Form.Clear();
-	Form.PopulateFromValues(ExampleValues);
-	return checkForm(Form.Objectify());
+	window.urlformjs.Clear();
+	window.urlformjs.PopulateFromValues(ExampleValues);
+	return checkForm(window.urlformjs.Objectify());
 };
 
 // Tests ObjectifyForm().
 function test_ObjectifyForm() {
-	return checkForm(Form.ObjectifyForm());
+	return checkForm(window.urlformjs.ObjectifyForm());
 }
 
 // Tests SerializeForm().
 function test_SerializeForm() {
-	return Form.SerializeForm();
+	return window.urlformjs.SerializeForm();
 }
 
 

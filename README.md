@@ -56,8 +56,21 @@ To update the submodule:
 git submodule update --remote
 ```
 
-Alternatively, download `urlform.min.js` or `urlform.js`.
+Alternatively, download `urlform.js`.
 
+If not importing `urlform.js` as a module, the file can be loaded in HTML using:
+
+``` HTML
+<script defer src="./urlformjs/urlform.js"></script>
+```
+
+`urlform.js` is in ['UMD' format](https://github.com/umdjs/umd) and can be accessed
+in Javascript with the following:
+``` Javascript
+window.urlformjs
+```
+
+See `example.js` for an example of initializing `URLFormJS` for a given form.
 
 # Development
 Issue submissions and pull requests are welcome.  Before submitting pull
