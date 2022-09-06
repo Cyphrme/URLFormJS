@@ -184,7 +184,7 @@
 		 * 
 		 * - cleanURL:             If set to `true`, does not preserve any extra
 		 *                         information from the URL that is not in the
-		 *                         initialized form.
+		 *                         initialized form. Defaults to false.
 		 * 
 		 * Properties that are intended for use within this module.
 		 * 
@@ -204,7 +204,7 @@
 		 * @property  {QueryLocation}        [defaultQueryLocation="fragment"]
 		 * @property  {Boolean}              [preserveExtra=false]
 		 * @property  {Function}             [callback]
-		 * @property  {Boolean}              [cleanURL]
+		 * @property  {Boolean}              [cleanURL=false]
 		 * @protected {Boolean}              Sanitized=false
 		 * @protected {Boolean}              Inited=false
 		 * @protected {Boolean}              HasForm=false
@@ -414,7 +414,7 @@
 		/**
 		 * getQueryPairs returns URL query parameters as a key:value pair object.
 		 *
-		 * @returns {QuagPairs}       Object. key:value pairs.
+		 * @returns {QuagPairs}       key:value pairs.
 		 */
 		function getQueryPairs() {
 			var url = new URL(window.location.href);
@@ -428,7 +428,7 @@
 		/**
 		 * Returns URL fragment query parameters as a key:value pair object.
 		 *
-		 * @returns {QuagPairs}       Object. key:value pairs.
+		 * @returns {QuagPairs}       key:value pairs.
 		 */
 		function getFragmentQueryPairs() {
 			let fq = getFragmentParts().query;
@@ -549,7 +549,7 @@
 		 * applicable. See docs in 'FormOptions'.
 		 * Form wide options are also executed (e.g. 'callback' in 'FormOptions').
 		 *
-		 * @param   {QuagPairs} kv    Object. key:value pair JSON object.
+		 * @param   {QuagPairs} kv    key:value pair JSON object.
 		 * @returns {void}
 		 */
 		function setGUI(kv) {
@@ -615,7 +615,7 @@
 		 * 
 		 * @param   {FormOptions} formOptions  A form options object.
 		 * @returns {FormOptions}              FormOptions
-		 * @throws  {Error}       fails if FormOptions or 'id' in options is empty.
+		 * @throws  {Error}        Fails if FormOptions or 'id' in options is empty.
 		 */
 		function sanitizeFormOptions(formOptions) {
 			// Not making a copy will modify the original, even though it's a const.
@@ -728,8 +728,9 @@
 			}
 
 			let extras = getExtraParameters();
-			// Set extras back in query params, if given, and 'cleanURL' not set.
-			if (!isEmpty(extras.query) && !FormOptions.cleanURL) {
+			// Set extras back in query params if extra params are given, 
+			// `preserveExtra` = true, and 'cleanURL' = false.
+			if (!isEmpty(extras.query) && FormOptions.preserveExtra && !FormOptions.cleanURL) {
 				for (let extra in extras.query) {
 					url.searchParams.set(extra, extras.query[extra]);
 				}
@@ -756,7 +757,7 @@
 		 * Returns the extra fields that are not specified in the initialized form
 		 * from both query params and fragment queries.
 		 * 
-		 * @returns {ExtraParameters}      Object. ExtraParameters object.
+		 * @returns {ExtraParameters}      ExtraParameters object.
 		 */
 		function getExtraParameters() {
 			let qp = getQuagParts();
@@ -796,9 +797,9 @@
 		 * Returns a fragment query string from a fragment query key:value object.
 		 * Returns empty string if 'qp.fragmentParts' object is empty.
 		 * 
-		 * @param   {QuagParts}       qp          Object. QuagParts
-		 * @param   {ExtraParameters} extras      Object. ExtraParameters.
-		 * @returns {String}                      String. Fragment query string (#?...).
+		 * @param   {QuagParts}       qp          QuagParts
+		 * @param   {ExtraParameters} extras      ExtraParameters.
+		 * @returns {String}                      Fragment query string (#?...).
 		 */
 		function quagPartsToURLHash(qp, extras) {
 			if (isEmpty(qp.fragmentParts)) {
@@ -1002,8 +1003,8 @@
 		/**
 		 * IsEmpty returns whether or not the initialized form is empty.
 		 * 
-		 * @returns {Boolean}  Boolean. Whether or not the form is empty.
-		 * @throws  {Error}    Error.   Fails if form is not of type HTMLFormElement.
+		 * @returns {Boolean}  Whether or not the form is empty.
+		 * @throws  {Error}    Fails if form is not of type HTMLFormElement.
 		 */
 		function IsEmpty() {
 			return isEmpty(Objectify());
