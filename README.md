@@ -40,8 +40,10 @@ Parts of the URL:
     scheme    authority      path         query      fragment
 
 
-Where `nose?name=bob` is the fragment, `nose` is the fragment anchor, and
-`?name=bob` is the fragment query.  In this example, since the query parameter
+Where `nose?name=bob` is the **fragment**, `nose` is the **fragment anchor**,
+and `?name=bob` is the **fragment query**.  
+
+In this example, since the query parameter
 and the fragment query parameter have the same key name of "name", the value of
 "bob" will take precedence over "ferret".  
 
@@ -129,8 +131,8 @@ Note that `?name=bob` appears in the log but `#test` does not.
 # Fragment Directive/Text Fragment Chrome bugs
 Chrome and potentially other browsers are removing anything after fragment
 directives from the URL when using 'window.location'.  This library gracefully
-handles this bug.  See notes on getFragment and [stack
-overflow](https://stackoverflow.com/a/73366996/1923095).
+handles this bug except when the protocol is `file://`.  See notes on
+getFragment and [stack overflow](https://stackoverflow.com/a/73366996/1923095).
 
 Note that fragment directives, including text fragments, should have the '?'
 character URL escaped.
