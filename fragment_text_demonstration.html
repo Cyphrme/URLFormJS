@@ -11,30 +11,45 @@
 </head>
 
 <body>
+	<h4>See browser console logs.</h4>
+
 	<p>This demonstrates different behaviors for 'window.location' across various
-		browsers. Firefox will correctly log all of the URL components, while Chrome
+		browsers. 
+		
+		Firefox will correctly log all of the URL components, while Chrome
 		(and potentially others) will remove parts of the URL that come after
 		fragment directives.
 	</p>
-	<p>See browser's console for logs.
-	</p>
-	<p>The 'golden' field in each printout will show the expected results from the
-		browser.
-	</p>
-	<p>The 'window_location_hash' field in each printout will show what the
-		browser is interpreting.
-	</p>
-	<p>The 'correct' field in each printout will show 'true' if the browser is
-		properly interpreting the URL, and 'false' if it is not.
-	</p>
-	<p>The 'url' field in each printout will show what the url was used to produce
-		the results for the object.
-	</p>
+
+<pre>
+'golden': expected results.
+
+'url': The url used to produce the results for the object.
+
+'window_location_hash':  value for `window.location.hash`
+
+'correct': 'true' if the browser is properly interpreting the URL.
+</pre>
+
+
+<p><a href="fragment_text_demonstration.html#:~:text=linguistically%2C%20a%20question%20may%20be%20defined%20on%20three%20levels.">Fragment directive test link.</a>  
+May need to enable `chrome://flags/#enable-experimental-web-platform-features`</p>
+
+
 </body>
 
 
 <script>
-	// https://localhost:8082/fragment_text_demonstration.html
+// If running the server: https://localhost:8082/fragment_text_demonstration.html 
+
+	// Test performance
+	// May want to use a URL like: /fragment_text_demonstration.html#:~:text=linguistically%2C%20a%20question%20may%20be%20defined%20on%20three%20levels.
+	// https://github.com/WICG/scroll-to-text-fragment/issues/196
+	console.log("performance.navigation.name is empty on protocol `file://`.  Value: ", performance.getEntriesByType("navigation")[0].name); 
+	console.log(document.fragmentDirective);
+
+
+		
 	let root = window.location.origin + window.location.pathname;
 	let urls = [
 		// Where '!' needs to be percent encoded to work properly in the text fragment.
