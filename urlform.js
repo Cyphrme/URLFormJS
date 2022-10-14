@@ -66,11 +66,11 @@
 	 * and
 	 * https://stackoverflow.com/a/63751410/15147681
 	 */
-	(function (global, factory) {
+	(function(global, factory) {
 		typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 			typeof define === 'function' && define.amd ? define(['exports'], factory) :
 			(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.urlformjs = {}));
-	})(this, (function (exports) {
+	})(this, (function(exports) {
 		'use strict';
 
 		/**
@@ -107,6 +107,9 @@
 		 *                  be a query parameter, or a fragment query. Defaults to empty
 		 *                  string, which will inherit the 'defaultQueryLocation' from
 		 *                  the form wide options.
+		 * 
+		 * - saveSetting:  Save and use this setting from local storage.  Will be
+		 *                  overwritten by URL flag values if present. 
 		 * @typedef  {Object}        FormParameter
 		 * @property {String}        name
 		 * @property {String}        [id]
@@ -114,6 +117,7 @@
 		 * @property {Function}      [func]
 		 * @property {Function}      [funcTrue]
 		 * @property {QueryLocation} [queryLocation=""]
+		 * @property {bool}          [saveSetting=false]
 		 */
 
 		/**
@@ -131,8 +135,8 @@
 		 * parameter will be.
 		 *
 		 * A QueryLocation may be one of the following:
-		 * - "fragment": The query is preceeded by '#' and '?'.
-		 * - "query":    The query is preceeded by '?'.
+		 * - "fragment": The query is preceded by '#' and '?'.
+		 * - "query":    The query is preceded by '?'.
 		 * - "":         Empty will inherit the form wide option for 'queryLocation'.
 		 * @typedef {"fragment" | "query" | ""} QueryLocation
 		 */
@@ -156,8 +160,7 @@
 		 * 
 		 * Fields:
 		 * 
-		 * - id:                   HTMLFormElement ID on the page for the initialized
-		 *                         form.
+		 * 
 		 * 
 		 * - prefix:               Form input prefix which will be prepended to name.
 		 * 
@@ -185,32 +188,38 @@
 		 * - cleanURL:             If set to `true`, does not preserve any extra
 		 *                         information from the URL that is not in the
 		 *                         initialized form. Defaults to false.
+		 * <form> mode options:
+		 * - formID:               HTMLFormElement ID of <form>. Set formMode true
+		 * 
 		 * 
 		 * Properties that are intended for use within this module.
 		 * 
 		 * - Sanitized:          Whether 'FormOptions' has been sanitized.
 		 * - Inited:             Whether URLFormJS module was initialized.
-		 * - HasForm:            Whether 'FormOptions' includes a form 'id' and is found in the GUI.
-		 * - FormElement:        Form element in GUI, specified by 'id' in 'FormOptions'.
 		 * - ShareURLBtnElement: Share URL button element in GUI.
 		 * - ClearBtnElement:    Clear the `shareURL` and form in GUI.
-		 * @typedef   {Object}               FormOptions
-		 * @property  {String}               [id]
-		 * @property  {String}               [prefix]
-		 * @property  {String}               [clearBtn]
-		 * @property  {String}               [shareURLBtn]
-		 * @property  {String}               [shareURL]
-		 * @property  {String}               [shareURLArea]
-		 * @property  {QueryLocation}        [defaultQueryLocation="fragment"]
-		 * @property  {Boolean}              [preserveExtra=false]
-		 * @property  {Function}             [callback]
-		 * @property  {Boolean}              [cleanURL=false]
-		 * @protected {Boolean}              Sanitized=false
-		 * @protected {Boolean}              Inited=false
-		 * @protected {Boolean}              HasForm=false
-		 * @protected {HTMLFormElement}      FormElement
-		 * @protected {HTMLButtonElement}    ShareURLBtnElement
-		 * @protected {HTMLButtonElement}    ClearBtnElement
+		 * <form> mode options:
+		 * - FormMode:            Use `<form>` mode.  FormOptions must include a form 'id' found in the GUI.
+		 * - FormElement:        Form element in GUI, specified by 'id' in 'FormOptions'.
+		 * @typedef  {Object}               FormOptions
+		 * @property {String}               [prefix]
+		 * @property {String}               [clearBtn]
+		 * @property {String}               [shareURLBtn] 
+		 * @property {String}               [shareURL]
+		 * @property {String}               [shareURLArea]
+		 * @property {QueryLocation}        [defaultQueryLocation="fragment"]
+		 * @property {Boolean}              [preserveExtra=false]
+		 * @property {Function}             [callback]
+		 * @property {Boolean}              [cleanURL=false]
+		 * @property {String}               [formID]
+		 * // Read only Values
+		 * @property {Boolean}              Sanitized=false
+		 * @property {Boolean}              Inited=false
+		 * @property {Boolean}              FormMode=false
+		 * @property {HTMLFormElement}      FormElement
+		 * @property {HTMLButtonElement}    ShareURLBtnElement
+		 * @property {HTMLButtonElement}    ClearBtnElement 
+		 * @property {FormParameters}       FormParameters
 		 */
 
 		/**
@@ -277,11 +286,12 @@
 		 * @property  {Array<String>} fragKeys
 		 */
 
-
-		// DefaultFormOptions where all options are set to their default case.
-		/**@type {FormOptions} */
+		/**
+		 * DefaultFormOptions where all options are set to their default case.
+		 * @type {FormOptions} 
+		 */
 		const DefaultFormOptions = {
-			id: "",
+			formID: "",
 			prefix: "",
 			shareURLBtn: "#shareURLBtn",
 			shareURL: "#shareURL",
@@ -290,87 +300,61 @@
 			preserveExtra: false,
 			callback: null,
 			cleanURL: false,
-
-			// Module protected fields
-			/**
-			 * Global state for whether FormOptions has been sanitized.
-			 * @protected */
+			localStorageNamespace: "URLFormJS_",
+			// Module fields not settable externally.  
 			Sanitized: false,
-			/**
-			 * Global state for whether URLFormJS module has been initialized.
-			 * @protected */
 			Inited: false,
-			/**
-			 * Global state for whether FormOptions has 'id' set, and the HTMLFormElement
-			 * was found in the GUI.
-			 * @protected */
-			HasForm: false,
-			/**
-			 * Global HTMLFormElement per FormOptions.
-			 * @protected */
+			FormMode: false,
 			FormElement: HTMLFormElement,
-			/**
-			 * Global Share URL Button per FormOptions.
-			 * @protected */
 			ShareURLBtnElement: HTMLButtonElement,
-			/**
-			 * Global Clear Button per FormOptions.
-			 * @protected */
 			ClearBtnElement: HTMLButtonElement,
 		};
-
-		/** Global FormOptions state, set by InitForm (which calls sanitizeFormOptions)
-		 * @type {FormOptions} */
-		var FormOptions;
-
-		/** Global FormParameters state, set by InitForm
-		 * @type {FormParameters} */
-		var FormParameters;
 
 		/**
 		 * Initializes the globals and event listeners for the URLFormJS module.
 		 * If 'formOptions' is empty, the default options will be used.
 		 * 
-		 * @param   {FormParameters} params          FormParameters object.
-		 * @param   {FormOptions}    [formOptions]   FormOptions object.
-		 * @returns {void}
+		 * @param   {FormParameters} params
+		 * @param   {FormOptions}    [formOptions]
+		 * @returns {FormParameters} SetFormParameters
 		 */
 		function Init(params, formOptions) {
-			FormParameters = params;
-			FormOptions = {};
-			FormOptions = sanitizeFormOptions(formOptions);
-			FormOptions.ShareURLBtnElement = document.querySelector(FormOptions.shareURLBtn);
-			if (FormOptions.ShareURLBtnElement != null) {
-				FormOptions.ShareURLBtnElement.addEventListener('click', () => shareURI()); // Must be anonymous, otherwise passes pointer event object.
+			let formOpt = {};
+			formOpt = sanitizeFormOptions(formOptions);
+			formOpt.FormParameters = params
+			formOpt.ShareURLBtnElement = document.querySelector(formOpt.shareURLBtn);
+			if (formOpt.ShareURLBtnElement != null) {
+				formOpt.ShareURLBtnElement.addEventListener('click', () => shareURI()); // Must be anonymous, otherwise passes pointer event object.
 			}
-			FormOptions.ClearBtnElement = document.querySelector(FormOptions.clearBtn);
-			if (FormOptions.ClearBtnElement != null) {
-				FormOptions.ClearBtnElement.addEventListener('click', () => {
+			formOpt.ClearBtnElement = document.querySelector(formOpt.clearBtn);
+			if (formOpt.ClearBtnElement != null) {
+				formOpt.ClearBtnElement.addEventListener('click', () => {
 					Clear()
 					shareURI();
 				});
 			}
-			if (!isEmpty(FormOptions.id)) {
-				FormOptions.FormElement = document.getElementById(FormOptions.id);
-				if (FormOptions.FormElement !== null) {
-					FormOptions.HasForm = true;
+			if (!isEmpty(formOpt.formID)) {
+				formOpt.FormElement = document.getElementById(formOpt.formID);
+				if (formOpt.FormElement !== null) {
+					formOpt.FormMode = true;
 				}
 			}
-			FormOptions.Inited = true;
+			formOpt.Inited = true;
+			return formOpt;
 		}
 
 		/**
 		 * PopulateFromURI populates the GUI from the URI, if any of the form params
 		 * are supplied in the URI Query.
-		 *
+		 * @param   {FormOptions}    formOptions
 		 * @returns {void}
 		 * @throws  {Error} Fails if Init() has not been called for the URLFormJS module.
 		 */
-		function PopulateFromURI() {
-			if (!FormOptions.Inited) {
+		function PopulateFromURI(formOptions) {
+			if (!formOptions.Inited) {
 				throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 			}
-			PopulateFromValues(getQuagParts().pairs);
+			PopulateFromValues(getQuagParts().pairs, formOptions);
 			shareURI();
 		}
 
@@ -378,14 +362,15 @@
 		 * Populates the form initialized in `Init()` from the given values. Values are
 		 * the given values to populate the form.
 		 * 
-		 * @param   {QuagPairs} values          A key:value pair JSON object.
+		 * @param   {QuagPairs}   quagPairs
+		 * @param   {FormOptions} formOptions
 		 * @returns {void}
 		 */
-		function PopulateFromValues(values) {
-			if (!FormOptions.Inited) {
+		function PopulateFromValues(quagPairs, formOptions) {
+			if (!formOptions.Inited) {
 				throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 			}
-			setGUI(values);
+			setGUI(quagPairs);
 		}
 
 		/**
@@ -549,12 +534,13 @@
 		 * applicable. See docs in 'FormOptions'.
 		 * Form wide options are also executed (e.g. 'callback' in 'FormOptions').
 		 *
-		 * @param   {QuagPairs} kv    key:value pair JSON object.
+		 * @param   {QuagPairs}    kv
+		 * @param   {FormOptions}  formOptions
 		 * @returns {void}
 		 */
-		function setGUI(kv) {
+		function setGUI(kv, formOptions) {
 			try {
-				for (let fp of FormParameters) {
+				for (let fp of formOptions.FormParameters) {
 					// Set as vars to avoid mutability.
 					let name = fp.name;
 					let value = kv[name];
@@ -562,7 +548,7 @@
 
 					// If id is empty, assume name is the id on the page.
 					if (isEmpty(id)) {
-						id = FormOptions.prefix + name;
+						id = formOptions.prefix + name;
 					}
 
 					// Run func if set
@@ -577,54 +563,95 @@
 						fp.funcTrue();
 					}
 
-					// Sets the GUI if the value is populated. Checks checkbox elements if
-					// type=bool and otherwise sets the value of the element based on the given
-					// name.
-					if (!isEmpty(value)) {
-						if (fp.type == "bool" && (value == "true" || value === true)) {
-							let e = document.getElementById(id);
-							if (e != null) {
-								e.checked = true;
-							}
-							continue;
-						}
+					// Attempt to get value from local storage if it hasn't already been
+					// set by URI.  
+					if (isEmpty(value)) {
+						value = getSavedSetting(name, formOptions);
+					}
 
-						let e = document.getElementById(id);
-						if (e != null) {
+					let e = document.getElementById(id);
+					if (e == null) {
+						continue;
+					}
+
+					// Set GUI bool elements.  
+					if (!isEmpty(value)) {
+						// Checks checkbox elements if type=bool and value==true.
+						if (fp.type == "bool" && (value == "true" || value === true)) {
+							e.checked = true;
+						} else {
+							// Set GUI Non-bool inputs.  
 							e.value = value;
 						}
 					}
+
+					if (fp.saveSetting) {
+						e.addEventListener("input", () => {
+							setSavedSetting(name, this.value, formOptions)
+						});
+					}
+
 				}
 			} finally {
 				//// Form wide options
 
 				// Callback if any.
-				if (!isEmpty(FormOptions.callback)) {
-					FormOptions.callback();
+				if (!isEmpty(formOptions.callback)) {
+					formOptions.callback();
 				}
 			}
 		}
 
 		/**
-		 * Sanitizes a formOptions object, and sets all of the options values to their
-		 * default value if not set.
+		 * Gets the setting. 
+		 * @param   {string}       name
+		 * @param   {FormOptions}  formOptions
+		 * @returns {void}
+		 */
+		function getSavedSetting(name, formOptions) {
+			return localStorage.getItem(localStorageNamespace + formOptions.prefix + name);
+		}
+
+
+		/**
+		 * Sets the setting. 
+		 * @param   {string}       name
+		 * @param   {string}       value
+		 * @param   {FormOptions}  formOptions
+		 * @returns {void}
+		 */
+		function setSavedSetting(name, value, formOptions) {
+			return localStorage.setItem(localStorageNamespace + formOptions.prefix + name, value);
+		}
+
+
+
+
+
+
+
+
+
+		/**
+		 * Sanitizes a formOptions object, and sets all of the options values to
+		 * their default value if not set.
 		 * 
 		 * Modifies "in place" as well as returns the object.
 		 * 
 		 * For new options/setting FormOptions, Init() must be re-called.
 		 * 
-		 * @param   {FormOptions} formOptions  A form options object.
-		 * @returns {FormOptions}              FormOptions
+		 * @param   {FormOptions} formOptions
+		 * @returns {FormOptions}
 		 * @throws  {Error}        Fails if FormOptions or 'id' in options is empty.
 		 */
 		function sanitizeFormOptions(formOptions) {
 			// Not making a copy will modify the original, even though it's a const.
-			let defaultFormOpts = {
+			let foc = {
 				...DefaultFormOptions
 			};
 			// If no options given, use default.
 			if (isEmpty(formOptions)) {
-				return defaultFormOpts;
+				return foc;
 			}
 			// If FormOptions has already been sanitized, do nothing.
 			if (!isEmpty(formOptions.Sanitized) && formOptions.Sanitized === true) {
@@ -632,56 +659,63 @@
 			}
 
 			//// Sanitize
-			if (!isEmpty(formOptions.id)) {
-				defaultFormOpts.id = formOptions.id;
+			if (!isEmpty(formOptions.formID)) {
+				foc.formID = formOptions.formID;
 			}
 			if (!isEmpty(formOptions.prefix)) {
-				defaultFormOpts.prefix = formOptions.prefix;
+				foc.prefix = formOptions.prefix;
 			}
 			if (!isEmpty(formOptions.clearBtn)) {
-				defaultFormOpts.clearBtn = formOptions.clearBtn;
+				foc.clearBtn = formOptions.clearBtn;
 			}
 			if (!isEmpty(formOptions.shareURLArea)) {
-				defaultFormOpts.shareURLArea = formOptions.shareURLArea;
+				foc.shareURLArea = formOptions.shareURLArea;
 			}
 			if (!isEmpty(formOptions.shareURL)) {
-				defaultFormOpts.shareURL = formOptions.shareURL;
+				foc.shareURL = formOptions.shareURL;
 			}
 			if (!isEmpty(formOptions.shareURLBtn)) {
-				defaultFormOpts.shareURLBtn = formOptions.shareURLBtn;
+				foc.shareURLBtn = formOptions.shareURLBtn;
 			}
 			if (!isEmpty(formOptions.defaultQueryLocation)) {
-				defaultFormOpts.defaultQueryLocation = formOptions.defaultQueryLocation;
+				foc.defaultQueryLocation = formOptions.defaultQueryLocation;
 			}
-			if (defaultFormOpts.defaultQueryLocation !== "query") {
-				defaultFormOpts.defaultQueryLocation = DefaultFormOptions.defaultQueryLocation;
-			}
+
 			if (!isEmpty(formOptions.preserveExtra)) {
-				defaultFormOpts.preserveExtra = formOptions.preserveExtra;
+				foc.preserveExtra = formOptions.preserveExtra;
 			}
 			if (!isEmpty(formOptions.callback)) {
-				defaultFormOpts.callback = formOptions.callback;
+				foc.callback = formOptions.callback;
 			}
 			if (!isEmpty(formOptions.cleanURL)) {
-				defaultFormOpts.cleanURL = formOptions.cleanURL;
+				foc.cleanURL = formOptions.cleanURL;
 			}
-			/** @protected */
-			defaultFormOpts.Sanitized = true;
-			return defaultFormOpts;
+			if (!isEmpty(formOptions.localStorageNamespace)) {
+				foc.localStorageNamespace = formOptions.localStorageNamespace;
+			}
+
+			// Options with limited valid values.  
+			if (formOptions.defaultQueryLocation !== "query") { // TODO test
+				foc.defaultQueryLocation = "fragment"; // TODO enum values. 
+			}
+
+			foc.Sanitized = true;
+			return foc;
 		}
 
 		/**
 		 * Generates a share URL, populates the GUI, and returns the URL.
 		 * Fragment queries will take precedence over query parameters.
 		 * 
-		 * @returns {URL}             Javascript URL object.
+		 * @param   {FormOptions}   formOptions
+		 * @returns {URL}           Javascript URL object.
 		 */
-		function shareURI() {
+		function shareURI(formOptions) {
 			let q = getQuagParts();
 			let fragKeys = Object.keys(q.fragmentPairs);
 			var url = new URL(window.location.origin + window.location.pathname);
 
-			for (let fp of FormParameters) {
+			for (let fp of formOptions.FormParameters) {
 				let name = fp.name;
 				let id = fp.id;
 
@@ -692,7 +726,7 @@
 					htmlID = id;
 				}
 
-				var elem = document.getElementById(FormOptions.prefix + htmlID);
+				var elem = document.getElementById(formOptions.prefix + htmlID);
 				let value;
 				if (elem !== null) {
 					value = elem.value;
@@ -708,7 +742,7 @@
 				// Inherit default query location if empty, not set, or not a recognized
 				// 'QueryLocation'.
 				if ((fp.queryLocation === "" || isEmpty(fp.queryLocation) || (fp.queryLocation !== "fragment" || fp.queryLocation !== "query"))) {
-					fp.queryLocation = FormOptions.defaultQueryLocation;
+					fp.queryLocation = formOptions.defaultQueryLocation;
 				}
 
 				// Sets value if populated, otherwise removes the name from the query param.
@@ -727,10 +761,10 @@
 				}
 			}
 
-			let extras = getExtraParameters();
+			let extras = getExtraParameters(formOptions);
 			// Set extras back in query params if extra params are given, 
 			// `preserveExtra` = true, and 'cleanURL' = false.
-			if (!isEmpty(extras.query) && FormOptions.preserveExtra && !FormOptions.cleanURL) {
+			if (!isEmpty(extras.query) && formOptions.preserveExtra && !formOptions.cleanURL) {
 				for (let extra in extras.query) {
 					url.searchParams.set(extra, extras.query[extra]);
 				}
@@ -739,13 +773,13 @@
 			url.hash = quagPartsToURLHash(q, extras);
 
 			// URI Link
-			let shareUrl = document.querySelector(FormOptions.shareURL);
+			let shareUrl = document.querySelector(formOptions.shareURL);
 			if (shareUrl !== null) {
 				shareUrl.innerHTML = url.href.link(url.href);
 			}
 
 			// Text Area 
-			let shareArea = document.querySelector(FormOptions.shareURLArea);
+			let shareArea = document.querySelector(formOptions.shareURLArea);
 			if (shareArea !== null) {
 				shareArea.innerHTML = url.href;
 			}
@@ -757,9 +791,10 @@
 		 * Returns the extra fields that are not specified in the initialized form
 		 * from both query params and fragment queries.
 		 * 
-		 * @returns {ExtraParameters}      ExtraParameters object.
+		 * @param   {FormOptions}       formOptions
+		 * @returns {ExtraParameters}   ExtraParameters object.
 		 */
-		function getExtraParameters() {
+		function getExtraParameters(formOptions) {
 			let qp = getQuagParts();
 
 			/** @type {ExtraParameters} */
@@ -774,7 +809,7 @@
 			let fragKeys = Object.keys(qp.fragmentPairs);
 
 			let params = [];
-			for (let p of FormParameters) {
+			for (let p of formOptions.FormParameters) {
 				params.push(p.name);
 			}
 			for (let key of queryKeys) {
@@ -799,9 +834,10 @@
 		 * 
 		 * @param   {QuagParts}       qp          QuagParts
 		 * @param   {ExtraParameters} extras      ExtraParameters.
+		 * @param   {FormOptions}   formOptions
 		 * @returns {String}                      Fragment query string (#?...).
 		 */
-		function quagPartsToURLHash(qp, extras) {
+		function quagPartsToURLHash(qp, extras, formOptions) {
 			if (isEmpty(qp.fragmentParts)) {
 				return "";
 			}
@@ -827,8 +863,8 @@
 				fqs += key + "=" + qp.fragmentPairs[key] + suffix;
 			}
 
-			// Set extras back in query params, if given and 'cleanURL' is false in 'FormOptions'.
-			if (!isEmpty(extras.frag) && !FormOptions.cleanURL) {
+			// Set extras back in query params, if given and 'cleanURL' is false in 'formOptions'.
+			if (!isEmpty(extras.frag) && !formOptions.cleanURL) {
 				i = 0;
 				suffix = "&";
 				last = extras.fragKeys.length - 1;
@@ -851,69 +887,51 @@
 		 * Serialize serializes the initialized FormParameters that are populated in the
 		 * GUI into a JSON string.
 		 * 
+		 * @param   {FormOptions}   formOptions
 		 * @returns {String}
 		 */
-		function Serialize() {
-			return JSON.stringify(Objectify());
+		function Serialize(formOptions) {
+			return JSON.stringify(Objectify(formOptions));
 		};
 
-		/**
-		 * SerializeForm serializes the initialized 'HTMLFormelement' into a JSON
-		 * string.
-		 *
-		 * @returns {String}
-		 * @throws  {Error}   Fails if form is not of type HTMLFormElement.
-		 */
-		function SerializeForm() {
-			return JSON.stringify(ObjectifyForm());
-		};
 
 		/**
 		 * Objectify makes the initialized FormParameters that are populated in the GUI
 		 * into a JSON object.
 		 * 
+		 * @param   {FormOptions}   formOptions
 		 * @returns {QuagPairs}
 		 */
-		function Objectify() {
-			if (!FormOptions.Inited) {
+		function Objectify(formOptions) {
+			if (!formOptions.Inited) {
 				throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 			}
-			var pairs = {};
-			for (let fp of FormParameters) {
-				let htmlID = fp.name;
-				if (!isEmpty(fp.id)) {
-					htmlID = fp.id;
-				}
-				var elem = document.getElementById(FormOptions.prefix + htmlID);
-				let value;
-				if (elem !== null) {
-					value = elem.value;
-					if (fp.type === "bool") {
-						value = elem.checked;
+
+			// Normal usage, FormMode=false.  On individual ID's, not in a <form>.
+			if (!formOptions.FormMode) { 
+				var pairs = {};
+				for (let fp of formOptions.FormParameters) {
+					let htmlID = fp.name;
+					if (!isEmpty(fp.id)) {
+						htmlID = fp.id;
+					}
+					var elem = document.getElementById(formOptions.prefix + htmlID);
+					let value;
+					if (elem !== null) {
+						value = elem.value;
+						if (fp.type === "bool") {
+							value = elem.checked;
+						}
+					}
+					if (!isEmpty(value)) {
+						pairs[fp.name] = value;
 					}
 				}
-				if (!isEmpty(value)) {
-					pairs[fp.name] = value;
-				}
+				return pairs;
 			}
-			return pairs;
-		};
 
-		/**
-		 * ObjectifyForm makes the initialized formElement in the GUI into a JSON
-		 * object.
-		 *
-		 * @returns {QuagPairs}
-		 * @throws  {Error}        Fails if form is not of type HTMLFormElement.
-		 */
-		function ObjectifyForm() {
-			if (!FormOptions.Inited) {
-				throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
-			}
-			if (!FormOptions.HasForm) {
-				throw new Error("URLFormJS: Could not find the HTMLFormElement in the GUI. Current 'id' in 'FormOptions': " + FormOptions.id);
-			}
-			var formData = new FormData(FormOptions.FormElement); // throws
+			// FormMode=true.  In a <form>.
+			var formData = new FormData(formOptions.FormElement); // throws
 			var pairs = {};
 			for (let [name, value] of formData) {
 				if (value == "true" || value == "on") {
@@ -922,12 +940,10 @@
 				if (value == "false" || value == "unchecked") {
 					value = false;
 				}
-				// Handle FormOptions if set.
-				if (!isEmpty(FormOptions)) {
-					// Remove prefix, if set.
-					if (!isEmpty(FormOptions.prefix)) {
-						name = name.substring(FormOptions.prefix.length);
-					}
+
+				// Remove prefix, if set.
+				if (!isEmpty(formOptions.prefix)) {
+					name = name.substring(formOptions.prefix.length);
 				}
 
 				if (!isEmpty(value)) {
@@ -937,19 +953,33 @@
 			return pairs;
 		};
 
+
 		/**
-		 * Clear clears out a form with the FormParameters and FormOptions set at
-		 * initialization.
+		 * Clear clears out a form.
 		 *
+		 * @param   {FormOptions}   formOptions
 		 * @returns {void}
 		 */
-		function Clear() {
-			if (!FormOptions.Inited) {
+		function Clear(formOptions) {
+			if (!formOptions.Inited) {
 				throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 			}
 
-			for (let fp of FormParameters) {
-				let name = FormOptions.prefix + fp.name;
+			if (FormOptions.FormMode) {
+				//throw new Error("URLFormJS: Could not find the HTMLFormElement in the GUI. Current 'id' in 'FormOptions': " + FormOptions.id);
+				//https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements
+				for (let e of FormOptions.FormElement.elements) {
+					if (e.type === "checkbox") {
+						e.checked = false;
+					} else {
+						e.value = "";
+					}
+				}
+				return;
+			}
+
+			for (let fp of formOptions.FormParameters) {
+				let name = formOptions.prefix + fp.name;
 				let id = fp.id
 				// If id is empty, assume name is the id on the page.
 				if (isEmpty(id)) {
@@ -968,33 +998,6 @@
 
 				let e = document.getElementById(id);
 				if (e != null) {
-					e.value = "";
-				}
-			}
-		}
-
-		/**
-		 * ClearForm clears out a form from the HTMLFormElement set at initialization.
-		 * 
-		 * Form elements:
-		 * https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements
-		 * Alternative to using HTMLFormElements.elements:
-		 * https://stackoverflow.com/questions/4431162/get-all-the-elements-of-a-particular-form/4431190#4431190
-		 * @returns {void}
-		 * @throws  {Error}        Fails if form is not of type HTMLFormElement.
-		 */
-		function ClearForm() {
-			if (!FormOptions.Inited) {
-				throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
-			}
-			if (!FormOptions.HasForm) {
-				throw new Error("URLFormJS: Could not find the HTMLFormElement in the GUI. Current 'id' in 'FormOptions': " + FormOptions.id);
-			}
-
-			for (let e of FormOptions.FormElement.elements) {
-				if (e.type === "checkbox") {
-					e.checked = false;
-				} else {
 					e.value = "";
 				}
 			}
@@ -1083,23 +1086,17 @@
 			return true;
 		};
 
-		// Required for initializing a form.
+
+		
+
 		exports.Init = Init;
-
-		// Helpers
-		exports.DefaultFormOptions = DefaultFormOptions;
-		exports.FormOptions = FormOptions;
-		exports.FormParameters = FormParameters;
-
 		exports.PopulateFromValues = PopulateFromValues;
 		exports.PopulateFromURI = PopulateFromURI;
 		exports.Serialize = Serialize;
-		exports.SerializeForm = SerializeForm;
 		exports.Objectify = Objectify;
-		exports.ObjectifyForm = ObjectifyForm;
 		exports.Clear = Clear;
-		exports.ClearForm = ClearForm;
 		exports.IsEmpty = IsEmpty;
+		exports.DefaultFormOptions = DefaultFormOptions;
 
 		Object.defineProperty(exports, '__esModule', {
 			value: true
