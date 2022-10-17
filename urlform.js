@@ -279,13 +279,13 @@ function Init(params, formOptions) {
 	formOpt.FormParameters = params
 	formOpt.ShareURLBtnElement = document.querySelector(formOpt.shareURLBtn);
 	if (formOpt.ShareURLBtnElement != null) {
-		formOpt.ShareURLBtnElement.addEventListener('click', () => shareURI()); // Must be anonymous, otherwise passes pointer event object.
+		formOpt.ShareURLBtnElement.addEventListener('click', () => shareURI(formOpt)); // Must be anonymous, otherwise passes pointer event object.
 	}
 	formOpt.ClearBtnElement = document.querySelector(formOpt.clearBtn);
 	if (formOpt.ClearBtnElement != null) {
 		formOpt.ClearBtnElement.addEventListener('click', () => {
-			Clear()
-			shareURI();
+			Clear(formOpt);
+			shareURI(formOpt);
 		});
 	}
 	if (!isEmpty(formOpt.formID)) {

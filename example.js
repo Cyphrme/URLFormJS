@@ -55,6 +55,5 @@ document.addEventListener('DOMContentLoaded', () => {
 	// }
 
 	// Initialize and populate sticky form.
-	window.urlformjs.Init(FormParameters, FormOptions);
-	window.urlformjs.PopulateFromURI();
+	URLForm.PopulateFromURI(URLForm.Init(FormParameters, FormOptions));
 });
