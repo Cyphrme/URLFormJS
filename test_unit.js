@@ -1,8 +1,6 @@
 "use strict";
 
-// Import 'UMD'format as 'ESM' format. 'UMD' exports are globals accessed
-// through 'window', and not the 'export' object.
-import * as _ from './urlform.js';
+import './urlform.js'; // Namespace exported as 'URLFORMJS'.
 
 export {
 	TestBrowserJS
@@ -80,13 +78,6 @@ let t_Clear = {
 };
 
 /**@type {Test} */
-let t_ClearForm = {
-	"name": "Clear Form",
-	"func": test_ClearForm,
-	"golden": true
-};
-
-/**@type {Test} */
 let t_PopulateFromURI = {
 	"name": "Populate From URI",
 	"func": test_PopulateFromURI,
@@ -103,15 +94,22 @@ let t_PopulateFromValues = {
 /**@type {Test} */
 let t_ObjectifyForm = {
 	"name": "Objectify Form",
-	"func": test_ObjectifyForm,
+	"func": test_Objectify,
 	"golden": true
 };
 
 /**@type {Test} */
 let t_SerializeForm = {
 	"name": "Serialize Form",
-	"func": test_SerializeForm,
+	"func": test_Serialize,
 	"golden": `{"first_name":"Bob","last_name":"Smith","email_address":"bob@something.com","phone_number":"1234567890","subscribe_latest_news":true,"country_select":"1"}`
+};
+
+/**@type {Test} */
+let t_GetDefaultOpts = {
+	"name": "Get Default Form Options",
+	"func": test_GetDefaultOpts,
+	"golden": `{"formID":"","prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","preserveExtra":false,"callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"FormMode":false}`
 };
 
 
@@ -160,6 +158,9 @@ function populateGUI() {
 // IsEmpty, Serialize, and Objectify are tests that do not have their own unit
 // test, but are all tested within the following unit tests.
 
+// Populated from Init. Global form options for testing.
+var initedFormOptions;
+
 // Tests Init().
 function test_Init() {
 	var url = new URL(window.location.origin);
@@ -172,7 +173,7 @@ function test_Init() {
 	url.searchParams.set('country_select', "1");
 	// Push new state that updates query params without reloading the page.
 	window.history.pushState({}, '', url);
-	window.urlformjs.Init(FormParameters, FormOptions);
+	initedFormOptions = URLForm.Init(FormParameters, FormOptions);
 	return document.getElementById('ShareURLBtn').formAction;
 };
 
@@ -180,28 +181,15 @@ function test_Init() {
 // This test will be ran as a unit test to make sure that it is working properly,
 // but may also be called from other tests when running TestsToRun.
 function test_Clear() {
-	if (window.urlformjs.IsEmpty()) {
+	if (URLForm.IsEmpty(initedFormOptions)) {
 		// Populate before clearing
 		// Manually set each field, to keep this as a unit test and not have to call
 		// PopulateFromURI or PopulateFromValues, in case one of those two funcs
 		// fail, it can make debugging more difficult.
 		populateGUI();
 	}
-	window.urlformjs.Clear();
-	if (!window.urlformjs.IsEmpty()) {
-		return false;
-	}
-
-	return true;
-}
-
-// Tests ClearForm().
-function test_ClearForm() {
-	if (window.urlformjs.IsEmpty()) {
-		populateGUI();
-	}
-	window.urlformjs.ClearForm();
-	if (!window.urlformjs.IsEmpty()) {
+	URLForm.Clear(initedFormOptions);
+	if (!URLForm.IsEmpty(initedFormOptions)) {
 		return false;
 	}
 
@@ -210,27 +198,31 @@ function test_ClearForm() {
 
 // Tests PopulateFromURI().
 function test_PopulateFromURI() {
-	window.urlformjs.PopulateFromURI();
-	return checkForm(window.urlformjs.Objectify());
+	URLForm.PopulateFromURI(initedFormOptions);
+	return checkForm(URLForm.Objectify(initedFormOptions));
 };
 
 // Tests PopulateFromValues().
 function test_PopulateFromValues() {
-	window.urlformjs.Clear();
-	window.urlformjs.PopulateFromValues(ExampleValues);
-	return checkForm(window.urlformjs.Objectify());
+	URLForm.Clear(initedFormOptions);
+	URLForm.PopulateFromValues(ExampleValues, initedFormOptions);
+	return checkForm(URLForm.Objectify(initedFormOptions));
 };
 
-// Tests ObjectifyForm().
-function test_ObjectifyForm() {
-	return checkForm(window.urlformjs.ObjectifyForm());
+// Tests Objectify().
+function test_Objectify() {
+	return checkForm(URLForm.Objectify(initedFormOptions));
 }
 
-// Tests SerializeForm().
-function test_SerializeForm() {
-	return window.urlformjs.SerializeForm();
+// Tests Serialize().
+function test_Serialize() {
+	return URLForm.Serialize(initedFormOptions);
 }
 
+// Tests GetDefaultFormOptions().
+function test_GetDefaultOpts() {
+	return JSON.stringify(URLForm.GetDefaultFormOptions());
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
@@ -248,11 +240,11 @@ function test_SerializeForm() {
 let TestsToRun = [
 	t_InitForm,
 	t_Clear,
-	t_ClearForm,
 	t_PopulateFromURI,
 	t_PopulateFromValues,
 	t_ObjectifyForm,
 	t_SerializeForm,
+	t_GetDefaultOpts,
 ];
 
 /** @type {TestGUIOptions} **/

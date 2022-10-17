@@ -1,6 +1,34 @@
 'use strict';
 
 /**
+ * Making file/module accessible through the global 'window' under the
+ * namespace 'URLForm'.
+ * Taken from
+ * https://github.com/paulmillr/noble-secp256k1/releases/tag/1.6.3
+ * and
+ * https://stackoverflow.com/a/63751410/15147681
+ */
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+		typeof define === 'function' && define.amd ? define(['exports'], factory) :
+		(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URLForm = {}));
+})(this, (function (exports) {
+	exports.Init = Init;
+	exports.PopulateFromValues = PopulateFromValues;
+	exports.PopulateFromURI = PopulateFromURI;
+	exports.Serialize = Serialize;
+	exports.Objectify = Objectify;
+	exports.Clear = Clear;
+	exports.IsEmpty = IsEmpty;
+	exports.GetDefaultFormOptions = GetDefaultFormOptions;
+
+	Object.defineProperty(exports, '__esModule', {
+		value: true
+	});
+}));
+
+
+/**
  * FormParameter are the options for a form's field/parameter.
  *
  * Example:
@@ -282,7 +310,7 @@ function PopulateFromURI(formOptions) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
 	PopulateFromValues(getQuagParts().pairs, formOptions);
-	shareURI();
+	shareURI(formOptions);
 }
 
 /**
@@ -297,7 +325,7 @@ function PopulateFromValues(quagPairs, formOptions) {
 	if (!formOptions.Inited) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
-	setGUI(quagPairs);
+	setGUI(quagPairs, formOptions);
 }
 
 /**
@@ -528,7 +556,6 @@ function setGUI(kv, formOptions) {
 		}
 	}
 }
-<<<<<<< HEAD
 
 /**
  * Gets the setting. 
@@ -537,7 +564,7 @@ function setGUI(kv, formOptions) {
  * @returns {void}
  */
 function getSavedSetting(name, formOptions) {
-	return localStorage.getItem(localStorageNamespace + formOptions.prefix + name);
+	return localStorage.getItem(formOptions.localStorageNamespace + formOptions.prefix + name);
 }
 
 /**
@@ -645,329 +672,11 @@ function shareURI(formOptions) {
 			htmlID = id;
 		}
 
-=======
-}
-
-/**
- * Gets the setting. 
- * @param   {string}       name
- * @param   {FormOptions}  formOptions
- * @returns {void}
- */
-function getSavedSetting(name, formOptions) {
-return localStorage.getItem(formOptions.localStorageNamespace + formOptions.prefix + name);
-}
-
-
-/**
- * Sets the setting. 
- * @param   {string}       name
- * @param   {string}       value
- * @param   {FormOptions}  formOptions
- * @returns {void}
- */
-function setSavedSetting(name, value, formOptions) {
-return localStorage.setItem(formOptions.localStorageNamespace + formOptions.prefix + name, value);
-}
-
-
-
-
-
-
-
-
-
-/**
- * Sanitizes a formOptions object, and sets all of the options values to
- * their default value if not set.
- * 
- * Modifies "in place" as well as returns the object.
- * 
- * For new options/setting FormOptions, Init() must be re-called.
- * 
- * @param   {FormOptions} formOptions
- * @returns {FormOptions}
- * @throws  {Error}        Fails if FormOptions or 'id' in options is empty.
- */
-function sanitizeFormOptions(formOptions) {
-// Not making a copy will modify the original, even though it's a const.
-let foc = {
-	...DefaultFormOptions
-};
-// If no options given, use default.
-if (isEmpty(formOptions)) {
-	return foc;
-}
-// If FormOptions has already been sanitized, do nothing.
-if (!isEmpty(formOptions.Sanitized) && formOptions.Sanitized === true) {
-	return;
-}
-
-//// Sanitize
-if (!isEmpty(formOptions.formID)) {
-	foc.formID = formOptions.formID;
-}
-if (!isEmpty(formOptions.prefix)) {
-	foc.prefix = formOptions.prefix;
-}
-if (!isEmpty(formOptions.clearBtn)) {
-	foc.clearBtn = formOptions.clearBtn;
-}
-if (!isEmpty(formOptions.shareURLArea)) {
-	foc.shareURLArea = formOptions.shareURLArea;
-}
-if (!isEmpty(formOptions.shareURL)) {
-	foc.shareURL = formOptions.shareURL;
-}
-if (!isEmpty(formOptions.shareURLBtn)) {
-	foc.shareURLBtn = formOptions.shareURLBtn;
-}
-if (!isEmpty(formOptions.defaultQueryLocation)) {
-	foc.defaultQueryLocation = formOptions.defaultQueryLocation;
-}
-
-if (!isEmpty(formOptions.preserveExtra)) {
-	foc.preserveExtra = formOptions.preserveExtra;
-}
-if (!isEmpty(formOptions.callback)) {
-	foc.callback = formOptions.callback;
-}
-if (!isEmpty(formOptions.cleanURL)) {
-	foc.cleanURL = formOptions.cleanURL;
-}
-if (!isEmpty(formOptions.localStorageNamespace)) {
-	foc.localStorageNamespace = formOptions.localStorageNamespace;
-}
-
-// Options with limited valid values.  
-if (formOptions.defaultQueryLocation !== "query") { // TODO test
-	foc.defaultQueryLocation = "fragment"; // TODO enum values. 
-}
-
-foc.Sanitized = true;
-return foc;
-}
-
-/**
- * Generates a share URL, populates the GUI, and returns the URL.
- * Fragment queries will take precedence over query parameters.
- * 
- * @param   {FormOptions}   formOptions
- * @returns {URL}           Javascript URL object.
- */
-function shareURI(formOptions) {
-let q = getQuagParts();
-let fragKeys = Object.keys(q.fragmentPairs);
-var url = new URL(window.location.origin + window.location.pathname);
-
-for (let fp of formOptions.FormParameters) {
-	let name = fp.name;
-	let id = fp.id;
-
-	// `name` is default id for html element. `id` overrides `name` for html
-	// elements ids.
-	let htmlID = name;
-	if (!isEmpty(id)) {
-		htmlID = id;
-	}
-
-	var elem = document.getElementById(formOptions.prefix + htmlID);
-	let value;
-	if (elem !== null) {
-		value = elem.value;
-		if (fp.type === "bool") {
-			if (elem.checked) {
-				value = "true";
-			} else {
-				value = "";
-			}
-		}
-	}
-
-	// Inherit default query location if empty, not set, or not a recognized
-	// 'QueryLocation'.
-	if ((fp.queryLocation === "" || isEmpty(fp.queryLocation) || (fp.queryLocation !== "fragment" || fp.queryLocation !== "query"))) {
-		fp.queryLocation = formOptions.defaultQueryLocation;
-	}
-
-	// Sets value if populated, otherwise removes the name from the query param.
-	// If 'queryLocation' is set to "fragment" on a form wide basis, all values
-	// will be part of the fragment query.
-	let e = isEmpty(value);
-	if (!e && (fp.queryLocation === "fragment" || fragKeys.includes(name))) {
-		q.fragmentPairs[name] = value;
-	} else if (!e) {
-		url.searchParams.set(name, value);
-	} else {
-		// Cleans out value from string in case it is set in the URI already.
-		// (e.g. bools on false will not be cleared)
-		url.searchParams.delete(name);
-		delete q.fragmentPairs[name];
-	}
-}
-
-let extras = getExtraParameters(formOptions);
-// Set extras back in query params if extra params are given, 
-// `preserveExtra` = true, and 'cleanURL' = false.
-if (!isEmpty(extras.query) && formOptions.preserveExtra && !formOptions.cleanURL) {
-	for (let extra in extras.query) {
-		url.searchParams.set(extra, extras.query[extra]);
-	}
-}
-// Rebuild fragment query in case new form fields were set.
-url.hash = quagPartsToURLHash(q, extras);
-
-// URI Link
-let shareUrl = document.querySelector(formOptions.shareURL);
-if (shareUrl !== null) {
-	shareUrl.innerHTML = url.href.link(url.href);
-}
-
-// Text Area 
-let shareArea = document.querySelector(formOptions.shareURLArea);
-if (shareArea !== null) {
-	shareArea.innerHTML = url.href;
-}
-
-return url;
-};
-
-/**
- * Returns the extra fields that are not specified in the initialized form
- * from both query params and fragment queries.
- * 
- * @param   {FormOptions}       formOptions
- * @returns {ExtraParameters}   ExtraParameters object.
- */
-function getExtraParameters(formOptions) {
-let qp = getQuagParts();
-
-/** @type {ExtraParameters} */
-let extras = {
-	query: {},
-	frag: {},
-	queryKeys: [],
-	fragKeys: [],
-};
-
-let queryKeys = Object.keys(qp.queryPairs);
-let fragKeys = Object.keys(qp.fragmentPairs);
-
-let params = [];
-for (let p of formOptions.FormParameters) {
-	params.push(p.name);
-}
-for (let key of queryKeys) {
-	if (!params.includes(key)) {
-		extras.query[key] = qp[key];
-		extras.queryKeys.push(key);
-	}
-}
-for (let key of fragKeys) {
-	if (!params.includes(key)) {
-		extras.frag[key] = qp.pairs[key];
-		extras.fragKeys.push(key);
-	}
-}
-
-return extras;
-}
-
-/**
- * Returns a fragment query string from a fragment query key:value object.
- * Returns empty string if 'qp.fragmentParts' object is empty.
- * 
- * @param   {QuagParts}       qp          QuagParts
- * @param   {ExtraParameters} extras      ExtraParameters.
- * @param   {FormOptions}   formOptions
- * @returns {String}                      Fragment query string (#?...).
- */
-function quagPartsToURLHash(qp, extras, formOptions) {
-if (isEmpty(qp.fragmentParts)) {
-	return "";
-}
-let fqs = "#";
-if (!isEmpty(qp.fragmentParts.before)) {
-	fqs += qp.fragmentParts.before;
-}
-fqs += "?";
-var last = Object.keys(qp.fragmentPairs).length - 1;
-var i = 0;
-var suffix = "&";
-if (last === 0) {
-	suffix = "";
-}
-for (let key in qp.fragmentPairs) {
-	if (i === (last)) {
-		suffix = "";
-	}
-	i++;
-	if (extras.fragKeys.includes(key)) {
-		continue;
-	}
-	fqs += key + "=" + qp.fragmentPairs[key] + suffix;
-}
-
-// Set extras back in query params, if given and 'cleanURL' is false in 'formOptions'.
-if (!isEmpty(extras.frag) && !formOptions.cleanURL) {
-	i = 0;
-	suffix = "&";
-	last = extras.fragKeys.length - 1;
-	for (let extra in extras.frag) {
-		if (i === (last)) {
-			suffix = "";
-		}
-		i++;
-		fqs += extra + "=" + extras.frag[extra] + suffix;
-	}
-}
-
-// Append text-fragment.
-fqs += qp.fragmentParts.after;
-return fqs;
-}
-
-
-/**
- * Serialize serializes the initialized FormParameters that are populated in the
- * GUI into a JSON string.
- * 
- * @param   {FormOptions}   formOptions
- * @returns {String}
- */
-function Serialize(formOptions) {
-return JSON.stringify(Objectify(formOptions));
-};
-
-
-/**
- * Objectify makes the initialized FormParameters that are populated in the GUI
- * into a JSON object.
- * 
- * @param   {FormOptions}   formOptions
- * @returns {QuagPairs}
- */
-function Objectify(formOptions) {
-if (!formOptions.Inited) {
-	throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
-}
-
-// Normal usage, FormMode=false.  On individual ID's, not in a <form>.
-if (!formOptions.FormMode) {
-	var pairs = {};
-	for (let fp of formOptions.FormParameters) {
-		let htmlID = fp.name;
-		if (!isEmpty(fp.id)) {
-			htmlID = fp.id;
-		}
->>>>>>> dc4e906d9377ea44a42197fcf3b5e1eddabedecf
 		var elem = document.getElementById(formOptions.prefix + htmlID);
 		let value;
 		if (elem !== null) {
 			value = elem.value;
 			if (fp.type === "bool") {
-<<<<<<< HEAD
 				if (elem.checked) {
 					value = "true";
 				} else {
@@ -1202,7 +911,7 @@ function Clear(formOptions) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
 
-	if (FormOptions.FormMode) {
+	if (formOptions.FormMode) {
 		//throw new Error("URLFormJS: Could not find the HTMLFormElement in the GUI. Current 'id' in 'FormOptions': " + FormOptions.id);
 		//https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements
 		for (let e of FormOptions.FormElement.elements) {
@@ -1243,12 +952,25 @@ function Clear(formOptions) {
 /**
  * IsEmpty returns whether or not the initialized form is empty.
  * 
+ * @param   {FormOptions}   formOptions
  * @returns {Boolean}  Whether or not the form is empty.
  * @throws  {Error}    Fails if form is not of type HTMLFormElement.
  */
-function IsEmpty() {
-	return isEmpty(Objectify());
+function IsEmpty(formOptions) {
+	return isEmpty(Objectify(formOptions));
 }
+
+/**
+ * GetDefaultFormOptions returns the Initialized default form options.
+ * NOTE: Exporting DefaultFormOptions directly will make it to where the
+ * UMD format block needs to be at the bottom of the file, after initialization.
+ * 
+ * @returns {FormOptions}
+ */
+function GetDefaultFormOptions() {
+	return DefaultFormOptions;
+}
+
 
 /**
  * isEmpty is a helper function to determine if thing is empty. 
@@ -1322,200 +1044,3 @@ function isBool(bool) {
 	}
 	return true;
 };
-
-
-/**
- * Making file/module accessible through the global 'window' under the
- * namespace 'urlformjs'.
- * Taken from
- * https://github.com/paulmillr/noble-secp256k1/releases/tag/1.6.3
- * and
- * https://stackoverflow.com/a/63751410/15147681
- */
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-		typeof define === 'function' && define.amd ? define(['exports'], factory) :
-		(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URLFORMJS = {}));
-})(this, (function (exports) {
-	exports.Init = Init;
-	exports.PopulateFromValues = PopulateFromValues;
-	exports.PopulateFromURI = PopulateFromURI;
-	exports.Serialize = Serialize;
-	exports.Objectify = Objectify;
-	exports.Clear = Clear;
-	exports.IsEmpty = IsEmpty;
-	exports.DefaultFormOptions = DefaultFormOptions;
-
-	Object.defineProperty(exports, '__esModule', {
-		value: true
-	});
-}));
-=======
-				value = elem.checked;
-			}
-		}
-		if (!isEmpty(value)) {
-			pairs[fp.name] = value;
-		}
-	}
-	return pairs;
-}
-
-// FormMode=true.  In a <form>.
-var formData = new FormData(formOptions.FormElement); // throws
-var pairs = {};
-for (let [name, value] of formData) {
-	if (value == "true" || value == "on") {
-		value = true;
-	}
-	if (value == "false" || value == "unchecked") {
-		value = false;
-	}
-
-	// Remove prefix, if set.
-	if (!isEmpty(formOptions.prefix)) {
-		name = name.substring(formOptions.prefix.length);
-	}
-
-	if (!isEmpty(value)) {
-		pairs[name] = value;
-	}
-}
-return pairs;
-};
-
-
-/**
- * Clear clears out a form.
- *
- * @param   {FormOptions}   formOptions
- * @returns {void}
- */
-function Clear(formOptions) {
-if (!formOptions.Inited) {
-	throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
-}
-
-if (FormOptions.FormMode) {
-	//throw new Error("URLFormJS: Could not find the HTMLFormElement in the GUI. Current 'id' in 'FormOptions': " + FormOptions.id);
-	//https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements
-	for (let e of FormOptions.FormElement.elements) {
-		if (e.type === "checkbox") {
-			e.checked = false;
-		} else {
-			e.value = "";
-		}
-	}
-	return;
-}
-
-for (let fp of formOptions.FormParameters) {
-	let name = formOptions.prefix + fp.name;
-	let id = fp.id
-	// If id is empty, assume name is the id on the page.
-	if (isEmpty(id)) {
-		id = name;
-	}
-
-	// Clears the GUI. Unchecks checkbox elements if type=bool and otherwise
-	// sets the value of the element to "";
-	if (fp.type == "bool") {
-		let e = document.getElementById(id);
-		if (e != null) {
-			e.checked = false;
-		}
-		continue;
-	}
-
-	let e = document.getElementById(id);
-	if (e != null) {
-		e.value = "";
-	}
-}
-}
-
-/**
- * isEmpty is a helper function to determine if thing is empty. 
- * 
- * Functions are considered always not empty. 
- * 
- * Arrays are checked for the number of elements, and recursively calls isEmpty.  
- * 
- * Objects are empty if they have no keys. (Returns len === 0 of object keys.)
- * 
- * NaN returns true.  (NaN === NaN is always false, as NaN is never equal to
- * anything. NaN is the only JavaScript value unequal to itself.)
- *
- * Don't use on HTMl elements. For HTML elements, use the !== equality check
- * (element !== null). 
- *
- * Cannot use CryptoKey with this function since (len === 0) always. 
- *
- * @param   {any}     thing    Thing you wish was empty.  
- * @returns {Boolean}          Boolean.  
- */
-function isEmpty(thing) {
-if (typeof thing === 'function') {
-	return false;
-}
-
-if (Array.isArray(thing)) {
-	return isEmpty(thing[0]);
-}
-
-if (thing === Object(thing)) {
-	if (Object.keys(thing).length === 0) {
-		return true;
-	}
-	return false;
-}
-
-if (!isBool(thing)) {
-	return true;
-}
-return false
-};
-
-/**
- * Helper function to determine boolean.  
- *
- * Javascript, instead of considering everything false except a few key words,
- * decided everything is true instead of a few key words.  Why?  Because
- * Javascript.  This function inverts that assumption, so that everything can be
- * considered false unless true. 
- *
- * @param   {any}      bool   Thing that you wish was a boolean.  
- * @returns {Boolean}         An actual boolean.
- */
-function isBool(bool) {
-if (
-	bool === false ||
-	bool === "false" ||
-	bool === undefined ||
-	bool === "undefined" ||
-	bool === "" ||
-	bool === 0 ||
-	bool === "0" ||
-	bool === null ||
-	bool === "null" ||
-	bool === "NaN" ||
-	Number.isNaN(bool) ||
-	bool === Object(bool) // isObject
-) {
-	return false;
-}
-return true;
-};
-
-
-(function (global, factory) {
-typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.Init = Init));
-})(this, (function (exports) {
-
-Object.defineProperty(exports, '__esModule', {
-	value: true
-});
-}));
->>>>>>> dc4e906d9377ea44a42197fcf3b5e1eddabedecf
