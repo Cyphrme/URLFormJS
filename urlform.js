@@ -1,18 +1,15 @@
 'use strict';
 
-/**
- * Making file/module accessible through the global 'window' under the
- * namespace 'URLForm'.
- * Taken from
- * https://github.com/paulmillr/noble-secp256k1/releases/tag/1.6.3
- * and
- * https://stackoverflow.com/a/63751410/15147681
- */
-(function (global, factory) {
+
+// URLFormJS is used for sticky forms and sharable URL links.  See README. 
+
+
+// UMD export pattern.  See //TODO LINk
+(function(global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 		typeof define === 'function' && define.amd ? define(['exports'], factory) :
 		(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URLForm = {}));
-})(this, (function (exports) {
+})(this, (function(exports) {
 	exports.Init = Init;
 	exports.PopulateFromValues = PopulateFromValues;
 	exports.PopulateFromURI = PopulateFromURI;
@@ -685,9 +682,8 @@ function shareURI(formOptions) {
 			}
 		}
 
-		// Inherit default query location if empty, not set, or not a recognized
-		// 'QueryLocation'.
-		if ((fp.queryLocation === "" || isEmpty(fp.queryLocation) || (fp.queryLocation !== "fragment" || fp.queryLocation !== "query"))) {
+		// Inherit default query location if not a recognized 'QueryLocation'.
+		if (fp.queryLocation !== "fragment" && fp.queryLocation !== "query") {
 			fp.queryLocation = formOptions.defaultQueryLocation;
 		}
 
@@ -715,8 +711,11 @@ function shareURI(formOptions) {
 			url.searchParams.set(extra, extras.query[extra]);
 		}
 	}
+
+	console.log(q);
 	// Rebuild fragment query in case new form fields were set.
 	url.hash = quagPartsToURLHash(q, extras);
+	console.log(url.href);
 
 	// URI Link
 	let shareUrl = document.querySelector(formOptions.shareURL);
@@ -780,50 +779,46 @@ function getExtraParameters(formOptions) {
  * 
  * @param   {QuagParts}       qp          QuagParts
  * @param   {ExtraParameters} extras      ExtraParameters.
- * @param   {FormOptions}   formOptions
+ * @param   {FormOptions}     formOptions
  * @returns {String}                      Fragment query string (#?...).
  */
 function quagPartsToURLHash(qp, extras, formOptions) {
-	if (isEmpty(qp.fragmentParts)) {
+	if (isEmpty(qp.fragmentPairs)) {
 		return "";
 	}
 	let fqs = "#";
-	if (!isEmpty(qp.fragmentParts.before)) {
-		fqs += qp.fragmentParts.before;
-	}
+	// Append anything that was in *fragment* before, but not in, *fragment query*.  
+	fqs += qp.fragmentParts.before;
+
+	// Build the fragment query
 	fqs += "?";
 	var last = Object.keys(qp.fragmentPairs).length - 1;
 	var i = 0;
-	var suffix = "&";
-	if (last === 0) {
-		suffix = "";
-	}
+
 	for (let key in qp.fragmentPairs) {
-		if (i === (last)) {
-			suffix = "";
-		}
 		i++;
 		if (extras.fragKeys.includes(key)) {
 			continue;
 		}
-		fqs += key + "=" + qp.fragmentPairs[key] + suffix;
+		fqs += key + "=" + qp.fragmentPairs[key] 
+		if (i !== 0) {
+			fqs += "&"; // Add separator on everything except the last.  
+		}
 	}
 
 	// Set extras back in query params, if given and 'cleanURL' is false in 'formOptions'.
 	if (!isEmpty(extras.frag) && !formOptions.cleanURL) {
-		i = 0;
-		suffix = "&";
 		last = extras.fragKeys.length - 1;
 		for (let extra in extras.frag) {
-			if (i === (last)) {
-				suffix = "";
-			}
 			i++;
-			fqs += extra + "=" + extras.frag[extra] + suffix;
+			fqs += extra + "=" + extras.frag[extra]
+			if (i !== 0) {
+				fqs += "&";
+			}
 		}
 	}
 
-	// Append text-fragment.
+	// Append anything that was in *fragment* after, but not in, *fragment query*.   
 	fqs += qp.fragmentParts.after;
 	return fqs;
 }
