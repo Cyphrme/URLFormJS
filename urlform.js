@@ -253,8 +253,6 @@ const QueryLocationQuery = "query";
 /** @type {QueryLocation} */
 const QueryLocationFragment = "fragment";
 
-
-
 /**
  * DefaultFormOptions where all options are set to their default case.
  * @type {FormOptions} 
@@ -738,19 +736,17 @@ function getQuagParts(formOptions) {
 			after: "",
 		};
 
+		// Check if fragment query has 'before'.
 		let ss = f.string.split('?');
-		// Check if fragment has 'query' and 'before'.
-		if (ss.length > 1) {
-			f.before = ss[0];
-			f.query = ss[1];
+		if (ss.length == 0) {
+			f.query = ss[0];
 		} else {
 			f.before = ss[0];
-			return f;
+			f.query = ss[1];
 		}
 
-		// Check for after. Fragment queries supports ending delimiters for other
-		// common schemes, such as the delimiter of `:~:` for fragment directives.
-		// Ignore anything after these ending delimiters.
+		// Check for after. Fragment queries supports beginning delimiters for other
+		// fragment schemes, like fragment directive `:~:`.
 		if (!isEmpty(f.query)) {
 			let s = f.query.split(':~:');
 			if (s.length > 1) {
