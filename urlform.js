@@ -1,22 +1,5 @@
-'use strict';
-
-
 // URLFormJS is used for sticky forms and sharable URL links.  See README. 
-
-
-
-// # Test URL
-// ### Convention
-// Queries values are two letters, 
-// Frag queries are one letter.  
-// Extras begin with "e".  
-// Extra before frag begin with "eb"
-// Extra after frag begin with "el"
-// file:///home/z/dev/go/src/github.com/cyphrme/cyphr.me/web/dist/js/pkg/urlformjs/index.html?last_name=Smith&eBob=eBob#ebmarry=ebmarry?first_name=f&middle_name=m&extramarry=extramarry
-
-// file:///home/z/dev/go/src/github.com/cyphrme/cyphr.me/web/dist/js/pkg/urlformjs/index.html?first_name=ff&eBob=eBob#ebmarry=ebmarry?&middle_name=m&last_name=l&email_address=e&phone_number=p&subscribe_latest_news=true&country_select=1&elmarry=elmarry
-
-
+'use strict';
 
 // UMD export pattern.  See //TODO LINk
 (function(global, factory) {
@@ -415,10 +398,9 @@ function getFragmentString() {
 
 
 /**
- * Does the processing and checking for a parameter in the params form.
- * Sets GUI for each parameter, and executes funcTrue() per parameter, if
- * applicable. See docs in 'FormOptions'.
- * Form wide options are also executed (e.g. 'callback' in 'FormOptions').
+ * setGUI sets GUI for each parameter, and executes funcTrue() per parameter, if
+ * applicable. See docs in 'FormOptions'. Form wide options are also executed
+ * (e.g. 'callback' in 'FormOptions').
  *
  * @param   {QuagPairs}    kv
  * @param   {FormOptions}  formOptions
@@ -576,17 +558,18 @@ function sanitizeFormOptions(formOptions) {
 }
 
 /**
- * Generates a share URL from the current URL and form, populates the GUI, and
- * returns the URL. Fragment queries take precedence over query parameters.
- * 
+ * Generates a share URL from the current URL and form, populates the GUI with
+ * share links, and returns the URL. 
+ *
+ * Fragment query parameters take precedence over query parameters.
+ *
  * @param   {FormOptions}   formOptions
  * @returns {URL}           Javascript URL object.
  */
 function shareURI(formOptions) {
 	let q = getQuagParts(formOptions); // Current URL values.
 	let formPairs = GetForm(formOptions); // Current form values.
-	console.log("QuagParts:", q, "formPairs:", formPairs);
-
+	//console.log("QuagParts:", q, "formPairs:", formPairs);
 	var u = new URL(window.location.origin + window.location.pathname);
 
 	for (let fp of formOptions.FormParameters) {
@@ -620,7 +603,6 @@ function shareURI(formOptions) {
 		}
 	}
 
-	// console.log(q);
 	// Rebuild fragment query in case new form fields were set.
 	u.hash = quagPartsToURLHash(q.fragment, formOptions);
 	setShareURL(u.href, formOptions);
@@ -654,10 +636,9 @@ function setShareURL(href, formOptions) {
  * 
  * @param   {Fragment}      fragment
  * @param   {FormOptions}   formOptions
- * @returns {String}        Fragment string (#<before>?<middle>[delimiter]<after>).
+ * @returns {String}        Fragment string (#<before>?<middle(fromForm?extras)>[delimiter]<after>).
  */
 function quagPartsToURLHash(fragment, formOptions) {
-	console.log(fragment);
 	// Concatenate fragment ("#") and before.
 	let fqs = "#" + fragment.before;
 
@@ -713,7 +694,7 @@ function getPairs(s) {
 		let key = kv[0];
 		let value = kv[1];
 		// If the string begins/ends with "&", there will be an empty element. 
-		if (isEmpty(key)) { 
+		if (isEmpty(key)) {
 			continue;
 		}
 		// Sanitize to string. (Don't use isEmpty as string "true"/"false" are valid.)
@@ -724,52 +705,7 @@ function getPairs(s) {
 		value = decodeURI(value);
 		pairs[key] = value;
 	}
-	console.log(pairs);
 	return pairs;
-}
-
-/**
- * getFragment returns (fragment,pairs,before,query,after) from the URL
- * fragment, but not (extras). Warning: Puts all pairs, including extras, into
- * pairs.  
- * @returns {Fragment}
- */
-function getFragment() {
-	let frag = {
-		string: getFragmentString(), // The whole fragment including `#`. 
-		pairs: {},
-		extras: {},
-		before: "",
-		query: "",
-		after: "",
-	};
-	console.log(frag);
-
-	// Check if fragment query has 'before'.
-	let ss = frag.string.split('?');
-	if (ss.length == 0) {
-		frag.query = ss[0];
-	} else {
-		frag.before = ss[0];
-		frag.query = ss[1];
-	}
-
-	// Check for after. Fragment queries supports beginning delimiters for other
-	// fragment schemes, like fragment directive `:~:`.
-	if (!isEmpty(frag.query)) {
-		let s = frag.query.split(':~:');
-		if (s.length > 1) {
-			frag.query = s[0];
-			frag.after = ':~:' + s[1];
-		}
-	}
-	let pairs = getPairs(frag.query);
-	console.log(pairs);
-	frag.pairs = pairs;
-	console.log(frag);
-
-	// Javascript deep copy
-	return JSON.parse(JSON.stringify(frag));
 }
 
 
@@ -782,6 +718,46 @@ function getFragment() {
  * @returns {QuagParts}
  */
 function getQuagParts(formOptions) {
+	/**
+	 * getFragment returns (fragment,pairs,before,query,after) from the URL
+	 * fragment, but not (extras). Warning: Puts all pairs, including extras, into
+	 * pairs.  
+	 * @returns {Fragment}
+	 */
+	function getFragment() {
+		let frag = {
+			string: getFragmentString(), // The whole fragment including `#`. 
+			pairs: {},
+			extras: {},
+			before: "",
+			query: "",
+			after: "",
+		};
+
+		// Check if fragment query has 'before'.
+		let ss = frag.string.split('?');
+		if (ss.length == 0) {
+			frag.query = ss[0];
+		} else {
+			frag.before = ss[0];
+			frag.query = ss[1];
+		}
+
+		// Check for after. Fragment queries supports beginning delimiters for other
+		// fragment schemes, like fragment directive `:~:`.
+		if (!isEmpty(frag.query)) {
+			let s = frag.query.split(':~:');
+			if (s.length > 1) {
+				frag.query = s[0];
+				frag.after = ':~:' + s[1];
+			}
+		}
+		frag.pairs = getPairs(frag.query);
+
+		// Javascript deep copy
+		return JSON.parse(JSON.stringify(frag));
+	}
+
 	let qp = {
 		query: {
 			string: window.location.search.substring(1), // substring removes "?"
@@ -795,7 +771,6 @@ function getQuagParts(formOptions) {
 		...qp.query.pairs,
 		...qp.fragment.pairs,
 	};
-
 
 	// Generate extras and remove any extras from Query and Fragment.  
 	let formParams = [];
