@@ -701,46 +701,6 @@ function getPairs(s) {
 }
 
 /**
- * getFragment returns (fragment,pairs,before,query,after) from the URL
- * fragment, but not (extras). Warning: Puts all pairs, including extras, into
- * pairs.  
- * @returns {Fragment}
- */
-function getFragment() {
-	let frag = {
-		string: getFragmentString(), // The whole fragment including `#`. 
-		pairs: {},
-		extras: {},
-		before: "",
-		query: "",
-		after: "",
-	};
-
-	// Check if fragment query has 'before'.
-	let ss = frag.string.split('?');
-	if (ss.length == 0) {
-		frag.query = ss[0];
-	} else {
-		frag.before = ss[0];
-		frag.query = ss[1];
-	}
-
-	// Check for after. Fragment queries supports beginning delimiters for other
-	// fragment schemes, like fragment directive `:~:`.
-	if (!isEmpty(frag.query)) {
-		let s = frag.query.split(':~:');
-		if (s.length > 1) {
-			frag.query = s[0];
-			frag.after = ':~:' + s[1];
-		}
-	}
-	frag.pairs = getPairs(frag.query);
-
-	// Javascript deep copy
-	return JSON.parse(JSON.stringify(frag));
-}
-
-/**
  * getQueryParts returns QuagParts generated from the current URL, not the
  * form, and puts values into the correct object based on formOptions.
  * Includes extras.  See docs on `QuagParts`.
