@@ -199,19 +199,19 @@ function test_Clear() {
 // Tests PopulateFromURI().
 function test_PopulateFromURI() {
 	URLForm.PopulateFromURI(initedFormOptions);
-	return checkForm(URLForm.Objectify(initedFormOptions));
+	return checkForm(URLForm.GetForm(initedFormOptions));
 };
 
 // Tests PopulateFromValues().
 function test_PopulateFromValues() {
 	URLForm.Clear(initedFormOptions);
 	URLForm.PopulateFromValues(ExampleValues, initedFormOptions);
-	return checkForm(URLForm.Objectify(initedFormOptions));
+	return checkForm(URLForm.GetForm(initedFormOptions));
 };
 
-// Tests Objectify().
+// Tests GetForm().
 function test_Objectify() {
-	return checkForm(URLForm.Objectify(initedFormOptions));
+	return checkForm(URLForm.GetForm(initedFormOptions));
 }
 
 // Tests Serialize().

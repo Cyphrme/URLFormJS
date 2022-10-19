@@ -1,9 +1,6 @@
 'use strict';
 
-
 // URLFormJS is used for sticky forms and sharable URL links.  See README. 
-
-
 
 // # Test URL
 // ### Convention
@@ -12,6 +9,7 @@
 // Extras begin with "e".  
 // Extra before frag begin with "eb"
 // Extra after frag begin with "el"
+
 // file:///home/z/dev/go/src/github.com/cyphrme/cyphr.me/web/dist/js/pkg/urlformjs/index.html?last_name=Smith&eBob=eBob#ebmarry=ebmarry?first_name=f&middle_name=m&extramarry=extramarry
 
 // file:///home/z/dev/go/src/github.com/cyphrme/cyphr.me/web/dist/js/pkg/urlformjs/index.html?first_name=ff&eBob=eBob#ebmarry=ebmarry?&middle_name=m&last_name=l&email_address=e&phone_number=p&subscribe_latest_news=true&country_select=1&elmarry=elmarry
@@ -19,11 +17,11 @@
 
 
 // UMD export pattern.  See //TODO LINk
-(function(global, factory) {
+(function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 		typeof define === 'function' && define.amd ? define(['exports'], factory) :
 		(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URLForm = {}));
-})(this, (function(exports) {
+})(this, (function (exports) {
 	exports.Init = Init;
 	exports.PopulateFromValues = PopulateFromValues;
 	exports.PopulateFromURI = PopulateFromURI;
@@ -214,13 +212,13 @@
  * - query:      Everything after `before` and before the next fragment scheme 
  *               delimiter, i.e. ':~:'. This is the "middle part".  This is the fragment query.  
  * - after:      Everything after `query`.
- * @typedef  {Object}        Fragment
- * @property {String}        string  
- * @property {QuagPairs}     pairs
- * @property {QuagPairs}     extras
- * @property {String}        before
- * @property {String}        query
- * @property {String}        after
+ * @typedef  {Object}         Fragment
+ * @property {FragmentString} string  
+ * @property {QuagPairs}      pairs
+ * @property {QuagPairs}      extras
+ * @property {String}         before
+ * @property {String}         query
+ * @property {String}         after
  */
 
 
@@ -249,13 +247,10 @@
  */
 
 
-/*
-* @type {QueryLocation}
-*/
-const QueryLocationQuery = "query"; 
-/*
-* @type {QueryLocation}
-*/
+/** @type {QueryLocation} */
+const QueryLocationQuery = "query";
+
+/** @type {QueryLocation} */
 const QueryLocationFragment = "fragment";
 
 
@@ -567,7 +562,7 @@ function sanitizeFormOptions(formOptions) {
 	}
 
 	// Options with limited valid values.  
-	if (formOptions.defaultQueryLocation !== QueryLocationQuery) { 
+	if (formOptions.defaultQueryLocation !== QueryLocationQuery) {
 		foc.defaultQueryLocation = QueryLocationFragment;
 	}
 
@@ -583,8 +578,8 @@ function sanitizeFormOptions(formOptions) {
  * @returns {URL}           Javascript URL object.
  */
 function shareURI(formOptions) {
-	let q = getQuagParts(formOptions);      // Current URL values.
-	let formPairs = GetForm(formOptions);   // Current form values.
+	let q = getQuagParts(formOptions); // Current URL values.
+	let formPairs = GetForm(formOptions); // Current form values.
 	console.log("QuagParts:", q, "formPairs:", formPairs);
 
 	var u = new URL(window.location.origin + window.location.pathname);
@@ -613,7 +608,7 @@ function shareURI(formOptions) {
 		delete q.fragment.pairs[fp.name];
 	}
 
-		// Query extras
+	// Query extras
 	if (!isEmpty(q.query.extras) && !formOptions.cleanURL) {
 		for (let e in q.query.extras) {
 			u.searchParams.set(e, q.query.extras[e]);
