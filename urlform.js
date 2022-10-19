@@ -345,9 +345,6 @@ function PopulateFromValues(quagPairs, formOptions) {
 	shareURI(formOptions);
 }
 
-
-
-
 /**
  * getFragmentString returns URL fragment as a string, not including '#'.
  * See notes in function.
