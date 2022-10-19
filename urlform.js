@@ -250,12 +250,12 @@
 
 
 /*
-* @type {QueryLocation}
-*/
-const QueryLocationQuery = "query"; 
+ * @type {QueryLocation}
+ */
+const QueryLocationQuery = "query";
 /*
-* @type {QueryLocation}
-*/
+ * @type {QueryLocation}
+ */
 const QueryLocationFragment = "fragment";
 
 
@@ -567,7 +567,7 @@ function sanitizeFormOptions(formOptions) {
 	}
 
 	// Options with limited valid values.  
-	if (formOptions.defaultQueryLocation !== QueryLocationQuery) { 
+	if (formOptions.defaultQueryLocation !== QueryLocationQuery) {
 		foc.defaultQueryLocation = QueryLocationFragment;
 	}
 
@@ -583,8 +583,8 @@ function sanitizeFormOptions(formOptions) {
  * @returns {URL}           Javascript URL object.
  */
 function shareURI(formOptions) {
-	let q = getQuagParts(formOptions);      // Current URL values.
-	let formPairs = GetForm(formOptions);   // Current form values.
+	let q = getQuagParts(formOptions); // Current URL values.
+	let formPairs = GetForm(formOptions); // Current form values.
 	console.log("QuagParts:", q, "formPairs:", formPairs);
 
 	var u = new URL(window.location.origin + window.location.pathname);
@@ -613,7 +613,7 @@ function shareURI(formOptions) {
 		delete q.fragment.pairs[fp.name];
 	}
 
-		// Query extras
+	// Query extras
 	if (!isEmpty(q.query.extras) && !formOptions.cleanURL) {
 		for (let e in q.query.extras) {
 			u.searchParams.set(e, q.query.extras[e]);
@@ -743,19 +743,17 @@ function getQuagParts(formOptions) {
 			after: "",
 		};
 
+		// Check if fragment query has 'before'.
 		let ss = f.string.split('?');
-		// Check if fragment has 'query' and 'before'.
-		if (ss.length > 1) {
+		if (ss.length == 0) {
+			f.query = ss[0];
+		}else{
 			f.before = ss[0];
 			f.query = ss[1];
-		} else {
-			f.before = ss[0];
-			return f;
 		}
 
-		// Check for after. Fragment queries supports ending delimiters for other
-		// common schemes, such as the delimiter of `:~:` for fragment directives.
-		// Ignore anything after these ending delimiters.
+		// Check for after. Fragment queries supports beginning delimiters for other
+		// fragment schemes, like fragment directive `:~:`.
 		if (!isEmpty(f.query)) {
 			let s = f.query.split(':~:');
 			if (s.length > 1) {
