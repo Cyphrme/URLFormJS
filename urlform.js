@@ -2,11 +2,11 @@
 'use strict';
 
 // UMD export pattern.  See //TODO LINk
-(function(global, factory) {
+(function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 		typeof define === 'function' && define.amd ? define(['exports'], factory) :
 		(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URLForm = {}));
-})(this, (function(exports) {
+})(this, (function (exports) {
 	exports.Init = Init;
 	exports.PopulateFromValues = PopulateFromValues;
 	exports.PopulateFromURI = PopulateFromURI;
@@ -197,13 +197,13 @@
  * - query:      Everything after `before` and before the next fragment scheme 
  *               delimiter, i.e. ':~:'. This is the "middle part".  This is the fragment query.  
  * - after:      Everything after `query`.
- * @typedef  {Object}        Fragment
- * @property {String}        string  
- * @property {QuagPairs}     pairs
- * @property {QuagPairs}     extras
- * @property {String}        before
- * @property {String}        query
- * @property {String}        after
+ * @typedef  {Object}         Fragment
+ * @property {FragmentString} string  
+ * @property {QuagPairs}      pairs
+ * @property {QuagPairs}      extras
+ * @property {String}         before
+ * @property {String}         query
+ * @property {String}         after
  */
 
 
@@ -232,16 +232,11 @@
  */
 
 
-/*
- * @type {QueryLocation}
- */
+/** @type {QueryLocation} */
 const QueryLocationQuery = "query";
-/*
- * @type {QueryLocation}
- */
+
+/** @type {QueryLocation} */
 const QueryLocationFragment = "fragment";
-
-
 
 /**
  * DefaultFormOptions where all options are set to their default case.
@@ -334,9 +329,6 @@ function PopulateFromValues(quagPairs, formOptions) {
 	setGUI(quagPairs, formOptions);
 	shareURI(formOptions);
 }
-
-
-
 
 /**
  * getFragmentString returns URL fragment as a string, not including '#'.

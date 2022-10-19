@@ -109,7 +109,7 @@ let t_SerializeForm = {
 let t_GetDefaultOpts = {
 	"name": "Get Default Form Options",
 	"func": test_GetDefaultOpts,
-	"golden": `{"formID":"","prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","preserveExtra":false,"callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"FormMode":false}`
+	"golden": `{"formID":"","prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"FormMode":false}`
 };
 
 
@@ -199,19 +199,19 @@ function test_Clear() {
 // Tests PopulateFromURI().
 function test_PopulateFromURI() {
 	URLForm.PopulateFromURI(initedFormOptions);
-	return checkForm(URLForm.Objectify(initedFormOptions));
+	return checkForm(URLForm.GetForm(initedFormOptions));
 };
 
 // Tests PopulateFromValues().
 function test_PopulateFromValues() {
 	URLForm.Clear(initedFormOptions);
 	URLForm.PopulateFromValues(ExampleValues, initedFormOptions);
-	return checkForm(URLForm.Objectify(initedFormOptions));
+	return checkForm(URLForm.GetForm(initedFormOptions));
 };
 
-// Tests Objectify().
+// Tests GetForm().
 function test_Objectify() {
-	return checkForm(URLForm.Objectify(initedFormOptions));
+	return checkForm(URLForm.GetForm(initedFormOptions));
 }
 
 // Tests Serialize().
