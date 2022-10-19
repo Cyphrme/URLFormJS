@@ -658,38 +658,38 @@ function setShareURL(href, formOptions) {
  */
 function quagPartsToURLHash(fragment, formOptions) {
 	console.log(fragment);
-	if (isEmpty(fragment.pairs)) {
-		return "";
-	}
-	// Start fragment and append "Before".
+	// Concatenate fragment ("#") and before.
 	let fqs = "#" + fragment.before;
 
 	// Middle.  Build the fragment query.  (Query is the middle).
-	fqs += "?";
-
 	var i = Object.keys(fragment.pairs).length;
-	for (let key in fragment.pairs) {
-		i--;
-		fqs += key + "=" + fragment.pairs[key]
-		if (i > 0) {
-			fqs += "&"; // Add separator on everything except the last.  
+	if (i != 0) {
+		fqs += "?"; //start fragment query delimiter ("?")
+		for (let key in fragment.pairs) {
+			i--;
+			fqs += key + "=" + fragment.pairs[key]
+			if (i > 0) {
+				fqs += "&"; // Add separator on everything except the last.  
+			}
 		}
 	}
 
-	i = Object.keys(fragment.extras).length;
-	if (Object.keys(fragment.pairs).length > 0 && i > 0) { // First ampersand if normal fragment query exists. 
-		fqs += "&";
+	// Extras (still in middle)
+	let j = Object.keys(fragment.extras).length;
+	if (Object.keys(fragment.pairs).length && j > 0) {
+		fqs += "&"; // Prepend extras with ampersand if fragment is populated. 
 	}
 	// Append extras back in query params
-	if (!isEmpty(fragment.extras) && !formOptions.cleanURL) {
+	if (j > 0 && !formOptions.cleanURL) {
 		for (let e in fragment.extras) {
-			i--;
+			j--;
 			fqs += e + "=" + fragment.extras[e]
-			if (i > 0) {
+			if (j > 0) {
 				fqs += "&";
 			}
 		}
 	}
+
 
 	// After.  
 	fqs += fragment.after;
@@ -703,18 +703,24 @@ function quagPartsToURLHash(fragment, formOptions) {
  * @returns {QuagPairs}       key:value pairs.
  */
 function getPairs(s) {
-	var pairs = {};
-	if (!isEmpty(s)) {
-		s.split('&').forEach((q) => {
-			let pair = q.split('=');
-			if (pair[1] === undefined) {
-				pairs[pair[0]] = null;
-				return;
-			}
-			// Browsers automatically escape values. Javascript 'unescape()' is deprecated.
-			pairs[pair[0]] = decodeURI(pair[1]);
-		});
+	if (isEmpty(s)) {
+		return {};
 	}
+
+	var pairs = {};
+	s.split('&').forEach((q) => {
+		let p = q.split('=');
+		let key = p[0];
+		let value = p[1];
+		// Sanitize to string. (Don't use isEmpty as string "true"/"false" are valid.)
+		if (value === undefined || value === null) {  
+			value = "";
+		}
+		// Browsers automatically escape values. Javascript 'unescape()' is deprecated.
+		value = decodeURI(value);
+		pairs[key] = value;
+	});
+
 	return pairs;
 }
 
@@ -735,19 +741,20 @@ function getQuagParts(formOptions) {
 	 */
 	function getFragment() {
 		let f = { // Initialize to avoid "undefined"
-			string: getFragmentString(), // The whole fragment with everything included. 
+			string: getFragmentString(), // The whole fragment including `#`. 
 			pairs: {},
 			extras: {},
 			before: "",
 			query: "",
 			after: "",
 		};
+		console.log(f);
 
 		// Check if fragment query has 'before'.
 		let ss = f.string.split('?');
 		if (ss.length == 0) {
 			f.query = ss[0];
-		}else{
+		} else {
 			f.before = ss[0];
 			f.query = ss[1];
 		}
@@ -762,6 +769,7 @@ function getQuagParts(formOptions) {
 			}
 		}
 		f.pairs = getPairs(f.query);
+		// console.log(f);
 		return f;
 	}
 
@@ -770,14 +778,19 @@ function getQuagParts(formOptions) {
 		pairs: getPairs(window.location.search.substring(1)),
 		extras: {},
 	}
-	let f = getFragment();
+	let ff = getFragment();
+	let f = {
+		...ff
+	};
 	let qp = {
 		pairs: {
 			...q.pairs,
 			...f.pairs,
 		},
 		query: q,
-		fragment: f,
+		fragment: {
+			...f
+		},
 	};
 
 	// Generate extras and remove any extras from Query and Fragment.  
@@ -785,6 +798,7 @@ function getQuagParts(formOptions) {
 	for (let p of formOptions.FormParameters) {
 		formParams.push(p.name);
 	}
+
 	// Extra query pairs.  
 	for (let key of Object.keys(qp.query.pairs)) {
 		if (!formParams.includes(key)) {
@@ -799,6 +813,8 @@ function getQuagParts(formOptions) {
 			delete qp.fragment.pairs[key];
 		}
 	}
+
+	console.log(formOptions, qp);
 
 	return qp;
 }
