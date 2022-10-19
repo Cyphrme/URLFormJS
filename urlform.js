@@ -362,7 +362,7 @@ function PopulateFromValues(quagPairs, formOptions) {
  * @returns {Fragment.string}
  */
 function getFragmentString() {
-	var frag = window.location.hash.split("#"); // May not work in chrome, see note below.
+	let fParts = window.location.hash.split("#"); // May not work in chrome, see note below.
 
 	// Chrome removes ':~:' (fragment directives (for text fragments)), and
 	// anything after the text fragment. Thus, calling 'window.location.hash' with
@@ -404,13 +404,13 @@ function getFragmentString() {
 
 	// Can't use 'name' in performance when running locally.
 	if (window.location.protocol !== "file:" && !navigator.userAgent.includes('Firefox')) {
-		frag = performance.getEntriesByType('navigation')[0].name.split("#");
+		fParts = performance.getEntriesByType('navigation')[0].name.split("#");
 	}
 
-	if (frag.length < 2) {
+	if (fParts.length == 1) { // only "#"
 		return "";
 	}
-	return frag[1];
+	return fParts[1];
 }
 
 
@@ -690,7 +690,6 @@ function quagPartsToURLHash(fragment, formOptions) {
 		}
 	}
 
-
 	// After.  
 	fqs += fragment.after;
 	return fqs;
@@ -698,30 +697,79 @@ function quagPartsToURLHash(fragment, formOptions) {
 
 
 /**
- * Returns URL string as key:value pair object.
- *@param    {String}      s   string to get pairs from.  
- * @returns {QuagPairs}       key:value pairs.
+ * Returns from `key=value` string a `key:value` object.
+ * @param   {String}      s   e.g. `key=value&key=value`.  
+ * @returns {QuagPairs}       {key:value}
  */
 function getPairs(s) {
 	if (isEmpty(s)) {
 		return {};
 	}
 
-	var pairs = {};
-	s.split('&').forEach((q) => {
-		let p = q.split('=');
-		let key = p[0];
-		let value = p[1];
+	let pairs = {};
+	let parts = s.split('&');
+	for (const i in parts) {
+		let kv = parts[i].split('=');
+		let key = kv[0];
+		let value = kv[1];
+		// If the string begins/ends with "&", there will be an empty element. 
+		if (isEmpty(key)) { 
+			continue;
+		}
 		// Sanitize to string. (Don't use isEmpty as string "true"/"false" are valid.)
-		if (value === undefined || value === null) {  
+		if (value === undefined || value === null) {
 			value = "";
 		}
 		// Browsers automatically escape values. Javascript 'unescape()' is deprecated.
 		value = decodeURI(value);
 		pairs[key] = value;
-	});
-
+	}
+	console.log(pairs);
 	return pairs;
+}
+
+/**
+ * getFragment returns (fragment,pairs,before,query,after) from the URL
+ * fragment, but not (extras). Warning: Puts all pairs, including extras, into
+ * pairs.  
+ * @returns {Fragment}
+ */
+function getFragment() {
+	let frag = {
+		string: getFragmentString(), // The whole fragment including `#`. 
+		pairs: {},
+		extras: {},
+		before: "",
+		query: "",
+		after: "",
+	};
+	console.log(frag);
+
+	// Check if fragment query has 'before'.
+	let ss = frag.string.split('?');
+	if (ss.length == 0) {
+		frag.query = ss[0];
+	} else {
+		frag.before = ss[0];
+		frag.query = ss[1];
+	}
+
+	// Check for after. Fragment queries supports beginning delimiters for other
+	// fragment schemes, like fragment directive `:~:`.
+	if (!isEmpty(frag.query)) {
+		let s = frag.query.split(':~:');
+		if (s.length > 1) {
+			frag.query = s[0];
+			frag.after = ':~:' + s[1];
+		}
+	}
+	let pairs = getPairs(frag.query);
+	console.log(pairs);
+	frag.pairs = pairs;
+	console.log(frag);
+
+	// Javascript deep copy
+	return JSON.parse(JSON.stringify(frag));
 }
 
 
@@ -734,64 +782,20 @@ function getPairs(s) {
  * @returns {QuagParts}
  */
 function getQuagParts(formOptions) {
-	/**
-	 * getFragment returns (fragment,pairs,before,query,after) from the URL
-	 * fragment, but not (extras). Warning: Puts all pairs, including extras, into pairs.  
-	 * @returns {Fragment}
-	 */
-	function getFragment() {
-		let f = { // Initialize to avoid "undefined"
-			string: getFragmentString(), // The whole fragment including `#`. 
-			pairs: {},
-			extras: {},
-			before: "",
-			query: "",
-			after: "",
-		};
-		console.log(f);
-
-		// Check if fragment query has 'before'.
-		let ss = f.string.split('?');
-		if (ss.length == 0) {
-			f.query = ss[0];
-		} else {
-			f.before = ss[0];
-			f.query = ss[1];
-		}
-
-		// Check for after. Fragment queries supports beginning delimiters for other
-		// fragment schemes, like fragment directive `:~:`.
-		if (!isEmpty(f.query)) {
-			let s = f.query.split(':~:');
-			if (s.length > 1) {
-				f.query = s[0];
-				f.after = ':~:' + s[1];
-			}
-		}
-		f.pairs = getPairs(f.query);
-		// console.log(f);
-		return f;
-	}
-
-	let q = {
-		string: window.location.search.substring(1), // substring removes "?"
-		pairs: getPairs(window.location.search.substring(1)),
-		extras: {},
-	}
-	let ff = getFragment();
-	let f = {
-		...ff
-	};
 	let qp = {
-		pairs: {
-			...q.pairs,
-			...f.pairs,
+		query: {
+			string: window.location.search.substring(1), // substring removes "?"
+			pairs: getPairs(window.location.search.substring(1)),
+			extras: {},
 		},
-		query: q,
-		fragment: {
-			...f
-		},
+		fragment: getFragment(),
 	};
+
+	qp.pairs = {
+		...qp.query.pairs,
+		...qp.fragment.pairs,
+	};
+
 
 	// Generate extras and remove any extras from Query and Fragment.  
 	let formParams = [];
@@ -813,8 +817,6 @@ function getQuagParts(formOptions) {
 			delete qp.fragment.pairs[key];
 		}
 	}
-
-	console.log(formOptions, qp);
 
 	return qp;
 }
@@ -843,15 +845,15 @@ function GetForm(formOptions) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
 
+	let pairs = {};
 	// Normal usage, Not FormMode.  On individual ID's, not in a <form>.
 	if (!formOptions.FormMode) {
-		var pairs = {};
 		for (let fp of formOptions.FormParameters) {
 			let htmlID = fp.name;
 			if (!isEmpty(fp.id)) {
 				htmlID = fp.id;
 			}
-			var elem = document.getElementById(formOptions.prefix + htmlID);
+			let elem = document.getElementById(formOptions.prefix + htmlID);
 			let value;
 			if (elem !== null) {
 				value = elem.value;
@@ -867,8 +869,7 @@ function GetForm(formOptions) {
 	}
 
 	// FormMode=true.  In a <form>.
-	var formData = new FormData(formOptions.FormElement); // throws
-	var pairs = {};
+	let formData = new FormData(formOptions.FormElement); // throws
 	for (let [name, value] of formData) {
 		if (value == "true" || value == "on") {
 			value = true;
