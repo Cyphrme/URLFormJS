@@ -110,7 +110,7 @@ https://github.com/evanw/esbuild/issues/507#issuecomment-1221091273
 Testing uses [BrowserTestJS](https://github.com/Cyphrme/BrowserTestJS]):
 
 ```
-cd /urlformjs/browsertestjs/
+cd browsertestjs
 go run server.go
 ```
 
