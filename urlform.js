@@ -680,7 +680,7 @@ function quagPartsToURLHash(fragment, formOptions) {
 		}
 	}
 
-	// After.  
+	// After.
 	fqs += fragment.after;
 	return fqs;
 }
@@ -703,7 +703,7 @@ function getPairs(s) {
 		let key = kv[0];
 		let value = kv[1];
 		// If the string begins/ends with "&", there will be an empty element. 
-		if (isEmpty(key)) { 
+		if (isEmpty(key)) {
 			continue;
 		}
 		// Sanitize to string. (Don't use isEmpty as string "true"/"false" are valid.)
@@ -711,10 +711,9 @@ function getPairs(s) {
 			value = "";
 		}
 		// Browsers automatically escape values. Javascript 'unescape()' is deprecated.
-		value = decodeURI(value);
-		pairs[key] = value;
+		// 'decodeURI' expects the full URI.
+		pairs[key] = decodeURIComponent(value);
 	}
-	console.log(pairs);
 	return pairs;
 }
 
@@ -733,7 +732,6 @@ function getFragment() {
 		query: "",
 		after: "",
 	};
-	console.log(frag);
 
 	// Check if fragment query has 'before'.
 	let ss = frag.string.split('?');
@@ -753,10 +751,7 @@ function getFragment() {
 			frag.after = ':~:' + s[1];
 		}
 	}
-	let pairs = getPairs(frag.query);
-	console.log(pairs);
-	frag.pairs = pairs;
-	console.log(frag);
+	frag.pairs = getPairs(frag.query);
 
 	// Javascript deep copy
 	return JSON.parse(JSON.stringify(frag));
