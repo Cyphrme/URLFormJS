@@ -628,6 +628,7 @@ function shareURI(formOptions) {
 	return u;
 };
 
+
 /**
  * Sets the URL on share link and share area.  
  * @param   {String}       href
@@ -647,6 +648,7 @@ function setShareURL(href, formOptions) {
 	}
 }
 
+
 /**
  * Generates a fragment string from Fragment.
  * 
@@ -659,11 +661,10 @@ function quagPartsToURLHash(fragment, formOptions) {
 	if (isEmpty(fragment.pairs)) {
 		return "";
 	}
-	let fqs = "#";
-	// Append anything that was in *fragment* before, but not in, *fragment query*.  
-	fqs += fragment.before;
+	// Start fragment and append "Before".
+	let fqs = "#" + fragment.before;
 
-	// Build the fragment query
+	// Middle.  Build the fragment query.  (Query is the middle).
 	fqs += "?";
 
 	var i = Object.keys(fragment.pairs).length;
@@ -676,7 +677,7 @@ function quagPartsToURLHash(fragment, formOptions) {
 	}
 
 	i = Object.keys(fragment.extras).length;
-	if (Object.keys(fragment.pairs).length > 0 && i > 0) { // First ampersand if normal fragment exists. 
+	if (Object.keys(fragment.pairs).length > 0 && i > 0) { // First ampersand if normal fragment query exists. 
 		fqs += "&";
 	}
 	// Append extras back in query params
@@ -690,11 +691,10 @@ function quagPartsToURLHash(fragment, formOptions) {
 		}
 	}
 
-	// Append anything that was in *fragment* after, but not in, *fragment query*.   
+	// After.  
 	fqs += fragment.after;
 	return fqs;
 }
-
 
 
 /**
@@ -761,8 +761,7 @@ function getQuagParts(formOptions) {
 				f.after = ':~:' + s[1];
 			}
 		}
-
-		f.pairs = getPairs(f.string.substring(1));
+		f.pairs = getPairs(f.query);
 		return f;
 	}
 
@@ -780,8 +779,6 @@ function getQuagParts(formOptions) {
 		query: q,
 		fragment: f,
 	};
-
-	console.log(qp);
 
 	// Generate extras and remove any extras from Query and Fragment.  
 	let formParams = [];
