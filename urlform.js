@@ -663,7 +663,7 @@ function quagPartsToURLHash(fragment, formOptions) {
 		}
 	}
 
-	// After.  
+	// After.
 	fqs += fragment.after;
 	return fqs;
 }
@@ -694,12 +694,11 @@ function getPairs(s) {
 			value = "";
 		}
 		// Browsers automatically escape values. Javascript 'unescape()' is deprecated.
-		value = decodeURI(value);
-		pairs[key] = value;
+		// 'decodeURI' expects the full URI.
+		pairs[key] = decodeURIComponent(value);
 	}
 	return pairs;
 }
-
 
 /**
  * getQueryParts returns QuagParts generated from the current URL, not the
