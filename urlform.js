@@ -1,7 +1,8 @@
 // URLFormJS is used for sticky forms and sharable URL links.  See README. 
 'use strict';
 
-// UMD export pattern.  See //TODO LINk
+// UMD export pattern.  See Cyphr.me's UMD tutorial
+// (https://github.com/Cyphrme/UMD_tutorial) for more on this design.
 (function(global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 		typeof define === 'function' && define.amd ? define(['exports'], factory) :
