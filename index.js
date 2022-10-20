@@ -1,40 +1,49 @@
 "use strict"
 
-// An application may use the prefix "input_" to denote user modifiable fields
-// in the GUI, use a custom id for the ShareURL button, or a custom id for the
-// share URL link.
+// An application may use a prefix, "input_" here, to namespace fields.
+// A custom id for the share button, share link, and clear button are set.
 const FormOptions = {
-	"id": "ExampleUserForm",
 	"prefix": 'input_',
 	"shareURLBtn": "#CustomShareURLBtnID",
 	"shareURL": "#CustomShareURL",
-	"clearBtn": "#CustomClearBtnID"
+	"clearBtn": "#CustomClearBtnID",
+	// Fields configurations.
+	"FormParameters": [{
+			"name": "first_name",
+		},
+		{
+			"name": "middle_name",
+		},
+		{
+			"name": "last_name",
+		},
+		{
+			"name": "email_address",
+		},
+		{
+			"name": "phone_number",
+		},
+		{
+			"name": "subscribe_latest_news",
+			"type": "bool",
+		},
+		{
+			"name": "country_select",
+		},
+		{
+			"name": "toggle",
+			"type": "bool",
+			"saveSetting": true,
+		},
+		{
+			"name": "uri_settable",
+			"type": "bool",
+		},
+	],
 };
 
-// Permissable fields within the form for the application.
-const FormParameters = [{
-		"name": "first_name",
-	},
-	{
-		"name": "middle_name",
-	},
-	{
-		"name": "last_name",
-	},
-	{
-		"name": "email_address",
-	},
-	{
-		"name": "phone_number",
-	},
-	{
-		"name": "subscribe_latest_news",
-		"type": "bool",
-	},
-	{
-		"name": "country_select",
-	},
-];
+
+
 
 // Runs when the DOM is loaded. Initializes the `URLFormJS` module, and then
 // populates the sticky form from the given URL query parameters.
@@ -55,5 +64,5 @@ document.addEventListener('DOMContentLoaded', () => {
 	// }
 
 	// Initialize and populate sticky form.
-	URLForm.PopulateFromURI(URLForm.Init(FormParameters, FormOptions));
+	URLForm.Populate(URLForm.Init(FormOptions));
 });

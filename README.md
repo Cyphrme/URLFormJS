@@ -55,6 +55,15 @@ Fragment query parameters are "non-standard", but we hope if enough people find
 it useful to standardize them through an RFC or other means.  
 
 
+# `FormOptions` and `FormParameters`
+URLFormJS is configured by two configuration objects.  
+
+See `index.js` for an example of `FormParameters`.  The docs are in `urlform.js`.
+
+# Savable Parameters
+
+
+
 # Install
 URLFormJS can be added into a project as a submodule with the following command:
 

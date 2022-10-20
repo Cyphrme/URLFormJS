@@ -2,14 +2,14 @@
 'use strict';
 
 // UMD export pattern.  See //TODO LINk
-(function (global, factory) {
+(function(global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 		typeof define === 'function' && define.amd ? define(['exports'], factory) :
 		(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URLForm = {}));
-})(this, (function (exports) {
+})(this, (function(exports) {
 	exports.Init = Init;
 	exports.PopulateFromValues = PopulateFromValues;
-	exports.PopulateFromURI = PopulateFromURI;
+	exports.Populate = Populate;
 	exports.Serialize = Serialize;
 	exports.GetForm = GetForm;
 	exports.Clear = Clear;
@@ -45,10 +45,10 @@
  *                  (e.g. https://localhost/?send_news_and_updates) using the
  *                  example above will execute the 'ToggleVisible' function.
  *
- * - func:          Gets called if set on each call to setGUI
- *                  (PopulateFromValues and PopulateFromURI).
+ * - func:          Called if set on each call to setGUI
+ *                  (Populate and PopulateFromValues).
  *
- * - funcTrue:      Function to execute if param is true. e.g. `"funcTrue": ()
+ * - funcTrue:      Execute if param is true. e.g. `"funcTrue": ()
  *                  => {
  *                  ToggleVisible(document.querySelector("#advancedOptions"))};`
  *
@@ -108,24 +108,19 @@
  * }
  * 
  * Fields:
- * 
- * 
- * 
  * - prefix:               Form input prefix which will be prepended to name.
  * 
  * - clearBtn:             Button element for clearing the form and
  *                         queries/fragments in the URL.
  * 
- * - shareURLBtn:          Button element for sharing the form in the URL.
- * 
  * - shareURL:             Will share the link as a URL.
+ * 
+ * - shareURLBtn:          Button element for sharing the form in the URL.
  * 
  * - shareURLArea:         Will share the link as a text.
  * 
- * - defaultQueryLocation: Whether form link generates as a fragment query, or
- *                         a regular query. Defaults to fragment query, which
- *                         is the recommended use, if possible. Can only be
- *                         either 'fragment' or 'query', and not empty.
+ * - defaultQueryLocation: Link sets parameter in query or fragment query.
+ *                         Defaults to fragment query (recommended).
  * 
  * - callback:             Function that's executed each time the form is
  *                         processed.
@@ -133,37 +128,43 @@
  * - cleanURL:             If set to `true`, does not preserve any extra
  *                         information from the URL that is not in the
  *                         initialized form. Defaults to false.
- * <form> mode options:
- * - formID:               HTMLFormElement ID of <form>. Set formMode true
  * 
- * 
- * Properties that are intended for use within this module.
- * 
+ * Read only:
+ * - FormParameters      Set by Init().  (Allows FormOptions to encapsulate FormParameters.)
  * - Sanitized:          Whether 'FormOptions' has been sanitized.
  * - Inited:             Whether URLFormJS module was initialized.
  * - ShareURLBtnElement: Share URL button element in GUI.
  * - ClearBtnElement:    Clear the `shareURL` and form in GUI.
- * <form> mode options:
+ * 
+ * "Form mode" parameters:
+ * - formID:               HTMLFormElement ID of <form>. Sets `formMode` to true if populated. 
+ * 
+ * Form Mode read only
  * - FormMode:            Use `<form>` mode.  FormOptions must include a form 'id' found in the GUI.
  * - FormElement:        Form element in GUI, specified by 'id' in 'FormOptions'.
  * @typedef  {Object}               FormOptions
+ * @property {FormParameters}       FormParameters
  * @property {String}               [prefix]
  * @property {String}               [clearBtn]
- * @property {String}               [shareURLBtn] 
  * @property {String}               [shareURL]
+ * @property {String}               [shareURLBtn] 
  * @property {String}               [shareURLArea]
  * @property {QueryLocation}        [defaultQueryLocation="fragment"]
  * @property {Function}             [callback]
  * @property {Boolean}              [cleanURL=false]
- * @property {String}               [formID]
- * // Read only Values
+ * 
+ * // Read only Values (Set internally by library)
  * @property {Boolean}              Sanitized=false
  * @property {Boolean}              Inited=false
- * @property {Boolean}              FormMode=false
- * @property {HTMLFormElement}      FormElement
  * @property {HTMLButtonElement}    ShareURLBtnElement
  * @property {HTMLButtonElement}    ClearBtnElement 
- * @property {FormParameters}       FormParameters
+ * 
+ * // Form Mode
+ * @property {String}               [formID]
+ * // Form Mode Read Only
+ * @property {Boolean}              FormMode=false
+ * @property {HTMLFormElement}      FormElement
+
  */
 
 /**
@@ -243,7 +244,7 @@ const QueryLocationFragment = "fragment";
  * @type {FormOptions} 
  */
 const DefaultFormOptions = {
-	formID: "",
+	FormParameters: [],
 	prefix: "",
 	shareURLBtn: "#shareURLBtn",
 	shareURL: "#shareURL",
@@ -255,32 +256,27 @@ const DefaultFormOptions = {
 	// Module fields not settable externally.  
 	Sanitized: false,
 	Inited: false,
-	FormMode: false,
-	FormElement: HTMLFormElement,
 	ShareURLBtnElement: HTMLButtonElement,
 	ClearBtnElement: HTMLButtonElement,
+
+	// Form Mode
+	formID: "",
+	FormMode: false,
+	FormElement: HTMLFormElement,
 };
 
 /**
  * Initializes the globals and event listeners for the URLFormJS module.
- * If 'formOptions' is empty, the default options will be used.
+ * If 'formOptions' is empty, defaults are used.
  * 
- * @param   {FormParameters} params
- * @param   {FormOptions}    [formOptions]
- * @returns {FormParameters} SetFormParameters
+ * @param   {FormOptions}    formOptions
+ * @returns {FormOptions} 
  */
-function Init(params, formOptions) {
+function Init(formOptions) {
+	console.log(formOptions);
 	let formOpt = {};
 	formOpt = sanitizeFormOptions(formOptions);
 
-	// Sanitize form parameters. (The `for` is pass by reference, not pass by copy.)
-	for (let fp of params) {
-		// If query location is not a recognized 'QueryLocation', use default.
-		if (fp.queryLocation !== QueryLocationFragment && fp.queryLocation !== QueryLocationQuery) {
-			fp.queryLocation = DefaultFormOptions.defaultQueryLocation;
-		}
-	}
-	formOpt.FormParameters = params;
 	formOpt.ShareURLBtnElement = document.querySelector(formOpt.shareURLBtn);
 	if (formOpt.ShareURLBtnElement != null) {
 		formOpt.ShareURLBtnElement.addEventListener('click', () => shareURI(formOpt)); // Must be anonymous, otherwise passes pointer event object.
@@ -303,14 +299,26 @@ function Init(params, formOptions) {
 }
 
 /**
- * PopulateFromURI populates the GUI from the URI, if any of the form params
- * are supplied in the URI Query.
+ * Populate populates the GUI from the URI and saved setting.
  * @param   {FormOptions}    formOptions
  * @returns {void}
- * @throws  {Error} Fails if Init() has not been called for the URLFormJS module.
+ * @throws  {Error}           If Init() has not been called.
  */
-function PopulateFromURI(formOptions) {
-	PopulateFromValues(getQuagParts(formOptions).pairs, formOptions);
+function Populate(formOptions) {
+	// Get local storage settings.  If set, URI should overwrite.  
+	let savedPairs = {};
+	for (let fp of formOptions.FormParameters) {
+		if (fp.saveSetting) {
+			savedPairs[fp.name] = getSavedSetting(fp.name, formOptions);
+		}
+	}
+
+	let uriPairs = getQuagParts(formOptions).pairs;
+	let pairs = {
+		...savedPairs,
+		...uriPairs,
+	}
+	PopulateFromValues(pairs, formOptions);
 }
 
 /**
@@ -406,6 +414,16 @@ function setGUI(kv, formOptions) {
 			let value = kv[name];
 			let id = fp.id;
 
+			// Sanitize bool `true` to string true.  
+			if (value === true) {
+				value = "true"
+			}
+
+			// Sanitize flags.  
+			if (fp.type == "bool" && value === "") {
+				value = "true"
+			}
+
 			// If id is empty, assume name is the id on the page.
 			if (isEmpty(id)) {
 				id = formOptions.prefix + name;
@@ -416,37 +434,36 @@ function setGUI(kv, formOptions) {
 				fp.func();
 			}
 
-			// Run funcTrue. Value may be "true", or empty "" if in the URL and with no
-			// value set, but not `undefined`.  Name only is considered a flag and is
+			// Value may be "true", or empty "" (flag). Empty "" is a flag and is
 			// interpreted as true.
-			if (!isEmpty(fp.funcTrue) && ((fp.type == "bool" && value !== undefined) || (value === "true" || value === true))) {
-				fp.funcTrue();
+			if (fp.type == "bool" && value == "true") {
+				if (!isEmpty(fp.funcTrue)) {
+					fp.funcTrue();
+				}
 			}
 
-			// Attempt to get value from local storage if it hasn't already been
-			// set by URI.  
-			if (isEmpty(value)) {
-				value = getSavedSetting(name, formOptions);
-			}
+			// Finally Set Gui
 			let e = document.getElementById(id);
 			if (e == null) {
 				continue;
 			}
-
-			// Set GUI bool elements.  
-			if (!isEmpty(value)) {
-				// Checks checkbox elements if type=bool and value==true.
-				if (fp.type == "bool" && (value == "true" || value === true)) {
-					e.checked = true;
-				} else {
-					// Set GUI Non-bool inputs.  
-					e.value = value;
-				}
+			if (fp.type == "bool" && value == "true") {
+				e.checked = true;
 			}
 
-			if (fp.saveSetting) {
-				e.addEventListener("input", () => {
-					setSavedSetting(name, this.value, formOptions)
+			// Set GUI Non-bool inputs. 
+			if (!isEmpty(value)) {
+				e.value = value;
+			}
+
+
+			if (fp.saveSetting) { // Set Action listener for savables.  
+				e.addEventListener("input", (e) => {
+					if (fp.type == "bool"){
+						setSavedSetting(name, e.target.checked, formOptions);
+					}else{
+						setSavedSetting(name, e.target.value, formOptions); // TODO test
+					}
 				});
 			}
 
@@ -479,7 +496,8 @@ function getSavedSetting(name, formOptions) {
  * @returns {void}
  */
 function setSavedSetting(name, value, formOptions) {
-	return localStorage.setItem(localStorageNamespace + formOptions.prefix + name, value);
+	console.log("URLFormJS - Saving setting:", name, value);
+	return localStorage.setItem(formOptions.localStorageNamespace + formOptions.prefix + name, value);
 }
 
 /**
@@ -544,6 +562,16 @@ function sanitizeFormOptions(formOptions) {
 	if (formOptions.defaultQueryLocation !== QueryLocationQuery) {
 		foc.defaultQueryLocation = QueryLocationFragment;
 	}
+
+	// Sanitize form parameters. (The `for` is pass by reference, not pass by copy.)
+	for (let fp of formOptions.FormParameters) {
+		// If query location is not a recognized 'QueryLocation', use default.
+		if (fp.queryLocation !== QueryLocationFragment && fp.queryLocation !== QueryLocationQuery) {
+			fp.queryLocation = foc.defaultQueryLocation;
+		}
+		foc.FormParameters.push(fp);
+	}
+
 
 	foc.Sanitized = true;
 	return foc;
@@ -700,6 +728,9 @@ function getPairs(s) {
 	return pairs;
 }
 
+
+
+
 /**
  * getQueryParts returns QuagParts generated from the current URL, not the
  * form, and puts values into the correct object based on formOptions.
@@ -815,18 +846,20 @@ function GetForm(formOptions) {
 	// Normal usage, Not FormMode.  On individual ID's, not in a <form>.
 	if (!formOptions.FormMode) {
 		for (let fp of formOptions.FormParameters) {
+			let value;
+
 			let htmlID = fp.name;
 			if (!isEmpty(fp.id)) {
 				htmlID = fp.id;
 			}
 			let elem = document.getElementById(formOptions.prefix + htmlID);
-			let value;
 			if (elem !== null) {
 				value = elem.value;
 				if (fp.type === "bool") {
 					value = elem.checked;
 				}
 			}
+
 			if (!isEmpty(value)) {
 				pairs[fp.name] = value;
 			}

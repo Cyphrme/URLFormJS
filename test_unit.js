@@ -78,9 +78,9 @@ let t_Clear = {
 };
 
 /**@type {Test} */
-let t_PopulateFromURI = {
+let t_Populate = {
 	"name": "Populate From URI",
-	"func": test_PopulateFromURI,
+	"func": test_Populate,
 	"golden": true
 };
 
@@ -184,7 +184,7 @@ function test_Clear() {
 	if (URLForm.IsEmpty(initedFormOptions)) {
 		// Populate before clearing
 		// Manually set each field, to keep this as a unit test and not have to call
-		// PopulateFromURI or PopulateFromValues, in case one of those two funcs
+		// Populate or PopulateFromValues, in case one of those two funcs
 		// fail, it can make debugging more difficult.
 		populateGUI();
 	}
@@ -196,9 +196,9 @@ function test_Clear() {
 	return true;
 }
 
-// Tests PopulateFromURI().
-function test_PopulateFromURI() {
-	URLForm.PopulateFromURI(initedFormOptions);
+// Tests Populate().
+function test_Populate() {
+	URLForm.Populate(initedFormOptions);
 	return checkForm(URLForm.GetForm(initedFormOptions));
 };
 
@@ -240,7 +240,7 @@ function test_GetDefaultOpts() {
 let TestsToRun = [
 	t_InitForm,
 	t_Clear,
-	t_PopulateFromURI,
+	t_Populate,
 	t_PopulateFromValues,
 	t_ObjectifyForm,
 	t_SerializeForm,
