@@ -273,7 +273,7 @@ const DefaultFormOptions = {
  * @returns {FormOptions} 
  */
 function Init(formOptions) {
-	console.log(formOptions);
+	// console.log(formOptions);
 	let formOpt = {};
 	formOpt = sanitizeFormOptions(formOptions);
 
@@ -571,7 +571,6 @@ function sanitizeFormOptions(formOptions) {
 		}
 		foc.FormParameters.push(fp);
 	}
-
 
 	foc.Sanitized = true;
 	return foc;

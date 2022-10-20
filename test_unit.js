@@ -26,10 +26,7 @@ const FormOptions = {
 	"prefix": 'input_',
 	"shareURLBtn": "#ShareURLBtn",
 	"shareURL": "#ShareURL",
-};
-
-/**@type {FormParameters} */
-const FormParameters = [{
+	"FormParameters": [{
 		"name": "first_name",
 	},
 	{
@@ -51,7 +48,8 @@ const FormParameters = [{
 	{
 		"name": "country_select",
 	},
-];
+]};
+
 
 // Example Parsed JSON object for the example user form.
 const ExampleValues = {
@@ -109,7 +107,7 @@ let t_SerializeForm = {
 let t_GetDefaultOpts = {
 	"name": "Get Default Form Options",
 	"func": test_GetDefaultOpts,
-	"golden": `{"formID":"","prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"FormMode":false}`
+	"golden": `{"FormParameters":[{"name":"first_name","queryLocation":"fragment"},{"name":"middle_name","queryLocation":"fragment"},{"name":"last_name","queryLocation":"fragment"},{"name":"email_address","queryLocation":"fragment"},{"name":"phone_number","queryLocation":"fragment"},{"name":"subscribe_latest_news","type":"bool","queryLocation":"fragment"},{"name":"country_select","queryLocation":"fragment"}],"prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"formID":"","FormMode":false}`
 };
 
 
@@ -173,7 +171,7 @@ function test_Init() {
 	url.searchParams.set('country_select', "1");
 	// Push new state that updates query params without reloading the page.
 	window.history.pushState({}, '', url);
-	initedFormOptions = URLForm.Init(FormParameters, FormOptions);
+	initedFormOptions = URLForm.Init(FormOptions);
 	return document.getElementById('ShareURLBtn').formAction;
 };
 
