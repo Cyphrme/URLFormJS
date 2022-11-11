@@ -3,11 +3,11 @@
 
 // UMD export pattern.  See Cyphr.me's UMD tutorial
 // (https://github.com/Cyphrme/UMD_tutorial) for more on this design.
-(function(global, factory) {
+(function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 		typeof define === 'function' && define.amd ? define(['exports'], factory) :
 		(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URLForm = {}));
-})(this, (function(exports) {
+})(this, (function (exports) {
 	exports.Init = Init;
 	exports.PopulateFromValues = PopulateFromValues;
 	exports.Populate = Populate;
@@ -74,10 +74,11 @@
  * ParamType is the type for a given FormParameter.
  *
  * A ParamType may be one of the following:
- * - "string":  The parameter is a string. Default.
- * - "bool":    The parameter is a boolean. Used for checkboxes.
- * - "":        The parameter uses the default.
- * @typedef {"string" | "bool" | ""} ParamType
+ * - "string":  String and default type.
+ * - "bool":    Boolean used for checkboxes.
+ * - "number":  Number will convert text values to number and sanitize NaN.
+ * - "":        Uses the default.
+ * @typedef {"string" | "bool" | "number" | ""} ParamType
  */
 
 /**
@@ -415,7 +416,7 @@ function setGUI(kv, formOptions) {
 			let value = kv[name];
 			let id = fp.id;
 
-			// Sanitize bool `true` to string true.  
+			// Sanitize bool `true` to string true.
 			if (value === true) {
 				value = "true"
 			}
@@ -452,7 +453,7 @@ function setGUI(kv, formOptions) {
 				e.checked = true;
 			}
 
-			// Set GUI Non-bool inputs. 
+			// Set GUI Non-bool inputs.
 			if (!isEmpty(value)) {
 				e.value = value;
 			}
@@ -460,9 +461,9 @@ function setGUI(kv, formOptions) {
 
 			if (fp.saveSetting) { // Set Action listener for savables.  
 				e.addEventListener("input", (e) => {
-					if (fp.type == "bool"){
+					if (fp.type == "bool") {
 						setSavedSetting(name, e.target.checked, formOptions);
-					}else{
+					} else {
 						setSavedSetting(name, e.target.value, formOptions); // TODO test
 					}
 				});
@@ -854,9 +855,20 @@ function GetForm(formOptions) {
 			}
 			let elem = document.getElementById(formOptions.prefix + htmlID);
 			if (elem !== null) {
-				value = elem.value;
-				if (fp.type === "bool") {
-					value = elem.checked;
+				switch (fp.type) {
+					default:
+						value = elem.value;
+						break;
+					case "bool":
+						value = elem.checked;
+						break;
+					case "number":
+						value = Number(elem.value);
+						// Sanitize NaN
+						if (isEmpty(value)) {
+							value = 0;
+						}
+						break;
 				}
 			}
 
