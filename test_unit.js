@@ -8,11 +8,11 @@ export {
 
 /**
  * Browser Test JS Imports
- * @typedef {import('./browsertestjs/test.js').Test} Test
- * @typedef {import('./browsertestjs/test.js').Tests} Tests
- * @typedef {import('./browsertestjs/test.js').TestsToRun} TestsToRun
- * @typedef {import('./browsertestjs/test.js').TestGUIOptions} TestGUIOptions
- * @typedef {import('./browsertestjs/test.js').TestBrowserJS} TestBrowserJS
+ * @typedef {import('./browsertestjs/test.js').Test}            Test
+ * @typedef {import('./browsertestjs/test.js').Tests}           Tests
+ * @typedef {import('./browsertestjs/test.js').TestsToRun}      TestsToRun
+ * @typedef {import('./browsertestjs/test.js').TestGUIOptions}  TestGUIOptions
+ * @typedef {import('./browsertestjs/test.js').TestBrowserJS}   TestBrowserJS
  *
  * 
  * Application imports
@@ -27,37 +27,41 @@ const FormOptions = {
 	"shareURLBtn": "#ShareURLBtn",
 	"shareURL": "#ShareURL",
 	"FormParameters": [{
-		"name": "first_name",
-	},
-	{
-		"name": "middle_name",
-	},
-	{
-		"name": "last_name",
-	},
-	{
-		"name": "email_address",
-	},
-	{
-		"name": "phone_number",
-	},
-	{
-		"name": "subscribe_latest_news",
-		"type": "bool",
-	},
-	{
-		"name": "country_select",
-	},
-]};
+			"name": "first_name",
+		},
+		{
+			"name": "middle_name",
+		},
+		{
+			"name": "last_name",
+		},
+		{
+			"name": "email_address",
+		},
+		{
+			"name": "phone_number",
+		},
+		{
+			"name": "subscribe_latest_news",
+			"type": "bool",
+			"saveSetting": true,
+		},
+		{
+			"name": "country_select",
+			"saveSetting": true,
+		},
+	]
+};
 
 
 // Example Parsed JSON object for the example user form.
 const ExampleValues = {
 	"first_name": "Bob",
+	"middle_name": "",
 	"last_name": "Smith",
 	"email_address": "bob@something.com",
 	"phone_number": "1234567890",
-	"subscribe_latest_news": true,
+	"subscribe_latest_news": "true",
 	"country_select": "1",
 };
 
@@ -90,9 +94,16 @@ let t_PopulateFromValues = {
 };
 
 /**@type {Test} */
-let t_ObjectifyForm = {
-	"name": "Objectify Form",
-	"func": test_Objectify,
+let t_GetForm = {
+	"name": "Get Form",
+	"func": test_GetForm,
+	"golden": true
+};
+
+/**@type {Test} */
+let t_GetFormElements = {
+	"name": "Get Form Elements",
+	"func": test_GetFormElements,
 	"golden": true
 };
 
@@ -107,9 +118,15 @@ let t_SerializeForm = {
 let t_GetDefaultOpts = {
 	"name": "Get Default Form Options",
 	"func": test_GetDefaultOpts,
-	"golden": `{"FormParameters":[{"name":"first_name","queryLocation":"fragment"},{"name":"middle_name","queryLocation":"fragment"},{"name":"last_name","queryLocation":"fragment"},{"name":"email_address","queryLocation":"fragment"},{"name":"phone_number","queryLocation":"fragment"},{"name":"subscribe_latest_news","type":"bool","queryLocation":"fragment"},{"name":"country_select","queryLocation":"fragment"}],"prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"formID":"","FormMode":false}`
+	"golden": `{"FormParameters":[{"name":"first_name","queryLocation":"fragment"},{"name":"middle_name","queryLocation":"fragment"},{"name":"last_name","queryLocation":"fragment"},{"name":"email_address","queryLocation":"fragment"},{"name":"phone_number","queryLocation":"fragment"},{"name":"subscribe_latest_news","type":"bool","saveSetting":true,"queryLocation":"fragment"},{"name":"country_select","saveSetting":true,"queryLocation":"fragment"}],"prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"formID":"","FormMode":false}`
 };
 
+/**@type {Test} */
+let t_SaveSetting = {
+	"name": "Save Setting",
+	"func": test_saveSetting,
+	"golden": true,
+};
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////    Testing Variables    /////////////////////////////////
@@ -153,8 +170,7 @@ function populateGUI() {
 // Tests
 ////////////////////
 
-// IsEmpty, Serialize, and Objectify are tests that do not have their own unit
-// test, but are all tested within the following unit tests.
+// IsEmpty does not have its own unit test, but is tested in the unit tests.
 
 // Populated from Init. Global form options for testing.
 var initedFormOptions;
@@ -208,8 +224,21 @@ function test_PopulateFromValues() {
 };
 
 // Tests GetForm().
-function test_Objectify() {
+function test_GetForm() {
 	return checkForm(URLForm.GetForm(initedFormOptions));
+}
+
+// Tests GetFormElements().
+function test_GetFormElements() {
+	let elems = URLForm.GetFormElements(initedFormOptions);
+	// Example values match the values of the returned elements.
+	for (let i in elems) {
+		if (elems[i].value === ExampleValues[i]) {
+			continue;
+		}
+		return false;
+	}
+	return true;
 }
 
 // Tests Serialize().
@@ -220,6 +249,28 @@ function test_Serialize() {
 // Tests GetDefaultFormOptions().
 function test_GetDefaultOpts() {
 	return JSON.stringify(URLForm.GetDefaultFormOptions());
+}
+
+// Tests FormParameters options 'saveSetting'.
+function test_saveSetting() {
+	// Test bool
+	let e = document.getElementById('input_subscribe_latest_news');
+	e.checked = false; // Sanitize check to be false before 'click'.
+	e.click(); // Sets local storage value to 'true'.
+	let results = localStorage.getItem('URLFormJS_input_subscribe_latest_news') === 'true';
+	if (!results) {
+		return results;
+	}
+
+	// Test non-bool
+	// Simulate a change of input for country select. This should set the value
+	// in local storage to '1'.
+	document.getElementById('input_country_select').dispatchEvent(new Event('input'));
+	results = localStorage.getItem('URLFormJS_input_country_select') === '1';
+
+	// Clear out testing state in local storage for next page load.
+	localStorage.clear();
+	return results;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -240,9 +291,11 @@ let TestsToRun = [
 	t_Clear,
 	t_Populate,
 	t_PopulateFromValues,
-	t_ObjectifyForm,
+	t_GetForm,
+	t_GetFormElements,
 	t_SerializeForm,
 	t_GetDefaultOpts,
+	t_SaveSetting,
 ];
 
 /** @type {TestGUIOptions} **/
