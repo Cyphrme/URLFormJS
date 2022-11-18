@@ -18,6 +18,7 @@
 	exports.Clear = Clear;
 	exports.IsEmpty = IsEmpty;
 	exports.GetDefaultFormOptions = GetDefaultFormOptions;
+	exports.ShareURI = ShareURI;
 
 	Object.defineProperty(exports, '__esModule', {
 		value: true
@@ -293,7 +294,7 @@ function Init(formOptions) {
 
 	formOpt.ShareURLBtnElement = document.querySelector(formOpt.shareURLBtn);
 	if (formOpt.ShareURLBtnElement != null) {
-		formOpt.ShareURLBtnElement.addEventListener('click', () => shareURI(formOpt)); // Must be anonymous, otherwise passes pointer event object.
+		formOpt.ShareURLBtnElement.addEventListener('click', () => ShareURI(formOpt)); // Must be anonymous, otherwise passes pointer event object.
 	}
 	formOpt.ClearBtnElement = document.querySelector(formOpt.clearBtn);
 	if (formOpt.ClearBtnElement != null) {
@@ -349,7 +350,7 @@ function PopulateFromValues(quagPairs, formOptions) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
 	SetForm(quagPairs, formOptions);
-	shareURI(formOptions);
+	ShareURI(formOptions);
 }
 
 /**
@@ -599,7 +600,7 @@ function sanitizeFormOptions(formOptions) {
  * @param   {FormOptions}   formOptions
  * @returns {URL}           Javascript URL object.
  */
-function shareURI(formOptions) {
+function ShareURI(formOptions) {
 	let q = getQuagParts(formOptions); // Current URL values.
 	let formPairs = GetForm(formOptions); // Current form values.
 	//console.log("QuagParts:", q, "formPairs:", formPairs);
