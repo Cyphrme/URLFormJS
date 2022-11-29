@@ -16,8 +16,8 @@ export {
  *
  * 
  * Application imports
- * @typedef {import ('./urlform.js').FormOptions} FormOptions
- * @typedef {import ('./urlform.js').FormParameters} FormParameters
+ * @typedef {import ('./urlform.js').FormOptions}     FormOptions
+ * @typedef {import ('./urlform.js').FormParameters}  FormParameters
  */
 
 /**@type {FormOptions} */
