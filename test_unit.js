@@ -16,7 +16,7 @@ export {
  *
  * 
  * Application imports
- * @typedef {import ('./urlform.js').FormOptions} FormOptions
+ * @typedef {import ('./urlform.js').FormOptions}    FormOptions
  * @typedef {import ('./urlform.js').FormParameters} FormParameters
  */
 
@@ -40,6 +40,7 @@ const FormOptions = {
 		},
 		{
 			"name": "phone_number",
+			"type": "number",
 		},
 		{
 			"name": "subscribe_latest_news",
@@ -60,7 +61,7 @@ const ExampleValues = {
 	"middle_name": "",
 	"last_name": "Smith",
 	"email_address": "bob@something.com",
-	"phone_number": "1234567890",
+	"phone_number": 1234567890,
 	"subscribe_latest_news": "true",
 	"country_select": "1",
 };
@@ -111,20 +112,27 @@ let t_GetFormElements = {
 let t_SerializeForm = {
 	"name": "Serialize Form",
 	"func": test_Serialize,
-	"golden": `{"first_name":"Bob","last_name":"Smith","email_address":"bob@something.com","phone_number":"1234567890","subscribe_latest_news":true,"country_select":"1"}`
+	"golden": `{"first_name":"Bob","last_name":"Smith","email_address":"bob@something.com","phone_number":1234567890,"subscribe_latest_news":true,"country_select":"1"}`
 };
 
 /**@type {Test} */
 let t_GetDefaultOpts = {
 	"name": "Get Default Form Options",
 	"func": test_GetDefaultOpts,
-	"golden": `{"FormParameters":[{"name":"first_name","queryLocation":"fragment"},{"name":"middle_name","queryLocation":"fragment"},{"name":"last_name","queryLocation":"fragment"},{"name":"email_address","queryLocation":"fragment"},{"name":"phone_number","queryLocation":"fragment"},{"name":"subscribe_latest_news","type":"bool","saveSetting":true,"queryLocation":"fragment"},{"name":"country_select","saveSetting":true,"queryLocation":"fragment"}],"prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"formID":"","FormMode":false}`
+	"golden": `{"FormParameters":[{"name":"first_name","queryLocation":"fragment"},{"name":"middle_name","queryLocation":"fragment"},{"name":"last_name","queryLocation":"fragment"},{"name":"email_address","queryLocation":"fragment"},{"name":"phone_number","type":"number","queryLocation":"fragment"},{"name":"subscribe_latest_news","type":"bool","saveSetting":true,"queryLocation":"fragment"},{"name":"country_select","saveSetting":true,"queryLocation":"fragment"}],"prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"formID":"","FormMode":false}`
 };
 
 /**@type {Test} */
 let t_SaveSetting = {
 	"name": "Save Setting",
 	"func": test_saveSetting,
+	"golden": true,
+};
+
+/**@type {Test} */
+let t_NumberType = {
+	"name": "Number Type",
+	"func": test_numberType,
 	"golden": true,
 };
 
@@ -147,7 +155,7 @@ function checkForm(parsd) {
 	if (parsd.last_name !== "Smith") {
 		return false;
 	}
-	if (parsd.phone_number !== "1234567890") {
+	if (parsd.phone_number !== 1234567890) {
 		return false;
 	}
 	if (parsd.subscribe_latest_news !== true) {
@@ -162,6 +170,7 @@ function populateGUI() {
 	document.getElementById('input_middle_name').value = ExampleValues.middle_name;
 	document.getElementById('input_last_name').value = ExampleValues.last_name;
 	document.getElementById('input_email_address').value = ExampleValues.email_address;
+	document.getElementById('input_phone_number').value = ExampleValues.phone_number;
 	document.getElementById('input_subscribe_latest_news').checked = ExampleValues.subscribe_latest_news;
 	document.getElementById('input_country_select').value = ExampleValues.country_select;
 }
@@ -182,7 +191,7 @@ function test_Init() {
 	// Optional middle name field not set.
 	url.searchParams.set('last_name', 'Smith');
 	url.searchParams.set('email_address', 'bob@something.com');
-	url.searchParams.set('phone_number', "1234567890");
+	url.searchParams.set('phone_number', 1234567890);
 	url.searchParams.set('subscribe_latest_news', true);
 	url.searchParams.set('country_select', "1");
 	// Push new state that updates query params without reloading the page.
@@ -233,7 +242,11 @@ function test_GetFormElements() {
 	let elems = URLForm.GetFormElements(initedFormOptions);
 	// Example values match the values of the returned elements.
 	for (let i in elems) {
-		if (elems[i].value === ExampleValues[i]) {
+		let elemVal = elems[i].value; // Always string
+		if (typeof ExampleValues[i] === "number") {
+			elemVal = Number(elemVal);
+		}
+		if (elemVal === ExampleValues[i]) {
 			continue;
 		}
 		return false;
@@ -273,6 +286,23 @@ function test_saveSetting() {
 	return results;
 }
 
+// Tests "number" type to ensure that type is always returned as number from
+// 'GetForm', and returned as 0 on empty.
+function test_numberType() {
+	let form = URLForm.GetForm(initedFormOptions); // Form vals populated.
+	if (typeof form.phone_number !== "number" || form.phone_number !== ExampleValues.phone_number) {
+		return false;
+	}
+	URLForm.Clear(initedFormOptions);
+	form = URLForm.GetForm(initedFormOptions, true); // Return zero val on clear.
+	if (typeof form.phone_number !== "number" || form.phone_number !== 0) {
+		return false;
+	}
+	URLForm.PopulateFromValues(ExampleValues, initedFormOptions); // Populate GUI again.
+	return true;
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////  Interface to BrowserTestJS package  ///////////////////
@@ -296,6 +326,7 @@ let TestsToRun = [
 	t_SerializeForm,
 	t_GetDefaultOpts,
 	t_SaveSetting,
+	t_NumberType,
 ];
 
 /** @type {TestGUIOptions} **/
