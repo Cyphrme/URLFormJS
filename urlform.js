@@ -13,9 +13,12 @@
 	exports.Populate = Populate;
 	exports.Serialize = Serialize;
 	exports.GetForm = GetForm;
+	exports.GetFormElements = GetFormElements;
+	exports.SetForm = SetForm;
 	exports.Clear = Clear;
 	exports.IsEmpty = IsEmpty;
 	exports.GetDefaultFormOptions = GetDefaultFormOptions;
+	exports.ShareURI = ShareURI;
 
 	Object.defineProperty(exports, '__esModule', {
 		value: true
@@ -40,13 +43,14 @@
  * - id:            Id of the html element if it differs from the name. Example,
  *                  URI parameter "retrieve" and html id "Retrieve"
  *
- * - type:          Type of the parameter (bool/string). Defaults to string.
- *                  For 'bool', if the parameter is present in the URL and has
- *                  a function set in 'funcTrue', the function will be executed.
- *                  (e.g. https://localhost/?send_news_and_updates) using the
- *                  example above will execute the 'ToggleVisible' function.
+ * - type:          Type of the parameter (bool/string/number). Defaults to
+ *                  string. For 'bool', if the parameter is present in the URL
+ *                  and has a function set in 'funcTrue', the function will be
+ *                  executed. (e.g. https://localhost/?send_news_and_updates)
+ *                  using the example above will execute the 'ToggleVisible'
+ *                  function.
  *
- * - func:          Called if set on each call to setGUI
+ * - func:          Called if set on each call to SetForm
  *                  (Populate and PopulateFromValues).
  *
  * - funcTrue:      Execute if param is true. e.g. `"funcTrue": ()
@@ -132,11 +136,12 @@
  *                         initialized form. Defaults to false.
  * 
  * Read only:
- * - FormParameters      Set by Init().  (Allows FormOptions to encapsulate FormParameters.)
- * - Sanitized:          Whether 'FormOptions' has been sanitized.
- * - Inited:             Whether URLFormJS module was initialized.
- * - ShareURLBtnElement: Share URL button element in GUI.
- * - ClearBtnElement:    Clear the `shareURL` and form in GUI.
+ * - FormParameters           Set by Init(). (Allows FormOptions to encapsulate
+ *                            FormParameters.)
+ * - Sanitized:               Whether 'FormOptions' has been sanitized.
+ * - Inited:                  Whether URLFormJS module was initialized.
+ * - ShareURLBtnElement:      Share URL button element in GUI.
+ * - ClearBtnElement:         Clear the `shareURL` and form in GUI.
  * 
  * "Form mode" parameters:
  * - formID:               HTMLFormElement ID of <form>. Sets `formMode` to true if populated. 
@@ -159,7 +164,7 @@
  * @property {Boolean}              Sanitized=false
  * @property {Boolean}              Inited=false
  * @property {HTMLButtonElement}    ShareURLBtnElement
- * @property {HTMLButtonElement}    ClearBtnElement 
+ * @property {HTMLButtonElement}    ClearBtnElement
  * 
  * // Form Mode
  * @property {String}               [formID]
@@ -183,22 +188,27 @@
  * QuagPairs is an Object of key:value pairs for both Query Parameters and
  * Fragment Query Parameters. `quag` is the superset of `query` and `fragment`.
  * 'object' is diluted in meaning by JSDoc, and using '{}' will denote a key:val
- * object. See: https://github.com/microsoft/TypeScript/issues/50321#issuecomment-1217224937
+ * object. See:
+ * https://github.com/microsoft/TypeScript/issues/50321#issuecomment-1217224937
  * @typedef {{}}   QuagPairs
  */
 
 /**
- * Fragment holds the fragment parts from the URL. All parts may be nil. Includes extras. 
- * // TODO future: support other scheme starting delimiters and perhaps `?` for
-	// fragment queries.
+ * Fragment holds the fragment parts from the URL. All parts may be nil.
+ * Includes extras.
+ * 
+ * TODO future: support other scheme starting delimiters and perhaps `?` for
+ * fragment queries.
  * 
  * - fragment:   The whole fragment string (everything included).
- * - pairs:      key:value object containing the fragment queries. Does not include extras.  
- * - extras:      key:value that appear in fragment query but not in form.
- * 
- * - before:     Everything after '#' and if exists everything before the first '?'.
- * - query:      Everything after `before` and before the next fragment scheme 
- *               delimiter, i.e. ':~:'. This is the "middle part".  This is the fragment query.  
+ * - pairs:      key:value object containing the fragment queries. Does not
+ *               include extras.
+ * - extras:     key:value that appear in fragment query but not in form.
+ * - before:     Everything after '#' and if exists everything before the first
+ *               '?'.
+ * - query:      Everything after `before` and before the next fragment scheme
+ *               delimiter, i.e. ':~:'. This is the "middle part".  This is the
+ *               fragment query.
  * - after:      Everything after `query`.
  * @typedef  {Object}         Fragment
  * @property {FragmentString} string  
@@ -211,7 +221,8 @@
 
 
 /**
- * Query holds the fragment parts from the URL. All parts may be nil. Includes extras. 
+ * Query holds the fragment parts from the URL. All parts may be nil.
+ * Includes extras.
  * 
  * - string:     The string URL query component. Does not contain any fragment.
  * - pairs:      key:value object containing the queries. Includes extras.
@@ -223,9 +234,11 @@
  */
 
 /**
- * QuagParts holds the query and fragment from the existing URL.  See README on `quag`.
+ * QuagParts holds the query and fragment from the existing URL.  See README on
+ * `quag`.
  *
- * - pairs:      All pairs.  key:value object containing `query.pairs` and `fragment.pairs`.
+ * - pairs:      All pairs.  key:value object containing `query.pairs` and
+ *               `fragment.pairs`.
  * - fragment:   Fragment object.
  * - query:      Query Object.
  * @typedef  {Object}    QuagParts
@@ -281,7 +294,7 @@ function Init(formOptions) {
 
 	formOpt.ShareURLBtnElement = document.querySelector(formOpt.shareURLBtn);
 	if (formOpt.ShareURLBtnElement != null) {
-		formOpt.ShareURLBtnElement.addEventListener('click', () => shareURI(formOpt)); // Must be anonymous, otherwise passes pointer event object.
+		formOpt.ShareURLBtnElement.addEventListener('click', () => ShareURI(formOpt)); // Must be anonymous, otherwise passes pointer event object.
 	}
 	formOpt.ClearBtnElement = document.querySelector(formOpt.clearBtn);
 	if (formOpt.ClearBtnElement != null) {
@@ -336,8 +349,8 @@ function PopulateFromValues(quagPairs, formOptions) {
 	if (!formOptions.Inited) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
-	setGUI(quagPairs, formOptions);
-	shareURI(formOptions);
+	SetForm(quagPairs, formOptions);
+	ShareURI(formOptions);
 }
 
 /**
@@ -400,15 +413,15 @@ function getFragmentString() {
 
 
 /**
- * setGUI sets GUI for each parameter, and executes funcTrue() per parameter, if
- * applicable. See docs in 'FormOptions'. Form wide options are also executed
+ * SetForm sets GUI for each parameter, and executes funcTrue() per parameter,
+ * if applicable. See docs in 'FormOptions'. Form wide options are also executed
  * (e.g. 'callback' in 'FormOptions').
  *
  * @param   {QuagPairs}    kv
  * @param   {FormOptions}  formOptions
  * @returns {void}
  */
-function setGUI(kv, formOptions) {
+function SetForm(kv, formOptions) {
 	try {
 		for (let fp of formOptions.FormParameters) {
 			// Set as vars to avoid mutability.
@@ -421,7 +434,7 @@ function setGUI(kv, formOptions) {
 				value = "true"
 			}
 
-			// Sanitize flags.  
+			// Sanitize flags.
 			if (fp.type == "bool" && value === "") {
 				value = "true"
 			}
@@ -459,12 +472,12 @@ function setGUI(kv, formOptions) {
 			}
 
 
-			if (fp.saveSetting) { // Set Action listener for savables.  
+			if (fp.saveSetting) { // Set Action listener for savables.
 				e.addEventListener("input", (e) => {
 					if (fp.type == "bool") {
 						setSavedSetting(name, e.target.checked, formOptions);
 					} else {
-						setSavedSetting(name, e.target.value, formOptions); // TODO test
+						setSavedSetting(name, e.target.value, formOptions);
 					}
 				});
 			}
@@ -587,7 +600,7 @@ function sanitizeFormOptions(formOptions) {
  * @param   {FormOptions}   formOptions
  * @returns {URL}           Javascript URL object.
  */
-function shareURI(formOptions) {
+function ShareURI(formOptions) {
 	let q = getQuagParts(formOptions); // Current URL values.
 	let formPairs = GetForm(formOptions); // Current form values.
 	//console.log("QuagParts:", q, "formPairs:", formPairs);
@@ -700,7 +713,8 @@ function quagPartsToURLHash(fragment, formOptions) {
 
 /**
  * Returns from `key=value` string a `key:value` object.
- * @param   {String}      s   e.g. `key=value&key=value`.  
+ * 
+ * @param   {String}      s   e.g. `key=value&key=value`.
  * @returns {QuagPairs}       {key:value}
  */
 function getPairs(s) {
@@ -730,8 +744,6 @@ function getPairs(s) {
 }
 
 
-
-
 /**
  * getQueryParts returns QuagParts generated from the current URL, not the
  * form, and puts values into the correct object based on formOptions.
@@ -744,7 +756,7 @@ function getQuagParts(formOptions) {
 	/**
 	 * getFragment returns (fragment,pairs,before,query,after) from the URL
 	 * fragment, but not (extras). Warning: Puts all pairs, including extras, into
-	 * pairs.  
+	 * pairs.
 	 * @returns {Fragment}
 	 */
 	function getFragment() {
@@ -801,14 +813,14 @@ function getQuagParts(formOptions) {
 		formParams.push(p.name);
 	}
 
-	// Extra query pairs.  
+	// Extra query pairs.
 	for (let key of Object.keys(qp.query.pairs)) {
 		if (!formParams.includes(key)) {
 			qp.query.extras[key] = qp.query.pairs[key];
 			delete qp.query.pairs[key];
 		}
 	}
-	// Extra frag pairs. 
+	// Extra frag pairs.
 	for (let key of Object.keys(qp.fragment.pairs)) {
 		if (!formParams.includes(key)) {
 			qp.fragment.extras[key] = qp.fragment.pairs[key];
@@ -834,11 +846,15 @@ function Serialize(formOptions) {
 
 /**
  * GetForm gets current form values from the GUI into {key:value,key:value}.
+ *
+ * ReturnPairOnZero: Whether all pairs from 'GetForm' will always be returned.
+ * Otherwise, on zero value, the pair will not be returned in the pairs object.
  * 
  * @param   {FormOptions}   formOptions
- * @returns {QuagPairs}     // key/value
+ * @param   {Boolean}       [ReturnPairOnZero]
+ * @returns {QuagPairs}     key/value
  */
-function GetForm(formOptions) {
+function GetForm(formOptions, ReturnPairOnZero) {
 	if (!formOptions.Inited) {
 		throw new Error("URLFormJS: Init() must be called first to initialize the URLFormJS module.");
 	}
@@ -856,8 +872,12 @@ function GetForm(formOptions) {
 			let elem = document.getElementById(formOptions.prefix + htmlID);
 			if (elem !== null) {
 				switch (fp.type) {
-					default:
+					default: // String
 						value = elem.value;
+						// Sanitize undefined
+						if (isEmpty(value)) {
+							value = "";
+						}
 						break;
 					case "bool":
 						value = elem.checked;
@@ -873,6 +893,8 @@ function GetForm(formOptions) {
 			}
 
 			if (!isEmpty(value)) {
+				pairs[fp.name] = value;
+			} else if (ReturnPairOnZero) {
 				pairs[fp.name] = value;
 			}
 		}
@@ -896,9 +918,27 @@ function GetForm(formOptions) {
 
 		if (!isEmpty(value)) {
 			pairs[name] = value;
+		} else if (ReturnPairOnZero) {
+			pairs[name] = value;
 		}
 	}
 	return pairs;
+};
+
+/**
+ * GetFormElements will return a key:value object, where the key's are the given
+ * form parameters, and the values are the elements that hold the form
+ * parameters' values.
+ * 
+ * @param   {FormOptions}   formOptions
+ * @returns {QuagPairs}     key/value (where value is an HTML Element)
+ */
+function GetFormElements(formOptions) {
+	let elems = {};
+	for (let param of formOptions.FormParameters) {
+		elems[param.name] = document.getElementById(formOptions.prefix + param.name);
+	}
+	return elems;
 };
 
 
