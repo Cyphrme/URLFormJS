@@ -119,7 +119,7 @@
  * - clearBtn:             Button element for clearing the form and
  *                         queries/fragments in the URL.
  * 
- *  - shareURLBtn:          Button element triggers generating share link.
+ * - shareURLBtn:          Button element triggers generating share link.
  * 
  * - shareURL:             Element ID of <a> for share link.
  * 
