@@ -119,11 +119,11 @@
  * - clearBtn:             Button element for clearing the form and
  *                         queries/fragments in the URL.
  * 
- * - shareURL:             Will share the link as a URL.
+ *  - shareURLBtn:          Button element triggers generating share link.
  * 
- * - shareURLBtn:          Button element for sharing the form in the URL.
+ * - shareURL:             Element ID of <a> for share link.
  * 
- * - shareURLArea:         Will share the link as a text.
+ * - shareURLArea:         Element ID of text area for share link.
  * 
  * - defaultQueryLocation: Link sets parameter in query or fragment query.
  *                         Defaults to fragment query (recommended).
@@ -153,8 +153,8 @@
  * @property {FormParameters}       FormParameters
  * @property {String}               [prefix]
  * @property {String}               [clearBtn]
- * @property {String}               [shareURL]
  * @property {String}               [shareURLBtn] 
+ * @property {String}               [shareURL]
  * @property {String}               [shareURLArea]
  * @property {QueryLocation}        [defaultQueryLocation="fragment"]
  * @property {Function}             [callback]
