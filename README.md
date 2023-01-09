@@ -5,7 +5,7 @@
 Sitcky URL Forms forms with sharable links.  Supports **query** parameters and
 **fragment query** parameters.
 
-## [Demo](https://cyphrme.github.io/URLFormJS/#?first_name=Bob&last_name=Smith&email_address=bob@something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1:~:text=Bob)
+## [Demo](https://cyphrme.github.io/URLFormJS/#?first_name=Bob&last_name=Smith&email_address=bob@something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1&uri_settable=true:~:text=Bob)
 
 
 # Query Parameters, Fragment Anchors, and Fragment Query Parameters
@@ -51,6 +51,9 @@ and the fragment query parameter have the same key name of "name", the value of
 See [RFC 3986 for query
 parameters](https://www.rfc-editor.org/rfc/rfc3986#section-3.5) and [Wikipedia](https://en.wikipedia.org/wiki/URI_fragment).
 
+Fragment queries also have the advantage of not having a size limits like normal
+queries, although this is browser dependent.  
+
 Fragment query parameters are "non-standard", but we hope if enough people find
 it useful to standardize them through an RFC or other means.  
 
@@ -59,9 +62,6 @@ it useful to standardize them through an RFC or other means.
 URLFormJS is configured by two configuration objects.  
 
 See `index.js` for an example of `FormParameters`.  The docs are in `urlform.js`.
-
-# Savable Parameters
-
 
 
 # Install
@@ -121,7 +121,7 @@ minifying the file wrong. See:
 https://github.com/evanw/esbuild/issues/507#issuecomment-1221091273
 
 ## Tests
-Testing uses [BrowserTestJS](https://github.com/Cyphrme/BrowserTestJS]):
+Testing uses [BrowserTestJS](https://github.com/Cyphrme/BrowserTestJS):
 
 ```
 cd browsertestjs
