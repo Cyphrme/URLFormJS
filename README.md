@@ -2,8 +2,9 @@
 
 ![URLFormJS](./urlformjs.png)
 
-Sitcky URL Forms forms with sharable links.  Supports **query** parameters and
-**fragment query** parameters.
+URLFormJS is useful for sticky URL forms, general application state, and
+sharable link generation.  Supports **query** parameters and **fragment query**
+parameters.
 
 ## [Demo](https://cyphrme.github.io/URLFormJS/#?first_name=Bob&last_name=Smith&email_address=bob@something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1&uri_settable=true:~:text=Bob)
 
@@ -21,9 +22,9 @@ query parameters over query parameters when possible.
                |                                          |
        Sent to the server                            Kept local
 
-For example, if a browser is given the URL `https://example.com#test` the browser
-makes a request only to `https://example.com` and does not include `#test` in the
-request.  Example.com would be unaware of `#test`.
+For example, the browser requests only `https://example.com` when supplied the
+URL `https://example.com#test` and does not include `#test` in the request.
+Example.com is unaware of `#test`.
 
 Fragment query parameters are located after the first `#`, then after the next
 `?`.  It is ended by the end of the URL, by the next `?`, or other fragment
@@ -43,19 +44,33 @@ Parts of the URL:
 Where `nose?name=bob` is the **fragment**, `nose` is the **fragment anchor**,
 and `?name=bob` is the **fragment query**.  
 
-In this example, since the query parameter
-and the fragment query parameter have the same key name of "name", the value of
-"bob" will take precedence over "ferret".  
+In this example, since the query parameter and the fragment query parameter have
+the same key name of "name", the value of "bob" will take precedence over
+the value "ferret".  
 
 
 See [RFC 3986 for query
 parameters](https://www.rfc-editor.org/rfc/rfc3986#section-3.5) and [Wikipedia](https://en.wikipedia.org/wiki/URI_fragment).
 
-Fragment queries also have the advantage of not having a size limits like normal
+Fragment queries also have the advantage of not having size limits like normal
 queries, although this is browser dependent.  
 
 Fragment query parameters are "non-standard", but we hope if enough people find
 it useful to standardize them through an RFC or other means.  
+
+
+# Quag
+
+We found it useful to name a super set of query and fragment, dubbed `quag`.
+The quag includes `?` and `#`.
+
+    foo://example.com:8042/over/there?name=ferret#nose?name=bob
+    \_/   \______________/\_________/ \_________/ \___________/
+     |           |            |            |            |
+    scheme    authority      path         query       fragment
+                                     \_________________________/
+                                                  | 
+                                                 quag
 
 
 # `FormOptions` and `FormParameters`
@@ -76,13 +91,11 @@ git clone git@github.com:Cyphrme/URLFormJS.git urlformjs
 cd urlformjs && git clone git@github.com:Cyphrme/BrowserTestJS.git browsertestjs
 ```
 
-To update the submodule:
+To update the submodule (or alternatively download just the file `urlform.js`):
 
 ```sh
 git submodule update --remote
 ```
-
-Alternatively, download just the file `urlform.js`.
 
 If not importing `urlform.js` as a module, the file can be loaded in HTML using:
 
@@ -90,13 +103,15 @@ If not importing `urlform.js` as a module, the file can be loaded in HTML using:
 <script defer src="./urlformjs/urlform.js"></script>
 ```
 
-`urlform.js` is in ['UMD' format](https://github.com/umdjs/umd) and can be accessed
-in Javascript with the following:
+`urlform.js` is in ['UMD' format](https://github.com/umdjs/umd) and can be
+accessed in Javascript with the following:
+
 ``` Javascript
 window.urlformjs
 ```
 
 See `example.js` for an example of initializing `URLFormJS` for a given form.
+
 
 # Development
 Issue submissions and pull requests are welcome.  Before submitting pull
@@ -119,6 +134,7 @@ esbuild urlform.js --minify --outfile=urlform.min.js
 'UMD' format is being interpreted as CommonJS (for node) instead of 'UMD', and
 minifying the file wrong. See:
 https://github.com/evanw/esbuild/issues/507#issuecomment-1221091273
+
 
 ## Tests
 Testing uses [BrowserTestJS](https://github.com/Cyphrme/BrowserTestJS):
@@ -154,20 +170,6 @@ character URL escaped.
 [Demonstrates of Firefox working and Chrome
 breaking](https://cyphrme.github.io/URLFormJS/fragment_text_demonstration.html)
 
-
-
-# Quag
-
-We found it useful to name a super set of query and fragment, dubbed `quag`.
-The quag includes `?` and `#`.
-
-    foo://example.com:8042/over/there?name=ferret#nose?name=bob
-    \_/   \______________/\_________/ \_________/ \___________/
-     |           |            |            |            |
-    scheme    authority      path         query       fragment
-                                     \_________________________/
-                                                  | 
-                                                 quag
 
 # Probably out of scope for this library:
 - JSON Schema validation. 
