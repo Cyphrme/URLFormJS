@@ -125,15 +125,10 @@ http server.  Use server.go for this.
 go run server.go
 ```
 
-To generate the minified file, use `esbuild` to run the following:
+## UMD Module
+See `minify.js` and for more https://github.com/Cyphrme/UMD_tutorial.  In short,
+`esbuild` has a bug with UMD so modules exports have to be manually done.  
 
-```sh
-esbuild urlform.js --minify --outfile=urlform.min.js
-```
-
-'UMD' format is being interpreted as CommonJS (for node) instead of 'UMD', and
-minifying the file wrong. See:
-https://github.com/evanw/esbuild/issues/507#issuecomment-1221091273
 
 
 ## Tests

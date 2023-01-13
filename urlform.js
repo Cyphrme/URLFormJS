@@ -1,29 +1,7 @@
 // URLFormJS is used for sticky forms and sharable URL links.  See README. 
 'use strict';
 
-// UMD export pattern.  See Cyphr.me's UMD tutorial
-// (https://github.com/Cyphrme/UMD_tutorial) for more on this design.
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-		typeof define === 'function' && define.amd ? define(['exports'], factory) :
-		(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URLForm = {}));
-})(this, (function (exports) {
-	exports.Init = Init;
-	exports.PopulateFromValues = PopulateFromValues;
-	exports.Populate = Populate;
-	exports.Serialize = Serialize;
-	exports.GetForm = GetForm;
-	exports.GetFormElements = GetFormElements;
-	exports.SetForm = SetForm;
-	exports.Clear = Clear;
-	exports.IsEmpty = IsEmpty;
-	exports.GetDefaultFormOptions = GetDefaultFormOptions;
-	exports.ShareURI = ShareURI;
 
-	Object.defineProperty(exports, '__esModule', {
-		value: true
-	});
-}));
 
 
 /**
@@ -1089,3 +1067,28 @@ function isBool(bool) {
 	}
 	return true;
 };
+
+
+
+//////////////////////////////Regex_match_for_truncation_for_umd
+// UMD export see https://github.com/Cyphrme/UMD_tutorial
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+		typeof define === 'function' && define.amd ? define(['exports'], factory) :
+		(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URLForm = {}));
+})(this, (function (exports) {
+	exports.Init = Init;
+	exports.PopulateFromValues = PopulateFromValues;
+	exports.Populate = Populate;
+	exports.Serialize = Serialize;
+	exports.GetForm = GetForm;
+	exports.GetFormElements = GetFormElements;
+	exports.SetForm = SetForm;
+	exports.Clear = Clear;
+	exports.IsEmpty = IsEmpty;
+	exports.GetDefaultFormOptions = GetDefaultFormOptions;
+	exports.ShareURI = ShareURI;
+	Object.defineProperty(exports, '__esModule', {
+		value: true
+	});
+}));
