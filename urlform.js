@@ -386,7 +386,8 @@ function getFragmentString() {
 	if (fParts.length == 1) { // only "#"
 		return "";
 	}
-	return fParts[1];
+	// Always decode URL, even if not URL encoded.
+	return decodeURIComponent(fParts[1]);
 }
 
 
@@ -571,7 +572,7 @@ function sanitizeFormOptions(formOptions) {
 
 /**
  * Generates a share URL from the current URL and form, populates the GUI with
- * share links, and returns the URL. 
+ * share links, and returns the URL encoded URL.
  *
  * Fragment query parameters take precedence over query parameters.
  *
@@ -644,7 +645,7 @@ function setShareURL(href, formOptions) {
 
 
 /**
- * Generates a fragment string from Fragment.
+ * Generates a URL encoded fragment string from Fragment.
  * 
  * @param   {Fragment}      fragment
  * @param   {FormOptions}   formOptions
@@ -685,7 +686,7 @@ function quagPartsToURLHash(fragment, formOptions) {
 
 	// After.
 	fqs += fragment.after;
-	return fqs;
+	return encodeURIComponent(fqs);
 }
 
 
@@ -773,7 +774,7 @@ function GetQuagParts(formOptions) {
 
 	let qp = {
 		query: {
-			string: window.location.search.substring(1), // substring removes "?"
+			string: decodeURIComponent(window.location.search.substring(1)), // substring removes "?"
 			pairs: getPairs(window.location.search.substring(1)),
 			extras: {},
 		},
