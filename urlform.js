@@ -306,7 +306,7 @@ function Populate(formOptions) {
 		}
 	}
 
-	let uriPairs = getQuagParts(formOptions).pairs;
+	let uriPairs = GetQuagParts(formOptions).pairs;
 	let pairs = {
 		...savedPairs,
 		...uriPairs,
@@ -579,7 +579,7 @@ function sanitizeFormOptions(formOptions) {
  * @returns {URL}           Javascript URL object.
  */
 function ShareURI(formOptions) {
-	let q = getQuagParts(formOptions); // Current URL values.
+	let q = GetQuagParts(formOptions); // Current URL values.
 	let formPairs = GetForm(formOptions); // Current form values.
 	//console.log("QuagParts:", q, "formPairs:", formPairs);
 	var u = new URL(window.location.origin + window.location.pathname);
@@ -723,14 +723,14 @@ function getPairs(s) {
 
 
 /**
- * getQueryParts returns QuagParts generated from the current URL, not the
+ * GetQuagParts returns QuagParts generated from the current URL, not the
  * form, and puts values into the correct object based on formOptions.
  * Includes extras.  See docs on `QuagParts`.
  * 
  * @param   {FormOptions}   formOptions
  * @returns {QuagParts}
  */
-function getQuagParts(formOptions) {
+function GetQuagParts(formOptions) {
 	/**
 	 * getFragment returns (fragment,pairs,before,query,after) from the URL
 	 * fragment, but not (extras). Warning: Puts all pairs, including extras, into
@@ -807,6 +807,18 @@ function getQuagParts(formOptions) {
 	}
 
 	return qp;
+}
+
+/**
+ * GetURLKeyValue is a helper func that returns the key:value pairs from the
+ * URL. Default behavior overwrites query pairs with fragment pairs.
+ *
+ * @param   {FormOptions}     formOptions
+ * @returns {QuagParts.pairs}
+ */
+function GetURLKeyValue(formOptions) {
+	let qp = GetQuagParts(formOptions);
+	return qp.pairs;
 }
 
 
@@ -1083,6 +1095,8 @@ function isBool(bool) {
 	exports.Serialize = Serialize;
 	exports.GetForm = GetForm;
 	exports.GetFormElements = GetFormElements;
+	exports.GetURLKeyValue = GetURLKeyValue;
+	exports.GetQuagParts = GetQuagParts;
 	exports.SetForm = SetForm;
 	exports.Clear = Clear;
 	exports.IsEmpty = IsEmpty;

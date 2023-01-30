@@ -109,6 +109,13 @@ let t_GetFormElements = {
 };
 
 /**@type {Test} */
+let t_GetURLKeyValue = {
+	"name": "Get URL Key Value Pairs",
+	"func": test_GetURLKeyValue,
+	"golden": true
+};
+
+/**@type {Test} */
 let t_SerializeForm = {
 	"name": "Serialize Form",
 	"func": test_Serialize,
@@ -254,6 +261,13 @@ function test_GetFormElements() {
 	return true;
 }
 
+// Tests retrieval of key:value pairs from the URL.
+function test_GetURLKeyValue() {
+	let pairs = URLForm.GetURLKeyValue(initedFormOptions);
+	let golden = `{"first_name":"Bob","last_name":"Smith","email_address":"bob@something.com","phone_number":"1234567890","subscribe_latest_news":"true","country_select":"1"}`
+	return JSON.stringify(pairs) === golden;
+}
+
 // Tests Serialize().
 function test_Serialize() {
 	return URLForm.Serialize(initedFormOptions);
@@ -323,6 +337,7 @@ let TestsToRun = [
 	t_PopulateFromValues,
 	t_GetForm,
 	t_GetFormElements,
+	t_GetURLKeyValue,
 	t_SerializeForm,
 	t_GetDefaultOpts,
 	t_SaveSetting,
