@@ -704,6 +704,7 @@ function getPairs(s) {
 	let pairs = {};
 	let parts = s.split('&');
 	for (const i in parts) {
+		console.debug(parts[i])
 		let kv = parts[i].split('=');
 		let key = kv[0];
 		let value = kv[1];
@@ -719,6 +720,7 @@ function getPairs(s) {
 		// 'decodeURI' expects the full URI.
 		pairs[key] = decodeURIComponent(value);
 	}
+
 	return pairs;
 }
 
@@ -775,7 +777,7 @@ function GetQuagParts(formOptions) {
 	let qp = {
 		query: {
 			string: decodeURIComponent(window.location.search.substring(1)), // substring removes "?"
-			pairs: getPairs(window.location.search.substring(1)),
+			pairs: getPairs(window.location.search.substring(1)), // getPairs decodes pair values.
 			extras: {},
 		},
 		fragment: getFragment(),

@@ -269,7 +269,15 @@ function test_GetFormElements() {
 // Tests retrieval of key:value pairs from the URL.
 function test_GetURLKeyValue() {
 	let pairs = URLForm.GetURLKeyValue(initedFormOptions);
-	let golden = {"first_name":"Bob","last_name":"Smith","email_address":"bob@something.com","phone_number":"1234567890","subscribe_latest_news":"true","country_select":"1","json_payload":"{\"e\":\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~\"}"}
+	let golden = {
+		"first_name": "Bob",
+		"last_name": "Smith",
+		"email_address": "bob@something.com",
+		"phone_number": "1234567890",
+		"subscribe_latest_news": "true",
+		"country_select": "1",
+		"json_payload": "{\"e\":\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~\"}"
+	}
 	return JSON.stringify(pairs) === JSON.stringify(golden);
 }
 
