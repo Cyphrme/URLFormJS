@@ -704,7 +704,6 @@ function getPairs(s) {
 	let pairs = {};
 	let parts = s.split('&');
 	for (const i in parts) {
-		console.debug(parts[i])
 		let kv = parts[i].split('=');
 		let key = kv[0];
 		let value = kv[1];
