@@ -70,7 +70,7 @@ const ExampleValues = {
 let t_InitForm = {
 	"name": "Initialize Form",
 	"func": test_Init,
-	"golden": `https://localhost:8082/?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1`
+	"golden": `https://localhost:8082/?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1&json_payload=%7B%22e%22%3A%22ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%21%23%24%25%26%28%29*%2B%2C.%2F%3A%3B%3C%3D%3E%3F%40%5B%5D%5E_%60%7B%7C%7D%7E%22%7D`
 };
 
 /**@type {Test} */
@@ -105,6 +105,13 @@ let t_GetForm = {
 let t_GetFormElements = {
 	"name": "Get Form Elements",
 	"func": test_GetFormElements,
+	"golden": true
+};
+
+/**@type {Test} */
+let t_GetURLKeyValue = {
+	"name": "Get URL Key Value Pairs",
+	"func": test_GetURLKeyValue,
 	"golden": true
 };
 
@@ -194,6 +201,11 @@ function test_Init() {
 	url.searchParams.set('phone_number', 1234567890);
 	url.searchParams.set('subscribe_latest_news', true);
 	url.searchParams.set('country_select', "1");
+	// Tests JSON objects/escaping as URL values.
+	url.searchParams.set('json_payload', JSON.stringify({
+		"e": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~"
+	}));
+
 	// Push new state that updates query params without reloading the page.
 	window.history.pushState({}, '', url);
 	initedFormOptions = URLForm.Init(FormOptions);
@@ -252,6 +264,21 @@ function test_GetFormElements() {
 		return false;
 	}
 	return true;
+}
+
+// Tests retrieval of key:value pairs from the URL.
+function test_GetURLKeyValue() {
+	let pairs = URLForm.GetURLKeyValue(initedFormOptions);
+	let golden = {
+		"first_name": "Bob",
+		"last_name": "Smith",
+		"email_address": "bob@something.com",
+		"phone_number": "1234567890",
+		"subscribe_latest_news": "true",
+		"country_select": "1",
+		"json_payload": "{\"e\":\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~\"}"
+	}
+	return JSON.stringify(pairs) === JSON.stringify(golden);
 }
 
 // Tests Serialize().
@@ -323,6 +350,7 @@ let TestsToRun = [
 	t_PopulateFromValues,
 	t_GetForm,
 	t_GetFormElements,
+	t_GetURLKeyValue,
 	t_SerializeForm,
 	t_GetDefaultOpts,
 	t_SaveSetting,
