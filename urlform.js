@@ -1,9 +1,6 @@
 // URLFormJS is used for sticky forms and sharable URL links.  See README. 
 'use strict';
 
-
-
-
 /**
  * FormParameter are the options for a form's field/parameter.
  *
@@ -15,32 +12,31 @@
  *  "funcTrue": ()=> ToggleVisible(document.querySelector("#advancedOptions"));
  * }
  *
- * - name:          Parameter name in the URI.  Is used as the default value for
+ * - name           Parameter name in the URI.  Is used as the default value for
  *                  id.
  *
- * - id:            Id of the html element if it differs from the name. Example,
- *                  URI parameter "retrieve" and html id "Retrieve"
+ * - id             Id of the HTML element if it differs from the name. Example,
+ *                  URI parameter "retrieve" and HTML id "Retrieve".
  *
- * - type:          Type of the parameter (bool/string/number). Defaults to
+ * - type           Type of the parameter (bool/string/number). Defaults to
  *                  string. For 'bool', if the parameter is present in the URL
  *                  and has a function set in 'funcTrue', the function will be
  *                  executed. (e.g. https://localhost/?send_news_and_updates)
  *                  using the example above will execute the 'ToggleVisible'
  *                  function.
  *
- * - func:          Called if set on each call to SetForm
+ * - func           Called if set on each call to SetForm
  *                  (Populate and PopulateFromValues).
  *
- * - funcTrue:      Execute if param is true. e.g. `"funcTrue": ()
- *                  => {
+ * - funcTrue       Execute if param is true. e.g. `"funcTrue": () => {
  *                  ToggleVisible(document.querySelector("#advancedOptions"))};`
  *
- * - queryLocation: Option for overriding the param in the URL link to either
+ * - queryLocation  Option for overriding the param in the URL link to either
  *                  be a query parameter, or a fragment query. Defaults to empty
  *                  string, which will inherit the 'defaultQueryLocation' from
  *                  the form wide options.
  * 
- * - saveSetting:  Save and use this setting from local storage.  Will be
+ * - saveSetting   (Bool) Save and use this setting from local storage.  Will be
  *                  overwritten by URL flag values if present. 
  * @typedef  {Object}        FormParameter
  * @property {String}        name
@@ -97,9 +93,9 @@
  * - clearBtn:             Button element for clearing the form and
  *                         queries/fragments in the URL.
  * 
- * - shareURLBtn:          Button element triggers generating share link.
- * 
  * - shareURL:             Element ID of <a> for share link.
+ * 
+ * - shareURLBtn:          Button element triggers generating share link.
  * 
  * - shareURLArea:         Element ID of text area for share link.
  * 
@@ -586,7 +582,7 @@ function ShareURI(formOptions) {
 	var u = new URL(window.location.origin + window.location.pathname);
 
 	for (let fp of formOptions.FormParameters) {
-		let value = formPairs[fp.name];
+		let value = encodeURIComponent(formPairs[fp.name]);
 		// console.log(fp, value);
 		if (isEmpty(value)) {
 			// Sets value if populated.  Otherwise removes from the query/fragment. (A
@@ -661,7 +657,7 @@ function quagPartsToURLHash(fragment, formOptions) {
 		fqs += "?"; //start fragment query delimiter ("?")
 		for (let key in fragment.pairs) {
 			i--;
-			fqs += key + "=" + fragment.pairs[key]
+			fqs += key + "=" + encodeURIComponent(fragment.pairs[key]);
 			if (i > 0) {
 				fqs += "&"; // Add separator on everything except the last.  
 			}
@@ -677,7 +673,7 @@ function quagPartsToURLHash(fragment, formOptions) {
 	if (j > 0 && !formOptions.cleanURL) {
 		for (let e in fragment.extras) {
 			j--;
-			fqs += e + "=" + fragment.extras[e]
+			fqs += e + "=" + encodeURIComponent(fragment.extras[e]);
 			if (j > 0) {
 				fqs += "&";
 			}
@@ -686,12 +682,12 @@ function quagPartsToURLHash(fragment, formOptions) {
 
 	// After.
 	fqs += fragment.after;
-	return encodeURIComponent(fqs);
+	return fqs;
 }
 
 
 /**
- * Returns from `key=value` string a `key:value` object.
+ * Helper that returns a `k:v,k:v` object from a `k=v&k=v` string.
  * 
  * @param   {String}      s   e.g. `key=value&key=value`.
  * @returns {QuagPairs}       {key:value}
@@ -729,6 +725,8 @@ function getPairs(s) {
  * GetQuagParts returns QuagParts generated from the current URL, not the
  * form, and puts values into the correct object based on formOptions.
  * Includes extras.  See docs on `QuagParts`.
+ * 
+ *  On duplicate the default behavior overwrites query pairs with fragment pairs.
  * 
  * @param   {FormOptions}   formOptions
  * @returns {QuagParts}
@@ -813,8 +811,9 @@ function GetQuagParts(formOptions) {
 }
 
 /**
- * GetURLKeyValue is a helper func that returns the key:value pairs from the
- * URL. Default behavior overwrites query pairs with fragment pairs.
+ * GetURLKeyValue is a helper that returns k:v from the current URL. 
+ *
+ * On duplicate the default behavior overwrites query pairs with fragment pairs.
  *
  * @param   {FormOptions}     formOptions
  * @returns {QuagParts.pairs}
@@ -853,7 +852,7 @@ function GetForm(formOptions, ReturnPairOnZero) {
 	}
 
 	let pairs = {};
-	// Normal usage, Not FormMode.  On individual ID's, not in a <form>.
+	// Normal usage, not FormMode (not in a <form>), select individual ID's.
 	if (!formOptions.FormMode) {
 		for (let fp of formOptions.FormParameters) {
 			let value;
@@ -919,19 +918,19 @@ function GetForm(formOptions, ReturnPairOnZero) {
 };
 
 /**
- * GetFormElements will return a key:value object, where the key's are the given
- * form parameters, and the values are the elements that hold the form
- * parameters' values.
+ * GetFormElements will return a key:value object from teh GUI form using form
+ * parameters, and the values are the elements that hold the form parameters'
+ * values.
  * 
  * @param   {FormOptions}   formOptions
  * @returns {QuagPairs}     key/value (where value is an HTML Element)
  */
 function GetFormElements(formOptions) {
-	let elems = {};
+	let kv = {};
 	for (let param of formOptions.FormParameters) {
-		elems[param.name] = document.getElementById(formOptions.prefix + param.name);
+		kv[param.name] = document.getElementById(formOptions.prefix + param.name);
 	}
-	return elems;
+	return kv;
 };
 
 
