@@ -815,10 +815,13 @@ function GetQuagParts(formOptions) {
  *
  * On duplicate the default behavior overwrites query pairs with fragment pairs.
  *
- * @param   {FormOptions}     formOptions
+ * @param   {FormOptions}     [formOptions]
  * @returns {QuagParts.pairs}
  */
 function GetURLKeyValue(formOptions) {
+	if (isEmpty(formOptions)) {
+		formOptions = GetDefaultFormOptions();
+	}
 	let qp = GetQuagParts(formOptions);
 	return qp.pairs;
 }
@@ -1086,11 +1089,11 @@ function isBool(bool) {
 
 //////////////////////////////Regex_match_for_truncation_for_umd
 // UMD export see https://github.com/Cyphrme/UMD_tutorial
-(function (global, factory) {
+(function(global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 		typeof define === 'function' && define.amd ? define(['exports'], factory) :
 		(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URLForm = {}));
-})(this, (function (exports) {
+})(this, (function(exports) {
 	exports.Init = Init;
 	exports.PopulateFromValues = PopulateFromValues;
 	exports.Populate = Populate;
