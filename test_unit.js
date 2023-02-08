@@ -70,7 +70,7 @@ const ExampleValues = {
 let t_InitForm = {
 	"name": "Initialize Form",
 	"func": test_Init,
-	"golden": `/?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1&json_payload=%7B%22e%22%3A%22ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%21%23%24%25%26%28%29*%2B%2C.%2F%3A%3B%3C%3D%3E%3F%40%5B%5D%5E_%60%7B%7C%7D%7E%22%7D`
+	"golden": `?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1&json_payload=%7B%22e%22%3A%22ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%21%23%24%25%26%28%29*%2B%2C.%2F%3A%3B%3C%3D%3E%3F%40%5B%5D%5E_%60%7B%7C%7D%7E%22%7D`
 };
 
 /**@type {Test} */
@@ -193,7 +193,7 @@ var initedFormOptions;
 
 // test_Init removes any existing quag components and sets the test values.  
 function test_Init() {
-	// Sanitize to get base path without query.  e.g. `https://bob.com/joe` 
+	// Get sanitize base path without query.  e.g. `https://bob.com/joe` 
 	var url = new URL(window.location.origin + window.location.pathname);
 	url.searchParams.set('first_name', 'Bob');
 	// Optional middle name field not set.
@@ -213,10 +213,9 @@ function test_Init() {
 
 	// Return golden path.  
 	let shareURI = document.getElementById('ShareURLBtn').formAction
-	let url2 = new URL(shareURI);
-	let path = url2.pathname + url2.search;
-	console.log("Initialization path: ", path);
-	return path;
+	let url2 = new URL(shareURI).search;
+	console.log("Initialization path: ", url2);
+	return url2;
 };
 
 // Unit test for Clear(), as well as a helper function for URLFormJS testing.
