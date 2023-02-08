@@ -411,7 +411,7 @@ let TestGUIOptions = {
 
 </div>
 `,
-	main_image: "urlformjs.png",
+	main_image: "../urlformjs.png",
 };
 
 /** @type {TestBrowserJS} **/
