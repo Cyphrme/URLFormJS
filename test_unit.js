@@ -70,7 +70,7 @@ const ExampleValues = {
 let t_InitForm = {
 	"name": "Initialize Form",
 	"func": test_Init,
-	"golden": `https://localhost:8082/?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1&json_payload=%7B%22e%22%3A%22ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%21%23%24%25%26%28%29*%2B%2C.%2F%3A%3B%3C%3D%3E%3F%40%5B%5D%5E_%60%7B%7C%7D%7E%22%7D`
+	"golden": `/?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1&json_payload=%7B%22e%22%3A%22ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%21%23%24%25%26%28%29*%2B%2C.%2F%3A%3B%3C%3D%3E%3F%40%5B%5D%5E_%60%7B%7C%7D%7E%22%7D`
 };
 
 /**@type {Test} */
@@ -191,9 +191,10 @@ function populateGUI() {
 // Populated from Init. Global form options for testing.
 var initedFormOptions;
 
-// Tests Init().
+// test_Init removes any existing quag components and sets the test values.  
 function test_Init() {
-	var url = new URL(window.location.origin);
+	// Sanitize to get base path without query.  e.g. `https://bob.com/joe` 
+	var url = new URL(window.location.origin + window.location.pathname);
 	url.searchParams.set('first_name', 'Bob');
 	// Optional middle name field not set.
 	url.searchParams.set('last_name', 'Smith');
@@ -206,10 +207,16 @@ function test_Init() {
 		"e": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~"
 	}));
 
-	// Push new state that updates query params without reloading the page.
+	// Push new URL that includes updated query params without reloading the page.
 	window.history.pushState({}, '', url);
 	initedFormOptions = URLForm.Init(FormOptions);
-	return document.getElementById('ShareURLBtn').formAction;
+
+	// Return golden path.  
+	let shareURI = document.getElementById('ShareURLBtn').formAction
+	let url2 = new URL(shareURI);
+	let path = url2.pathname + url2.search;
+	console.log("Initialization path: ", path);
+	return path;
 };
 
 // Unit test for Clear(), as well as a helper function for URLFormJS testing.
