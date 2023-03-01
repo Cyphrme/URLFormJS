@@ -24,11 +24,11 @@ const FormOptions = {
 			"name": "phone_number",
 		},
 		{
-			"name": "subscribe_latest_news",
-			"type": "bool",
+			"name": "country_select",
 		},
 		{
-			"name": "country_select",
+			"name": "subscribe",
+			"type": "bool",
 		},
 		{
 			"name": "toggle",

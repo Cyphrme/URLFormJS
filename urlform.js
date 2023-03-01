@@ -262,7 +262,7 @@ const DefaultFormOptions = {
  * @returns {FormOptions} 
  */
 function Init(formOptions) {
-	// console.log(formOptions);
+	console.log(formOptions);
 	let formOpt = {};
 	formOpt = sanitizeFormOptions(formOptions);
 
@@ -283,6 +283,13 @@ function Init(formOptions) {
 			formOpt.FormMode = true;
 		}
 	}
+
+	// Related events: [locationchange, hashchange]
+	window.addEventListener('hashchange', function() {
+		window.location.reload();
+	});
+
+
 	formOpt.Inited = true;
 	return formOpt;
 }
@@ -641,7 +648,8 @@ function setShareURL(href, formOptions) {
 
 
 /**
- * Generates a URL encoded fragment string from Fragment.
+ * Generates a URL encoded fragment string from Fragment. If fragment is empty
+ * will return empty string.  
  * 
  * @param   {Fragment}      fragment
  * @param   {FormOptions}   formOptions
@@ -682,6 +690,9 @@ function quagPartsToURLHash(fragment, formOptions) {
 
 	// After.
 	fqs += fragment.after;
+	if (fqs == "#") { // Return empty string if fragment is empty.  
+		return "";
+	}
 	return fqs;
 }
 
