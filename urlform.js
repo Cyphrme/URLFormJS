@@ -12,31 +12,36 @@
  *  "funcTrue": ()=> ToggleVisible(document.querySelector("#advancedOptions"));
  * }
  *
- * - name           Parameter name in the URI.  Is used as the default value for
+ * name           Parameter name in the URI.  Is used as the default value for
  *                  id.
  *
- * - id             Id of the HTML element if it differs from the name. Example,
+ * id             Id of the HTML element if it differs from the name. Example,
  *                  URI parameter "retrieve" and HTML id "Retrieve".
  *
- * - type           Type of the parameter (bool/string/number). Defaults to
+ * type           Type of the parameter (bool/string/number). Defaults to
  *                  string. For 'bool', if the parameter is present in the URL
  *                  and has a function set in 'funcTrue', the function will be
  *                  executed. (e.g. https://localhost/?send_news_and_updates)
  *                  using the example above will execute the 'ToggleVisible'
  *                  function.
  *
- * - func           Called if set on each call to SetForm
+ * func           Called if set on each call to SetForm
  *                  (Populate and PopulateFromValues).
  *
- * - funcTrue       Execute if param is true. e.g. `"funcTrue": () => {
+ * funcTrue       Execute if param is true. e.g. `"funcTrue": () => {
  *                  ToggleVisible(document.querySelector("#advancedOptions"))};`
  *
- * - queryLocation  Option for overriding the param in the URL link to either
+ * queryLocation  Option for overriding the param in the URL link to either
  *                  be a query parameter, or a fragment query. Defaults to empty
  *                  string, which will inherit the 'defaultQueryLocation' from
  *                  the form wide options.
  * 
- * - saveSetting   (Bool) Save and use this setting from local storage.  Will be
+ * nonFormValue   Values that do not appear in the form, but may appear in the
+ *                 URL.  URL non-form values will be sticky, e.g. they must be
+ *                 manually removed from the URL if already set in the URL.
+ *                 Otherwise, ShareURL will preserve all set non-form values.  
+ * 
+ * saveSetting   (Bool) Save and use this setting from local storage.  Will be
  *                  overwritten by URL flag values if present. 
  * @typedef  {Object}        FormParameter
  * @property {String}        name
@@ -45,6 +50,7 @@
  * @property {Function}      [func]
  * @property {Function}      [funcTrue]
  * @property {QueryLocation} [queryLocation=""]
+ * @property {NonFormValue}  [nonFormValue]
  * @property {bool}          [saveSetting=false]
  */
 
@@ -262,7 +268,7 @@ const DefaultFormOptions = {
  * @returns {FormOptions} 
  */
 function Init(formOptions) {
-	console.log(formOptions);
+	// console.log(formOptions);
 	let formOpt = {};
 	formOpt = sanitizeFormOptions(formOptions);
 
@@ -284,11 +290,13 @@ function Init(formOptions) {
 		}
 	}
 
+	// Force page reload when fragment changes.  Chrome as of 03/01/2023 does not
+	// refresh page on first enter, but the second enter and the following
+	// corrects this errant behavior.  
 	// Related events: [locationchange, hashchange]
 	window.addEventListener('hashchange', function() {
 		window.location.reload();
 	});
-
 
 	formOpt.Inited = true;
 	return formOpt;
@@ -573,6 +581,34 @@ function sanitizeFormOptions(formOptions) {
 	return foc;
 }
 
+
+
+/** getActiveFuncTrues returns funcTrue parameters set to true from the URL.  
+ * Currently this function is not in use.  
+ *@param   {QuagParts}               quagParts
+ * @param   {FormOptions}             formOptions
+ * @returns {Array<FormParameter>}           
+ */
+function getActiveFuncTrues(quagParts, formOptions) {
+	//console.log("QuagParts:", quagParts, "FormOptions:", formOptions);
+	let funcTrues = [];
+	for (let p in quagParts.pairs) {
+		//console.log("p:", p);
+		let formParameter = formOptions.FormParameters.find(a => a.name == p);
+		//console.log(formParameter);
+		if (isEmpty(formParameter.funcTrue)) {
+			continue;
+		}
+		// Value may be "true", or empty "" (flag). Empty "" is a flag and is
+		// interpreted as true.
+		if (formParameter.type == "bool") {
+			funcTrues.push(p);
+		}
+	}
+	return funcTrues;
+}
+
+
 /**
  * Generates a share URL from the current URL and form, populates the GUI with
  * share links, and returns the URL encoded URL.
@@ -585,19 +621,43 @@ function sanitizeFormOptions(formOptions) {
 function ShareURI(formOptions) {
 	let q = GetQuagParts(formOptions); // Current URL values.
 	let formPairs = GetForm(formOptions); // Current form values.
-	//console.log("QuagParts:", q, "formPairs:", formPairs);
+	// console.log(q, formPairs);
+	// let ft = getActiveFuncTrues(q, formOptions);
+	// for (let f of ft){
+	// 	//formPairs[f] = q.pairs[f]; // Preserve `=true` or flag style from URL.  
+	// 	//formPairs[f] = true; // Always do non-flag style.  
+	// 	//formPairs[f] = ''; // Always do flag style.  
+	// }
 	var u = new URL(window.location.origin + window.location.pathname);
 
-	for (let fp of formOptions.FormParameters) {
+	// label for outer for loop.  
+	loop1: for (let fp of formOptions.FormParameters) {
 		let value = encodeURIComponent(formPairs[fp.name]);
-		// console.log(fp, value);
-		if (isEmpty(value)) {
-			// Sets value if populated.  Otherwise removes from the query/fragment. (A
-			// query parameter set in fragment, or a fragment parameter set in Query.
-			// Note: bools on false will not have been cleared yet.)
+		// console.log(fp, fp.name, value, q.pairs.hasOwnProperty(fp.name));
+		// console.log(fp.name + ": " + value);
+
+		// Sets value if populated.  Otherwise removes from the query/fragment. (A
+		// query parameter set in fragment, or a fragment parameter set in Query.
+		// Note: bools on false will not have been cleared yet.)
+		while (true) {
+			if (!isEmpty(value)) {
+				break;
+			}
+
+			// console.log(isEmpty(fp.funcTrue));
+			if (q.pairs.hasOwnProperty(fp.name) && fp.nonFormValue) {
+				break;
+			}
+			// console.log("Deleting: " + fp.name);
+
 			u.searchParams.delete(fp.name);
 			delete q.fragment.pairs[fp.name];
-			continue;
+			// console.log("Deleting and continuing", fp.name);
+			continue loop1; // Continue "breaks"
+		}
+
+		if (fp.type == "bool") { // Always use flag form for bools.  
+			value = "";
 		}
 
 		// Set to Fragment
@@ -648,14 +708,18 @@ function setShareURL(href, formOptions) {
 
 
 /**
- * Generates a URL encoded fragment string from Fragment. If fragment is empty
- * will return empty string.  
+ * Generates a URL encoded fragment string from Fragment. 
+ * 
+ * Returns empty string when fragment is empty.  
  * 
  * @param   {Fragment}      fragment
  * @param   {FormOptions}   formOptions
  * @returns {String}        Fragment string (#<before>?<middle(fromForm?extras)>[delimiter]<after>).
  */
 function quagPartsToURLHash(fragment, formOptions) {
+	// URL Fragment has three parts: 1. before fragment query, 2. fragment query, 3.
+	// after fragment query.  
+
 	// Concatenate fragment ("#") and before.
 	let fqs = "#" + fragment.before;
 
@@ -665,7 +729,12 @@ function quagPartsToURLHash(fragment, formOptions) {
 		fqs += "?"; //start fragment query delimiter ("?")
 		for (let key in fragment.pairs) {
 			i--;
-			fqs += key + "=" + encodeURIComponent(fragment.pairs[key]);
+			let eq = "=";
+			let fp = formOptions.FormParameters.find(a => a.name == key);
+			if (fragment.pairs[key] == "" && fp.type == "bool") {
+				eq = ""; // flag style.  No "=" in string if parameter is flag. 
+			}
+			fqs += key + eq + encodeURIComponent(fragment.pairs[key]);
 			if (i > 0) {
 				fqs += "&"; // Add separator on everything except the last.  
 			}
@@ -711,7 +780,7 @@ function getPairs(s) {
 	let pairs = {};
 	let parts = s.split('&');
 	for (const i in parts) {
-		console.debug(parts[i])
+		// console.debug(parts[i])
 		let kv = parts[i].split('=');
 		let key = kv[0];
 		let value = kv[1];
