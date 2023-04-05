@@ -23,7 +23,11 @@
  *                  and has a function set in 'funcTrue', the function will be
  *                  executed. (e.g. https://localhost/?send_news_and_updates)
  *                  using the example above will execute the 'ToggleVisible'
- *                  function.
+ *                  function. Negative flags specify an explicit value and are
+ *                  only supported on bool types. e.g. `&foo` with a default
+ *                  value of `false` will be overwritten to true, and a url
+ *                  `www.foobar.com` with `foo` having a default value of
+ *                  `true` will populate the element with `true`.
  *
  * func           Called if set on each call to SetForm
  *                  (Populate and PopulateFromValues).
@@ -41,8 +45,12 @@
  *                 manually removed from the URL if already set in the URL.
  *                 Otherwise, ShareURL will preserve all set non-form values.  
  * 
- * saveSetting   (Bool) Save and use this setting from local storage.  Will be
- *                  overwritten by URL flag values if present. 
+ * saveSetting    Save and use this setting from local storage.  Will be
+ *                  overwritten by URL flag values if present.
+ * 
+ * defaultValue   Element is populated with the specified default value on page
+ *                  loads, unless otherwise overwritten via a populate from the
+ *                  URL, or given values.
  * @typedef  {Object}        FormParameter
  * @property {String}        name
  * @property {String}        [id]
@@ -51,7 +59,9 @@
  * @property {Function}      [funcTrue]
  * @property {QueryLocation} [queryLocation=""]
  * @property {NonFormValue}  [nonFormValue]
- * @property {bool}          [saveSetting=false]
+ * @property {Boolean}       [saveSetting=false]
+ * @property {Boolean}       [defaultValue=false]
+ * 
  */
 
 /**
@@ -428,9 +438,17 @@ function SetForm(kv, formOptions) {
 	try {
 		for (let fp of formOptions.FormParameters) {
 			// Set as vars to avoid mutability.
-			let name = fp.name
-			let value = kv[name]
 			let id = fp.id
+			let name = fp.name
+			// Using `isEmpty` returns true on empty strings, and other zero values,
+			// but trying to access an object key that does not exist returns
+			// `undefined`.
+			let hasNegative = (kv["-" + name] !== undefined)
+			if (hasNegative) {
+				var value = kv["-" + name]
+			} else {
+				var value = kv[name]
+			}
 
 			// Sanitize bool `true` to string true.
 			if (value === true) {
@@ -440,6 +458,16 @@ function SetForm(kv, formOptions) {
 			// Sanitize flags.
 			if (fp.type == "bool" && value === "") {
 				value = "true"
+			}
+
+			// Check for defaults
+			let hasDefaults = !isEmpty(fp.defaultValue)
+			if (fp.type == "bool" && hasDefaults) {
+				value = (fp.defaultValue === true || fp.defaultValue === "true").toString()
+			}
+
+			if (fp.type == "bool" && hasNegative) {
+				value = "false"
 			}
 
 			// If id is empty, assume name is the id on the page.
@@ -454,6 +482,8 @@ function SetForm(kv, formOptions) {
 
 			// Value may be "true", or empty "" (flag). Empty "" is a flag and is
 			// interpreted as true.
+			//
+			// TODO why do we have to do this twice, and doc if valid
 			if (fp.type == "bool" && value == "true") {
 				if (!isEmpty(fp.funcTrue)) {
 					fp.funcTrue()
@@ -470,10 +500,11 @@ function SetForm(kv, formOptions) {
 			}
 
 			// Set GUI Non-bool inputs.
-			if (!isEmpty(value)) {
+			if (!isEmpty(value) && fp.type !== "bool") {
 				e.value = value
+			} else if (hasDefaults && fp.type !== "bool") {
+				e.value = fp.defaultValue
 			}
-
 
 			if (fp.saveSetting) { // Set Action listener for savables.
 				e.addEventListener("input", (e) => {
@@ -595,7 +626,7 @@ function sanitizeFormOptions(formOptions) {
 }
 
 
-
+// TODO deprecate?
 /** getActiveFuncTrues returns funcTrue parameters set to true from the URL.  
  * Currently this function is not in use.
  * @param   {QuagParts}               quagParts
@@ -634,6 +665,8 @@ function getActiveFuncTrues(quagParts, formOptions) {
 function ShareURI(formOptions) {
 	let q = GetQuagParts(formOptions) // Current URL values.
 	let formPairs = GetForm(formOptions) // Current form values.
+
+	// TODO deprecate?
 	// console.log(q, formPairs)
 	// let ft = getActiveFuncTrues(q, formOptions)
 	// for (let f of ft){
@@ -721,9 +754,9 @@ function setShareURL(href, formOptions) {
 
 
 /**
- * Generates a URL encoded fragment string from Fragment. 
+ * Generates a URL encoded fragment string from Fragment.
  * 
- * Returns empty string when fragment is empty.  
+ * Returns empty string when fragment is empty.
  * 
  * @param   {Fragment}      fragment
  * @param   {FormOptions}   formOptions
@@ -793,7 +826,6 @@ function getPairs(s) {
 	let pairs = {}
 	let parts = s.split('&')
 	for (const i in parts) {
-		// console.debug(parts[i])
 		let kv = parts[i].split('=')
 		let key = kv[0]
 		let value = kv[1]

@@ -51,6 +51,11 @@ const FormOptions = {
 			"name": "country_select",
 			"saveSetting": true,
 		},
+		{
+			"name": "default_negative_flag",
+			"defaultValue": true,
+			"type": "bool"
+		},
 	]
 }
 
@@ -64,6 +69,7 @@ const ExampleValues = {
 	"phone_number": 1234567890,
 	"subscribe_latest_news": "true",
 	"country_select": "1",
+	"-default_negative_flag": "" // Flag for overwriting default value
 }
 
 /**@type {Test} */
@@ -126,7 +132,7 @@ let t_SerializeForm = {
 let t_GetDefaultOpts = {
 	"name": "Get Default Form Options",
 	"func": test_GetDefaultOpts,
-	"golden": `{"FormParameters":[{"name":"first_name","queryLocation":"fragment"},{"name":"middle_name","queryLocation":"fragment"},{"name":"last_name","queryLocation":"fragment"},{"name":"email_address","queryLocation":"fragment"},{"name":"phone_number","type":"number","queryLocation":"fragment"},{"name":"subscribe_latest_news","type":"bool","saveSetting":true,"queryLocation":"fragment"},{"name":"country_select","saveSetting":true,"queryLocation":"fragment"}],"prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"formID":"","FormMode":false}`
+	"golden": `{"FormParameters":[{"name":"first_name","queryLocation":"fragment"},{"name":"middle_name","queryLocation":"fragment"},{"name":"last_name","queryLocation":"fragment"},{"name":"email_address","queryLocation":"fragment"},{"name":"phone_number","type":"number","queryLocation":"fragment"},{"name":"subscribe_latest_news","type":"bool","saveSetting":true,"queryLocation":"fragment"},{"name":"country_select","saveSetting":true,"queryLocation":"fragment"},{"name":"default_negative_flag","defaultValue":true,"type":"bool","queryLocation":"fragment"}],"prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"formID":"","FormMode":false}`
 }
 
 /**@type {Test} */
@@ -149,7 +155,6 @@ let t_NoReload = {
 	"func": test_noReload,
 	"golden": true,
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 //////////////////////    Testing Variables    /////////////////////////////////
@@ -188,6 +193,7 @@ function populateGUI() {
 	document.getElementById('input_phone_number').value = ExampleValues.phone_number
 	document.getElementById('input_subscribe_latest_news').checked = ExampleValues.subscribe_latest_news
 	document.getElementById('input_country_select').value = ExampleValues.country_select
+	document.getElementById('input_default_negative_flag').value = ExampleValues["-default_negative_flag"]
 }
 
 ////////////////////
@@ -245,7 +251,12 @@ function test_Clear() {
 // Tests Populate().
 function test_Populate() {
 	URLForm.Populate(initedFormOptions)
-	return checkForm(URLForm.GetForm(initedFormOptions))
+	// Additional check for default value that is not in `checkForm`.
+	let parsd = URLForm.GetForm(initedFormOptions)
+	if (parsd.default_negative_flag !== true) {
+		return false
+	}
+	return checkForm(parsd)
 }
 
 // Tests PopulateFromValues().
@@ -269,7 +280,16 @@ function test_GetFormElements() {
 		if (typeof ExampleValues[i] === "number") {
 			elemVal = Number(elemVal)
 		}
+		// Sanitize Javascripts `on` for checkboxes
+		if (elemVal === "on") {
+			elemVal = "true"
+		}
 		if (elemVal === ExampleValues[i]) {
+			continue
+		}
+		if (elems[i].id == "input_default_negative_flag") {
+			// Element is altered for testing default values, and negative flag for
+			// booleans. Value will be true here, and false/empty in ExampleValues.
 			continue
 		}
 		return false
@@ -288,7 +308,12 @@ function test_GetURLKeyValue() {
 		"subscribe_latest_news": "true",
 		"country_select": "1",
 		"json_payload": "{\"e\":\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:<=>?@[]^_`{|}~\"}",
-		"no_reload": "true"
+	}
+	// `no_reload` is added to the URL after the first page load, and on refresh
+	// has differing results. This line keeps the testing idempotent for first
+	// time and refreshed page loads.
+	if ("no_reload" in pairs) {
+		golden.no_reload = "true"
 	}
 
 	return JSON.stringify(pairs) === JSON.stringify(golden)
@@ -348,7 +373,6 @@ function test_noReload() {
 	return window.location.hash === "#?no_reload=true"
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////  Interface to BrowserTestJS package  ///////////////////
@@ -399,6 +423,10 @@ let TestGUIOptions = {
 		</div>
 		<div>
 			<input type="text" id="input_phone_number" name="input_phone_number" placeholder="Phone Number">
+		</div>
+		<div id="defaultNegativeFlag" >
+		<label for="input_default_negative_flag">Defaults and Negative Flag</label>
+			<input type="checkbox" id="input_default_negative_flag" name="input_default_negative_flag">
 		</div>
 		<div>
 			<label for="input_subscribe_latest_news">Subscribe to the latest news</label>
