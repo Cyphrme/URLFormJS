@@ -24,11 +24,11 @@ const FormOptions = {
 			"name": "phone_number",
 		},
 		{
-			"name": "subscribe_latest_news",
-			"type": "bool",
+			"name": "country_select",
 		},
 		{
-			"name": "country_select",
+			"name": "subscribe",
+			"type": "bool",
 		},
 		{
 			"name": "toggle",
@@ -38,6 +38,12 @@ const FormOptions = {
 		{
 			"name": "uri_settable",
 			"type": "bool",
+		},
+		{
+			"name": "customFunction", // A custom Javascript function example that has no form buttons on the page.  
+			"type": "bool",
+			"funcTrue": () => document.getElementById("customFunction").textContent = "true",
+			"nonFormValue":true, // Value that appears in the URL, but is not in the form.  This causes the URL value to be sticky for ShareURL if already set and then can only be removed by manual deletion.  
 		},
 	],
 };

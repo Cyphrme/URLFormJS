@@ -141,6 +141,8 @@ go run server.go
 
 Then go to `localhost:8082` for the results.
 
+Tests are also [Github hosted](https://cyphrme.github.io/URLFormJS/browsertestjs/browsertest.html).
+
 
 #### Demonstration that fragment is not sent off.  
 The test server logs requests and can be used to demonstrated that
