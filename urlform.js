@@ -25,9 +25,9 @@
  *                  using the example above will execute the 'ToggleVisible'
  *                  function. Negative flags specify an explicit value and are
  *                  only supported on bool types. e.g. `&foo` with a default
- *                  value of `false` will be overwritten to true, and a url
- *                  `www.foobar.com` with `foo` having a default value of
- *                  `true` will populate the element with `true`.
+ *                  value of `false` will be overwritten to true. A url with
+ *                  no query params with a form parameter `foo` having a default
+ *                  value of `true` will populate the element with `true`.
  *
  * func           Called if set on each call to SetForm
  *                  (Populate and PopulateFromValues).
@@ -49,8 +49,7 @@
  *                  overwritten by URL flag values if present.
  * 
  * defaultValue   Element is populated with the specified default value on page
- *                  loads, unless otherwise overwritten via a populate from the
- *                  URL, or given values.
+ *                  loads (unless otherwise specified).
  * @typedef  {Object}        FormParameter
  * @property {String}        name
  * @property {String}        [id]
@@ -440,39 +439,17 @@ function SetForm(kv, formOptions) {
 			// Set as vars to avoid mutability.
 			let id = fp.id
 			let name = fp.name
-			// Using `isEmpty` returns true on empty strings, and other zero values,
-			// but trying to access an object key that does not exist returns
-			// `undefined`.
-			let hasNegative = (kv["-" + name] !== undefined)
-			if (hasNegative) {
-				var value = kv["-" + name]
-			} else {
-				var value = kv[name]
-			}
-
-			// Sanitize bool `true` to string true.
-			if (value === true) {
-				value = "true"
-			}
-
-			// Sanitize flags.
-			if (fp.type == "bool" && value === "") {
-				value = "true"
-			}
 
 			// Check for defaults
-			let hasDefaults = !isEmpty(fp.defaultValue)
-			if (fp.type == "bool" && hasDefaults) {
-				value = (fp.defaultValue === true || fp.defaultValue === "true").toString()
+			if (!isEmpty(fp.defaultValue)) {
+				value = fp.defaultValue
 			}
 
-			if (fp.type == "bool" && hasNegative) {
-				value = "false"
-			}
-
-			// If id is empty, assume name is the id on the page.
-			if (isEmpty(id)) {
-				id = formOptions.prefix + name
+			let hasNegative = (kv["-" + name] !== undefined) // Don't use `isEmpty`.
+			if (hasNegative && fp.type == "bool") {
+				var value = false
+			} else {
+				var value = kv[name]
 			}
 
 			// Run func if set
@@ -480,11 +457,19 @@ function SetForm(kv, formOptions) {
 				fp.func()
 			}
 
-			// Value may be "true", or empty "" (flag). Empty "" is a flag and is
-			// interpreted as true.
-			//
-			// TODO why do we have to do this twice, and doc if valid
-			if (fp.type == "bool" && value == "true") {
+			// If id is empty, assume name is the id on the page.
+			if (isEmpty(id)) {
+				id = formOptions.prefix + name
+			}
+
+			// Sanitize bool `true` to string true and sanitize flags. Flag values for
+			// bool may be `true` or empty. Empty as a flag is interpreted as true.
+			if (value === true || (fp.type === "bool" && value === "")) {
+				value = "true"
+			}
+
+			// Run `funcTrue`. Value may be "true", or empty "" (flag).
+			if (fp.type == "bool" && value === "true") {
 				if (!isEmpty(fp.funcTrue)) {
 					fp.funcTrue()
 				}
@@ -502,8 +487,6 @@ function SetForm(kv, formOptions) {
 			// Set GUI Non-bool inputs.
 			if (!isEmpty(value) && fp.type !== "bool") {
 				e.value = value
-			} else if (hasDefaults && fp.type !== "bool") {
-				e.value = fp.defaultValue
 			}
 
 			if (fp.saveSetting) { // Set Action listener for savables.
@@ -625,34 +608,6 @@ function sanitizeFormOptions(formOptions) {
 	return foc
 }
 
-
-// TODO deprecate?
-/** getActiveFuncTrues returns funcTrue parameters set to true from the URL.  
- * Currently this function is not in use.
- * @param   {QuagParts}               quagParts
- * @param   {FormOptions}             formOptions
- * @returns {Array<FormParameter>}           
- */
-function getActiveFuncTrues(quagParts, formOptions) {
-	//console.log("QuagParts:", quagParts, "FormOptions:", formOptions)
-	let funcTrues = []
-	for (let p in quagParts.pairs) {
-		//console.log("p:", p)
-		let formParameter = formOptions.FormParameters.find(a => a.name == p)
-		//console.log(formParameter)
-		if (isEmpty(formParameter.funcTrue)) {
-			continue
-		}
-		// Value may be "true", or empty "" (flag). Empty "" is a flag and is
-		// interpreted as true.
-		if (formParameter.type == "bool") {
-			funcTrues.push(p)
-		}
-	}
-	return funcTrues
-}
-
-
 /**
  * Generates a share URL from the current URL and form, populates the GUI with
  * share links, and returns the URL encoded URL.
@@ -665,15 +620,6 @@ function getActiveFuncTrues(quagParts, formOptions) {
 function ShareURI(formOptions) {
 	let q = GetQuagParts(formOptions) // Current URL values.
 	let formPairs = GetForm(formOptions) // Current form values.
-
-	// TODO deprecate?
-	// console.log(q, formPairs)
-	// let ft = getActiveFuncTrues(q, formOptions)
-	// for (let f of ft){
-	// 	//formPairs[f] = q.pairs[f] // Preserve `=true` or flag style from URL.  
-	// 	//formPairs[f] = true // Always do non-flag style.  
-	// 	//formPairs[f] = '' // Always do flag style.  
-	// }
 	var u = new URL(window.location.origin + window.location.pathname)
 
 	// label for outer for loop.  

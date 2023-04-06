@@ -52,7 +52,12 @@ const FormOptions = {
 			"saveSetting": true,
 		},
 		{
-			"name": "default_negative_flag",
+			"name": "default_value",
+			"defaultValue": true,
+			"type": "bool"
+		},
+		{
+			"name": "negative_flag",
 			"defaultValue": true,
 			"type": "bool"
 		},
@@ -69,14 +74,16 @@ const ExampleValues = {
 	"phone_number": 1234567890,
 	"subscribe_latest_news": "true",
 	"country_select": "1",
-	"-default_negative_flag": "" // Flag for overwriting default value
+	"default_value": "true",
+	"negative_flag": "true", // Default
+	"-negative_flag": "", // Override default
 }
 
 /**@type {Test} */
 let t_InitForm = {
 	"name": "Initialize Form",
 	"func": test_Init,
-	"golden": `?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1&json_payload=%7B%22e%22%3A%22ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%21%23%24%25%26%28%29*%2B%2C.%2F%3A%3C%3D%3E%3F%40%5B%5D%5E_%60%7B%7C%7D%7E%22%7D`
+	"golden": ` ?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=&country_select=1&json_payload=%7B%22e%22%3A%22ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%21%23%24%25%26%28%29*%2B%2C.%2F%3A%3C%3D%3E%3F%40%5B%5D%5E_%60%7B%7C%7D%7E%22%7D&default_value=&-negative_flag=`
 }
 
 /**@type {Test} */
@@ -125,14 +132,14 @@ let t_GetURLKeyValue = {
 let t_SerializeForm = {
 	"name": "Serialize Form",
 	"func": test_Serialize,
-	"golden": `{"first_name":"Bob","last_name":"Smith","email_address":"bob@something.com","phone_number":1234567890,"subscribe_latest_news":true,"country_select":"1"}`
+	"golden": `{"first_name":"Bob","last_name":"Smith","email_address":"bob@something.com","phone_number":1234567890,"subscribe_latest_news":true,"country_select":"1","default_value":true}`
 }
 
 /**@type {Test} */
 let t_GetDefaultOpts = {
 	"name": "Get Default Form Options",
 	"func": test_GetDefaultOpts,
-	"golden": `{"FormParameters":[{"name":"first_name","queryLocation":"fragment"},{"name":"middle_name","queryLocation":"fragment"},{"name":"last_name","queryLocation":"fragment"},{"name":"email_address","queryLocation":"fragment"},{"name":"phone_number","type":"number","queryLocation":"fragment"},{"name":"subscribe_latest_news","type":"bool","saveSetting":true,"queryLocation":"fragment"},{"name":"country_select","saveSetting":true,"queryLocation":"fragment"},{"name":"default_negative_flag","defaultValue":true,"type":"bool","queryLocation":"fragment"}],"prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"formID":"","FormMode":false}`
+	"golden": `{"FormParameters":[{"name":"first_name","queryLocation":"fragment"},{"name":"middle_name","queryLocation":"fragment"},{"name":"last_name","queryLocation":"fragment"},{"name":"email_address","queryLocation":"fragment"},{"name":"phone_number","type":"number","queryLocation":"fragment"},{"name":"subscribe_latest_news","type":"bool","saveSetting":true,"queryLocation":"fragment"},{"name":"country_select","saveSetting":true,"queryLocation":"fragment"},{"name":"default_value","defaultValue":true,"type":"bool","queryLocation":"fragment"},{"name":"negative_flag","defaultValue":true,"type":"bool","queryLocation":"fragment"}],"prefix":"","shareURLBtn":"#shareURLBtn","shareURL":"#shareURL","shareURLArea":"#shareURLArea","defaultQueryLocation":"fragment","callback":null,"cleanURL":false,"localStorageNamespace":"URLFormJS_","Sanitized":false,"Inited":false,"formID":"","FormMode":false}`
 }
 
 /**@type {Test} */
@@ -146,13 +153,6 @@ let t_SaveSetting = {
 let t_NumberType = {
 	"name": "Number Type",
 	"func": test_numberType,
-	"golden": true,
-}
-
-/**@type {Test} */
-let t_NoReload = {
-	"name": "No Reload On Change",
-	"func": test_noReload,
 	"golden": true,
 }
 
@@ -181,6 +181,12 @@ function checkForm(parsd) {
 	if (parsd.subscribe_latest_news !== true) {
 		return false
 	}
+	if (parsd.default_value !== true) {
+		return false
+	}
+	if (parsd.negative_flag !== false && parsd.negative_flag !== undefined) {
+		return false
+	}
 	return true
 }
 
@@ -193,7 +199,8 @@ function populateGUI() {
 	document.getElementById('input_phone_number').value = ExampleValues.phone_number
 	document.getElementById('input_subscribe_latest_news').checked = ExampleValues.subscribe_latest_news
 	document.getElementById('input_country_select').value = ExampleValues.country_select
-	document.getElementById('input_default_negative_flag').value = ExampleValues["-default_negative_flag"]
+	document.getElementById('input_default_value').checked = ExampleValues.default_value
+	document.getElementById('input_negative_flag').checked = ExampleValues["-negative_flag"]
 }
 
 ////////////////////
@@ -201,6 +208,11 @@ function populateGUI() {
 ////////////////////
 
 // IsEmpty does not have its own unit test, but is tested in the unit tests.
+
+// Tests for not reloading the page on URL hash change are not done, because
+// the only foreseeable way of accomplishing this is to check if the infinite
+// loop of reloading the page is not being hit. To test non page reloads on
+// change, it must be done manually.
 
 // Populated from Init. Global form options for testing.
 var initedFormOptions
@@ -214,12 +226,14 @@ function test_Init() {
 	url.searchParams.set('last_name', 'Smith')
 	url.searchParams.set('email_address', 'bob@something.com')
 	url.searchParams.set('phone_number', 1234567890)
-	url.searchParams.set('subscribe_latest_news', true)
+	url.searchParams.set('subscribe_latest_news', "")
 	url.searchParams.set('country_select', "1")
 	// Tests JSON objects/escaping as URL values.
 	url.searchParams.set('json_payload', JSON.stringify({
 		"e": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:<=>?@[]^_`{|}~"
 	}))
+	url.searchParams.set('default_value', "")
+	url.searchParams.set('-negative_flag', "")
 
 	// Push new URL that includes updated query params without reloading the page.
 	window.history.pushState({}, '', url)
@@ -244,7 +258,6 @@ function test_Clear() {
 	if (!URLForm.IsEmpty(initedFormOptions)) {
 		return false
 	}
-
 	return true
 }
 
@@ -253,9 +266,6 @@ function test_Populate() {
 	URLForm.Populate(initedFormOptions)
 	// Additional check for default value that is not in `checkForm`.
 	let parsd = URLForm.GetForm(initedFormOptions)
-	if (parsd.default_negative_flag !== true) {
-		return false
-	}
 	return checkForm(parsd)
 }
 
@@ -287,11 +297,6 @@ function test_GetFormElements() {
 		if (elemVal === ExampleValues[i]) {
 			continue
 		}
-		if (elems[i].id == "input_default_negative_flag") {
-			// Element is altered for testing default values, and negative flag for
-			// booleans. Value will be true here, and false/empty in ExampleValues.
-			continue
-		}
 		return false
 	}
 	return true
@@ -300,22 +305,18 @@ function test_GetFormElements() {
 // Tests retrieval of key:value pairs from the URL.
 function test_GetURLKeyValue() {
 	let pairs = URLForm.GetURLKeyValue(initedFormOptions)
+	// Order of fields in golden must be correct.
 	let golden = {
 		"first_name": "Bob",
 		"last_name": "Smith",
 		"email_address": "bob@something.com",
 		"phone_number": "1234567890",
-		"subscribe_latest_news": "true",
+		"subscribe_latest_news": "",
 		"country_select": "1",
 		"json_payload": "{\"e\":\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:<=>?@[]^_`{|}~\"}",
+		"default_value": "",
+		"-negative_flag": "",
 	}
-	// `no_reload` is added to the URL after the first page load, and on refresh
-	// has differing results. This line keeps the testing idempotent for first
-	// time and refreshed page loads.
-	if ("no_reload" in pairs) {
-		golden.no_reload = "true"
-	}
-
 	return JSON.stringify(pairs) === JSON.stringify(golden)
 }
 
@@ -367,12 +368,6 @@ function test_numberType() {
 	return true
 }
 
-// Tests changing the URL without triggering a reload.
-function test_noReload() {
-	URLForm.SetURLNoReload(window.location.href + "#?no_reload=true")
-	return window.location.hash === "#?no_reload=true"
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ///////////////////////  Interface to BrowserTestJS package  ///////////////////
@@ -398,7 +393,6 @@ let TestsToRun = [
 	t_GetDefaultOpts,
 	t_SaveSetting,
 	t_NumberType,
-	t_NoReload,
 ]
 
 /** @type {TestGUIOptions} **/
@@ -424,9 +418,13 @@ let TestGUIOptions = {
 		<div>
 			<input type="text" id="input_phone_number" name="input_phone_number" placeholder="Phone Number">
 		</div>
-		<div id="defaultNegativeFlag" >
-		<label for="input_default_negative_flag">Defaults and Negative Flag</label>
-			<input type="checkbox" id="input_default_negative_flag" name="input_default_negative_flag">
+		<div id="defaultValue" >
+		<label for="input_default_value">Default Value</label>
+			<input type="checkbox" id="input_default_value" name="input_default_value">
+		</div>
+		<div id="negativeFlag" >
+		<label for="input_negative_flag">Negative Flag</label>
+			<input type="checkbox" id="input_negative_flag" name="input_negative_flag">
 		</div>
 		<div>
 			<label for="input_subscribe_latest_news">Subscribe to the latest news</label>
