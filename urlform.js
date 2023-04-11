@@ -440,16 +440,12 @@ function SetForm(kv, formOptions) {
 			let id = fp.id
 			let name = fp.name
 
-			// Check for defaults
-			if (!isEmpty(fp.defaultValue)) {
-				value = fp.defaultValue
-			}
-
+			let value = fp.defaultValue
 			let hasNegative = (kv["-" + name] !== undefined) // Don't use `isEmpty`.
 			if (hasNegative && fp.type == "bool") {
-				var value = false
-			} else {
-				var value = kv[name]
+				value = false
+			} else if (!isEmpty(kv[name])) {
+				value = kv[name]
 			}
 
 			// Run func if set
