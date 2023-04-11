@@ -83,7 +83,7 @@ const ExampleValues = {
 let t_InitForm = {
 	"name": "Initialize Form",
 	"func": test_Init,
-	"golden": ` ?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=&country_select=1&json_payload=%7B%22e%22%3A%22ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%21%23%24%25%26%28%29*%2B%2C.%2F%3A%3C%3D%3E%3F%40%5B%5D%5E_%60%7B%7C%7D%7E%22%7D&default_value=&-negative_flag=`
+	"golden": ` ?first_name=Bob&last_name=Smith&email_address=bob%40something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1&json_payload=%7B%22e%22%3A%22ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%21%23%24%25%26%28%29*%2B%2C.%2F%3A%3C%3D%3E%3F%40%5B%5D%5E_%60%7B%7C%7D%7E%22%7D&default_value=&-negative_flag=`
 }
 
 /**@type {Test} */
@@ -226,7 +226,7 @@ function test_Init() {
 	url.searchParams.set('last_name', 'Smith')
 	url.searchParams.set('email_address', 'bob@something.com')
 	url.searchParams.set('phone_number', 1234567890)
-	url.searchParams.set('subscribe_latest_news', "")
+	url.searchParams.set('subscribe_latest_news', true)
 	url.searchParams.set('country_select', "1")
 	// Tests JSON objects/escaping as URL values.
 	url.searchParams.set('json_payload', JSON.stringify({
@@ -311,7 +311,7 @@ function test_GetURLKeyValue() {
 		"last_name": "Smith",
 		"email_address": "bob@something.com",
 		"phone_number": "1234567890",
-		"subscribe_latest_news": "",
+		"subscribe_latest_news": "true",
 		"country_select": "1",
 		"json_payload": "{\"e\":\"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:<=>?@[]^_`{|}~\"}",
 		"default_value": "",
