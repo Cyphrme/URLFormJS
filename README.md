@@ -58,6 +58,21 @@ queries, although this is browser dependent.
 Fragment query parameters are "non-standard", but we hope it is useful enough to
 eventually standardize through an RFC or other means.  
 
+# Form Options
+See docs on the Javascript FormParameter and FormOptions
+
+An application may use a prefix, "input_" here, to namespace fields.
+// A custom id for the share button, share link, and clear button are set.
+
+
+# Booleans and Boolean Flags
+Boolean parameters are encoded as "flag style" where the value is known by key
+presence and the value is not explicitly given.  For example, parameter
+`subscribe=true` will be encoded in the URL as simply "subscribe".  Negative
+values `subscribe=false` are dropped since the negative value is the implicit
+default.  As a special case, where a boolean parameter has a default value of
+"true", negative flags are used, e.g. `-subscribe` to explicitly denote that the
+value is false. 
 
 # Quag
 
@@ -122,13 +137,16 @@ We have a single page test that's useful.  Since it uses js modules it needs an
 http server.  Use server.go for this.
 
 ```
-go run server.go
+(cd browsertestjs && go run server.go)
 ```
+
+Then go to `https://localhost:8082/demo_simple.html`
+
+
 
 ## UMD Module
 See `minify.js` and for more https://github.com/Cyphrme/UMD_tutorial.  In short,
 `esbuild` has a bug with UMD so modules exports have to be manually done.  
-
 
 
 ## Tests
@@ -144,7 +162,8 @@ Then go to `localhost:8082` for the results.
 Tests are also [Github hosted](https://cyphrme.github.io/URLFormJS/browsertestjs/browsertest.html).
 
 
-#### Demonstration that fragment is not sent off.  
+
+#### Demonstration that fragment is not sent to the server from the browser.  
 The test server logs requests and can be used to demonstrated that
 fragment is not sent to the server by the browser by visiting
 `https://localhost:8082?name=bob#test` or using curl:
