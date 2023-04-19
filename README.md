@@ -6,7 +6,7 @@ URLFormJS creates sticky forms, stateful applications, and
 shareable link using **query** parameters and **fragment query**
 parameters.
 
-## [Demo](https://cyphrme.github.io/URLFormJS/#?first_name=Bob&last_name=Smith&email_address=bob@something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1&uri_settable=true:~:text=Bob)
+## [Demo](https://cyphrme.github.io/URLFormJS/demo_simple.html#?first_name=Bob&last_name=Smith&email_address=bob@something.com&phone_number=1234567890&subscribe_latest_news=true&country_select=1&uri_settable=true:~:text=Bob)
 
 
 # Query Parameters, Fragment Anchors, and Fragment Query Parameters
