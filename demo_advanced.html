@@ -3,7 +3,7 @@
 <!-- h-100 for sticky footer -->
 
 <head>
-	<script src="./index.js"></script>
+	<script src="./demo_advanced.js"></script>
 	<script src="./urlform.min.js"></script>
 
 	<meta charset="UTF-8">
@@ -17,6 +17,16 @@
 	<link rel="icon" href="favicon.ico" type="image/x-icon">
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 	<link rel="icon" href="favicon.ico" type="image/x-icon">
+
+	<style>
+		#CustomShareURL {
+			word-wrap: break-word;
+			max-width: 400px;
+			border-style: solid;
+			border-radius: 25px;
+			border-color: #2B5AA0;
+		}
+	</style>
 </head>
 
 <body class="d-flex flex-column h-100">
@@ -62,45 +72,42 @@
 					</div>
 				</div>
 
+				<!-- Bool Examples -->
 				<div>
-					<label for="input_subscribe">Subscribe to the latest news</label>
+					<label for="input_subscribe">Subscribe</label>
 					<input type="checkbox" id="input_subscribe" name="input_subscribe">
+				</div>
+				<div>
+					<label for="input_default_check">Default Checked</label>
+					<input type="checkbox" id="input_default_check" name="input_default_check">
 				</div>
 
 				<div class="form-switch" title="">
 					<input class="form-check-input" type="checkbox" id="input_toggle" name="input_toggle">
 					<label class="text-start" for="input_toggle">Savable Toggle</label>
 				</div>
-
 				<div>
 					<label for="input_uri_settable">Only settable via URI</label>
 					<input type="checkbox" id="input_uri_settable" name="input_uri_settable" disabled>
 				</div>
 				<div>
-					<label for="customFunction">Custom JS function:</label>
+					<label for="customFunction">JS function triggered by URI flag:</label>
 					<span id="customFunction">false</span>
 				</div>
-
-
-
-
-
-
-
 			</form>
 
 
 
-
-
-			<button id="CustomShareURLBtnID" class="btn mt-3 btn-primary">Share URL</button>
-			<p class="mt-3" id="CustomShareURL"></p>
+			<button id="CustomShareURLBtnID" class="btn mt-3 btn-primary">Generate Share URL</button>
+			<p class="mt-1 mx-auto p-5" id="CustomShareURL"></p>
 			<button id="CustomClearBtnID" class="btn mt-3 btn-danger" title="This will clear the entire form and URL queries & fragments.">Clear</button>
 
 
 
 			<div class="mt-5">
-				<p><a href="#?first_name=Bob&last_name=Smith&email_address=bob@something.com&phone_number=1234567890&subscribe&country_select=1&uri_settable&customFunction:~:text=Bob">Demo </a></p>
+
+
+
 
 				<!-- 
 # Test URL
@@ -112,17 +119,30 @@ Extra before frag begin with "eb"
 Extra after frag begin with "el"
 
 Test one has:
-- Query
-- Query Extra
-- Fragment Before
-- Fragment Query Extra
+- Query (first_name)
+- Query Extra (eBob)
+- Fragment Before (ebmarry)
+- Fragment Queries (middle_name, last_name, email_address, phone_number, country_select, subscribe, uri_settable, customFunction)
+- Fragment Query Extra (elmarry)
 - Fragment after  `:~:text=1354`
-- Fragment Extra '&' at the end and the begining
+- Fragment Query starts and ends with a '&' to test so called "empty queries"
+
+The resulting URL should be:
+https://localhost:8082/demo_advanced.html?eBob=eBob#ebmarry=ebmarry?middle_name&last_name&email_address&phone_number&country_select&subscribe&uri_settable&customFunction&first_name&default_check&toggle&elmarry=elmarry:~:text=1354
+
 -->
-				<p><a href="?first_name=ff&eBob=eBob#ebmarry=ebmarry?&middle_name=m&last_name=l&email_address=e@example.com&phone_number=p&subscribe&country_select=1&uri_settable&customFunction&elmarry=elmarry&:~:text=1354">Test</a></p>
+				<p><a href="/demo_advanced.html?first_name=ff&eBob=eBob#ebmarry=ebmarry?&middle_name=m&last_name=l&email_address=e@example.com&phone_number=p&country_select=1&subscribe&uri_settable&customFunction&elmarry=elmarry&:~:text=1354">Advanced Test</a></p>
+				<p><a href="/demo_advanced.html#?&subscribe&uri_settable&customFunction&uri_settable">Bool Test </a></p>
+
 				<p><a href=""></a></p>
 				<p><a href=""></a></p>
 				<p><a href=""></a></p>
+				<br>
+				<br>
+				<br>
+				<p><a href="/demo_simple.html#?first_name=Bob&last_name=Smith&email_address=bob%40example.com&phone_number=1234567890&country_select=1&subscribe">Simple Demo </a></p>
+
+
 			</div>
 
 		</div><!-- end main container -->

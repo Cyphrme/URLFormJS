@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+<!-- h-100 for sticky footer -->
+
+<head>
+	<script src="./demo_simple.js"></script>
+	<script src="./urlform.min.js"></script>
+
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#ffffff">
+
+	<title>URLFormJS</title>
+	<link rel="stylesheet" id="bootstrapCSS" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+	<link rel="icon" href="favicon.ico" type="image/x-icon">
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+	<link rel="icon" href="favicon.ico" type="image/x-icon">
+
+	<style>
+		#CustomShareURL {
+			word-wrap: break-word;
+			max-width: 400px;
+			border-style: solid;
+			border-radius: 25px;
+			border-color: #2B5AA0;
+		}
+	</style>
+</head>
+
+<body class="d-flex flex-column h-100">
+	<header>
+		<nav class="navbar navbar-light bg-light">
+			<div class="container-fluid">
+				<a class="navbar-brand"></a>
+			</div>
+		</nav>
+	</header>
+
+
+	<main class="flex-shrink-0">
+		<div class="container-xxl text-center">
+			<a href="/"><img class="my-2" id="MainImage" src="urlformjs.png" alt="URLFormJS"></a>
+
+			<form id="ExampleUserForm">
+				<div>
+					<input type="text" id="input_first_name" name="input_first_name" placeholder="First Name">
+				</div>
+				<div>
+					<input type="text" id="input_middle_name" name="input_middle_name" placeholder="Middle Name">
+				</div>
+				<div>
+					<input type="text" id="input_last_name" name="input_last_name" placeholder="Last Name">
+				</div>
+				<div>
+					<input type="text" id="input_email_address" name="input_email_address" placeholder="Email Address">
+				</div>
+				<div>
+					<input type="text" id="input_phone_number" name="input_phone_number" placeholder="Phone Number">
+				</div>
+
+				<div class="d-flex justify-content-center">
+					<div class="form-floating w-40">
+						<select title="Example country codes for (alphabetically) first,last, and United States." class="form-select" id="input_country_select" name="country_select">
+							<option disabled selected value> -- select a country -- </option>
+							<option value="1">United States</option>
+							<option value="93">Afghanistan</option>
+							<option value="263">Zimbabwe</option>
+						</select>
+						<label class="text-start" for="input_country_select">Country</label>
+					</div>
+				</div>
+
+				<div>
+					<label for="input_subscribe">Subscribe</label>
+					<input type="checkbox" id="input_subscribe" name="input_subscribe">
+				</div>
+			</form>
+
+
+
+			<button id="CustomShareURLBtnID" class="btn mt-3 btn-primary">Generate Share URL</button>
+			<p class="mt-1 mx-auto p-5" id="CustomShareURL"></p>
+			<button id="CustomClearBtnID" class="btn mt-3 btn-danger" title="This will clear the entire form and URL queries & fragments.">Clear</button>
+
+
+
+			<div class="mt-5">
+				<p><a href="/demo_simple.html#?first_name=Bob&last_name=Smith&email_address=bob%40example.com&phone_number=1234567890&country_select=1&subscribe">Simple Demo </a></p>
+
+				<p><a href="/demo_advanced.html">Advanced Demo</a></p>
+				
+				<p><a href=""></a></p>
+				<p><a href=""></a></p>
+				<p><a href=""></a></p>
+			</div>
+
+		</div><!-- end main container -->
+	</main>
+
+	<footer class="footer mt-auto py-3 bg-light text-center">
+		<h4><a href="https://github.com/Cyphrme/URLFormJS">Source code for URLFormJS</a></h4>
+	</footer>
+</body>
+
+</html>

@@ -19,15 +19,15 @@
  *                  URI parameter "retrieve" and HTML id "Retrieve".
  *
  * type           Type of the parameter (bool/string/number). Defaults to
- *                  string. For 'bool', if the parameter is present in the URL
+ *                  `string`. 
+ *                  For `bool`, if the parameter is present in the URL
  *                  and has a function set in 'funcTrue', the function will be
- *                  executed. (e.g. https://localhost/?send_news_and_updates)
- *                  using the example above will execute the 'ToggleVisible'
- *                  function. Negative flags specify an explicit value and are
- *                  only supported on bool types. e.g. `&foo` with a default
- *                  value of `false` will be overwritten to true. A url with
- *                  no query params with a form parameter `foo` having a default
- *                  value of `true` will populate the element with `true`.
+ *                  executed.  
+ *                  Bool negative flags specify an explicit value and are only
+ *                  supported on bool types. e.g. `&-foo which denotes a value
+ *                  of `false`.  Negative flags are only used when default value
+ *                  is `true` and form value is `false`.  See README.  
+ *
  *
  * func           Called if set on each call to SetForm
  *                  (Populate and PopulateFromValues).
@@ -49,7 +49,10 @@
  *                  overwritten by URL flag values if present.
  * 
  * defaultValue   Element is populated with the specified default value on page
- *                  loads (unless otherwise specified).
+ *                  loads (unless otherwise specified).  Bools support defaults,
+ *                  e.g. a url with no URL params and a form parameter `foo`
+ *                  having a default value of `true` will populate the element
+ *                  with `true`.
  * @typedef  {Object}        FormParameter
  * @property {String}        name
  * @property {String}        [id]
@@ -126,7 +129,7 @@
  * 
  * Read only:
  * - FormParameters           Set by Init(). (Allows FormOptions to encapsulate
- *                            FormParameters.)
+ *                            FormParameters.) See docs on FormParameter. 
  * - Sanitized:               Whether 'FormOptions' has been sanitized.
  * - Inited:                  Whether URLFormJS module was initialized.
  * - ShareURLBtnElement:      Share URL button element in GUI.
@@ -136,6 +139,7 @@
  * - formID:               HTMLFormElement ID of <form>. Sets `formMode` to true
  *                         if populated. 
  * 
+ * // TODO test "FormMode" where FormParameters are known from Form and not set.  
  * Form Mode read only
  * - FormMode:          Use `<form>` mode.  FormOptions must include a form
  *                      'id' found in the GUI.
@@ -278,7 +282,7 @@ const DefaultFormOptions = {
  * @returns {FormOptions} 
  */
 function Init(formOptions) {
-	// console.log(formOptions)
+	console.log("Initializing URLFormJS: ", formOptions);
 	let formOpt = {}
 	formOpt = sanitizeFormOptions(formOptions)
 
@@ -304,7 +308,7 @@ function Init(formOptions) {
 	// refresh page on first enter, but the second enter and the following
 	// corrects this errant behavior.
 	// Related events: [locationchange, hashchange]
-	window.addEventListener('hashchange', function () {
+	window.addEventListener('hashchange', function() {
 		window.location.reload()
 	})
 
@@ -313,24 +317,17 @@ function Init(formOptions) {
 }
 
 
-/**
- * SetURLNoReload sets the full URL, without reloading. Helper function for both
- * explicitly setting a URL without reloading, and syntax. This function also
- * serves as code as documentation.
- * @param   {String}    url   Full URL
- * @returns {void}
- */
-function SetURLNoReload(url) {
-	window.history.pushState({}, '', url)
-}
+
 
 /**
- * Populate populates the GUI from the URI and saved setting.
+ * Populate populates the GUI (form and share links) from the URI and saved
+ * setting.
  * @param   {FormOptions}    formOptions
  * @returns {void}
  * @throws  {Error}           If Init() has not been called.
  */
 function Populate(formOptions) {
+	//console.log("Populate");
 	// Get local storage settings.  If set, URI should overwrite.  
 	let savedPairs = {}
 	for (let fp of formOptions.FormParameters) {
@@ -344,13 +341,12 @@ function Populate(formOptions) {
 		...savedPairs,
 		...uriPairs,
 	}
+	//console.log("savedPairs", savedPairs, "uriPairs", uriPairs, "Pairs", pairs);
 	PopulateFromValues(pairs, formOptions)
 }
 
 /**
- * Populates the form initialized in `Init()` from the given values. Values are
- * the given values to populate the form.
- * 
+ * Populates the GUI (form and share links) using the given key:value pairs. 
  * @param   {QuagPairs}   quagPairs
  * @param   {FormOptions} formOptions
  * @returns {void}
@@ -364,112 +360,66 @@ function PopulateFromValues(quagPairs, formOptions) {
 	ShareURI(formOptions)
 }
 
-/**
- * getFragmentString returns URL fragment as a string, not including '#'.
- * See notes in function.
- *
- * @returns {Fragment.string}
- */
-function getFragmentString() {
-	let fParts = window.location.hash.split("#") // May not work in chrome, see note below.
-
-	// Chrome removes ':~:' (fragment directives (for text fragments)), and
-	// anything after the text fragment. Thus, calling 'window.location.hash' with
-	// a URL of:
-	// https://localhost:8082/#:~:text=hello?first_name=asdf&last_name=hello
-	// will result: '#a'. And calling 'window.location.hash' with a URL of:
-	// https://localhost:8082/#?first_name=asdf&last_name=hello:~:text=hello
-	// will result: '#?first_name=asdf&last_name=hello'.
-	// Firefox sees and preserves the text fragment. See:
-	// https://stackoverflow.com/a/73366996/1923095
-	// and
-	// https://github.com/WICG/scroll-to-text-fragment/issues/193#issuecomment-1219640246
-	//
-	// FireFox's way of handling the text fragment using 'window.location'is
-	// correct and the following performs a secondary check for other browsers
-	// (Chrome) that have changed the behavior of 'window.location'.
-	//
-	// Use 'performance' API for browsers other than 'Firefox', to
-	// properly handle text fragments MDN recommends never using user agent or
-	// browsers to determine logic, but this is the only way in Chrome to
-	// guaranteed to be given the full URL now that Chrome may remove parts of
-	// the URL. (WTF).
-	//
-	// When running files locally, calling
-	// `performance.getEntriesByType('navigation')[0].name`
-	// will return an empty string. Thus, running a file locally that uses
-	// URLFormJS, and using Chrome, will have no way of preserving fragment
-	// directives in the URL, since they cannot be interpreted by the browser.
-	// Another problem under this circumstance is that if the fragment
-	// directive comes before the fragment query, the fragment query will not
-	// be interpreted either.
-	// TODO Implement Chrome API for directives when supported:
-	// https://github.com/WICG/scroll-to-text-fragment/blob/main/fragment-directive-api.md
-
-	// See issues for not retrieving full URL (with fragment directives) when
-	// using 'file://' protocol:
-	// https://github.com/mozilla/standards-positions/issues/194#issuecomment-1224592766
-	// https://github.com/WICG/scroll-to-text-fragment/issues/196#issue-1348444072
-
-	// Can't use 'name' in performance when running locally.
-	if (window.location.protocol !== "file:" && !navigator.userAgent.includes('Firefox')) {
-		fParts = performance.getEntriesByType('navigation')[0].name.split("#")
-	}
-
-	if (fParts.length == 1) { // only "#"
-		return ""
-	}
-	// Always decode URL, even if not URL encoded.
-	return decodeURIComponent(fParts[1])
-}
-
 
 /**
- * SetForm sets GUI for each parameter, and executes funcTrue() per parameter,
- * if applicable. See docs in 'FormOptions'. Form wide options are also executed
- * (e.g. 'callback' in 'FormOptions').
+ * SetForm sets GUI for each parameter and executes funcTrue() per parameter.
+ * See docs in 'FormOptions'. Form wide options are also executed (e.g.
+ * 'callback' in 'FormOptions').
  *
  * @param   {QuagPairs}    kv
  * @param   {FormOptions}  formOptions
  * @returns {void}
  */
 function SetForm(kv, formOptions) {
+	//console.log("SetForm:", kv, formOptions);
 	try {
 		for (let fp of formOptions.FormParameters) {
 			// Set as vars to avoid mutability.
 			let id = fp.id
 			let name = fp.name
+			let value = ""
+			// If id is empty, assume name is the id on the page.
+			if (isEmpty(id)) {
+				id = formOptions.prefix + name
+			}
 
-			let value = fp.defaultValue
-			let hasNegative = (kv["-" + name] !== undefined) // Don't use `isEmpty`.
+			// "undefined" does not need to be a string as long as fp itself is
+			// defined.  `defaultValue` will be `undefined` (not a string) if not set.
+			if (fp.defaultValue !== undefined) { // TODO consider using typeof on undefined. 
+				//console.log("Default value is set.");
+				value = fp.defaultValue
+			}
+			let hasNegative = (kv["-" + name] !== undefined) // Don't use `isEmpty`. // TODO test `!== undefined`
 			if (hasNegative && fp.type == "bool") {
+				//console.log("Has Negative");
 				value = false
-			} else if (!isEmpty(kv[name])) {
+			}
+			if (name in kv) {
 				value = kv[name]
+			}
+			//console.log(id, name, value);
+
+			// Sanitize bool `true` to string true 
+			if (value === true) {
+				value = "true"
+			}
+			// Flag will have a key present in kv, but am empty value. Flag values for bool
+			// may be `true` or empty. Empty as a flag is interpreted as true.
+			if (fp.type === "bool" && value === "" && kv[name] !== undefined) {
+				value = "true"
 			}
 
 			// Run func if set
 			if (!isEmpty(fp.func)) {
 				fp.func()
 			}
-
-			// If id is empty, assume name is the id on the page.
-			if (isEmpty(id)) {
-				id = formOptions.prefix + name
-			}
-
-			// Sanitize bool `true` to string true and sanitize flags. Flag values for
-			// bool may be `true` or empty. Empty as a flag is interpreted as true.
-			if (value === true || (fp.type === "bool" && value === "")) {
-				value = "true"
-			}
-
-			// Run `funcTrue`. Value may be "true", or empty "" (flag).
+			// Run `funcTrue`.
 			if (fp.type == "bool" && value === "true") {
 				if (!isEmpty(fp.funcTrue)) {
 					fp.funcTrue()
 				}
 			}
+			//console.log("Before set GUI", fp.type, name, value)
 
 			// Finally Set Gui
 			let e = document.getElementById(id)
@@ -524,7 +474,7 @@ function getSavedSetting(name, formOptions) {
  * @returns {void}
  */
 function setSavedSetting(name, value, formOptions) {
-	console.log("URLFormJS - Saving setting:", name, value)
+	//console.log("URLFormJS - Saving setting:", name, value)
 	return localStorage.setItem(formOptions.localStorageNamespace + formOptions.prefix + name, value)
 }
 
@@ -605,48 +555,62 @@ function sanitizeFormOptions(formOptions) {
 }
 
 /**
- * Generates a share URL from the current URL and form, populates the GUI with
- * share links, and returns the URL encoded URL.
+ * ShareURI 
+ * 1. Generates a share URL from the current URL and form, 
+ * 2. Populates the GUI share links, 
+ * 3. Returns URL.
  *
  * Fragment query parameters take precedence over query parameters.
  *
  * @param   {FormOptions}   formOptions
  * @returns {URL}           Javascript URL object.
  */
-function ShareURI(formOptions) {
-	let q = GetQuagParts(formOptions) // Current URL values.
+async function ShareURI(formOptions) {
+	//console.log("ShareURI", await JSON.stringify(formOptions));
 	let formPairs = GetForm(formOptions) // Current form values.
-	var u = new URL(window.location.origin + window.location.pathname)
+	let q = GetQuagParts(formOptions) // Current URL values.
+	var u = new URL(window.location.origin + window.location.pathname) // Current URL.  
 
-	// label for outer for loop.  
-	loop1: for (let fp of formOptions.FormParameters) {
+	//console.log("formPairs:", formPairs, "\nq:", q, "\nURL:", u);
+
+	// Build fragment.pairs which is then used to generate a new URL.  
+	for (let fp of formOptions.FormParameters) {
+		//console.log(fp);
+
 		let value = encodeURIComponent(formPairs[fp.name])
-		// console.log(fp, fp.name, value, q.pairs.hasOwnProperty(fp.name))
-		// console.log(fp.name + ": " + value)
-
-		// Sets value if populated.  Otherwise removes from the query/fragment. (A
-		// query parameter set in fragment, or a fragment parameter set in Query.
-		// Note: bools on false will not have been cleared yet.)
-		while (true) {
-			if (!isEmpty(value)) {
-				break
-			}
-
-			// console.log(isEmpty(fp.funcTrue))
-			if (q.pairs.hasOwnProperty(fp.name) && fp.nonFormValue) {
-				break
-			}
-			// console.log("Deleting: " + fp.name)
-
-			u.searchParams.delete(fp.name)
-			delete q.fragment.pairs[fp.name]
-			// console.log("Deleting and continuing", fp.name)
-			continue loop1 // Continue "breaks"
-		}
-
-		if (fp.type == "bool") { // Always use flag form for bools.  
+		if (value == "undefined") {
 			value = ""
 		}
+		//console.log("q.pairs.hasOwnProperty: ", q.pairs.hasOwnProperty(fp.name), "\nvalue:", value)
+
+
+		if (fp.type == "bool") {
+			if (value === false) {
+				value = "false"
+			}
+			// "Negative" flag for default true (Bools with default "true" values).
+			if (fp.defaultValue === true && value == "") {
+				//console.log("Negative flag");
+				value = "false"
+			}
+		}
+
+		// TODO WTF first check, but second part is checking if value is already in URL and does not
+		// "re-add" the value.  
+		if (fp.nonFormValue && q.pairs.hasOwnProperty(fp.name)) { // WTF
+			break
+		}
+
+		// If empty, remove from fragment.pairs and the URL. 
+		if (value == "") {
+			//console.log("Deleting: " + fp.name)
+			u.searchParams.delete(fp.name)
+			delete q.fragment.pairs[fp.name]
+			continue
+		}
+
+
+		//console.log("Not Empty:", fp.name, value)
 
 		// Set to Fragment
 		if (fp.queryLocation === QueryLocationFragment) {
@@ -655,10 +619,13 @@ function ShareURI(formOptions) {
 			continue
 		}
 
+
 		// Set to Query
 		u.searchParams.set(fp.name, value)
 		delete q.fragment.pairs[fp.name]
 	}
+
+	//console.log("Out of loop");
 
 	// Query extras
 	if (!isEmpty(q.query.extras) && !formOptions.cleanURL) {
@@ -666,6 +633,8 @@ function ShareURI(formOptions) {
 			u.searchParams.set(e, q.query.extras[e])
 		}
 	}
+
+	//console.log(await JSON.stringify(q.fragment));
 
 	// Rebuild fragment query in case new form fields were set.
 	u.hash = quagPartsToURLHash(q.fragment, formOptions)
@@ -705,11 +674,14 @@ function setShareURL(href, formOptions) {
  * @returns {String}        Fragment string (#<before>?<middle(fromForm?extras)>[delimiter]<after>).
  */
 function quagPartsToURLHash(fragment, formOptions) {
-	// URL Fragment has three parts: 1. before fragment query, 2. fragment query, 3.
-	// after fragment query.  
+	// URL Fragment has three parts: 
+	//  1. before fragment query, 
+	//  2. fragment query, 
+	//  3. after fragment query.  
 
 	// Concatenate fragment ("#") and before.
 	let fqs = "#" + fragment.before
+	//console.log(fragment.pairs)
 
 	// Middle.  Build the fragment query.  (Query is the middle).
 	var i = Object.keys(fragment.pairs).length
@@ -717,40 +689,53 @@ function quagPartsToURLHash(fragment, formOptions) {
 		fqs += "?" //start fragment query delimiter ("?")
 		for (let key in fragment.pairs) {
 			i--
-			let eq = "="
+			let value = "=" + fragment.pairs[key] // Value includes "="
 			let fp = formOptions.FormParameters.find(a => a.name == key)
 			if (fragment.pairs[key] == "" && fp.type == "bool") {
-				eq = "" // flag style.  No "=" in string if parameter is flag. 
+				value = "" // flag style.  No "=" in string if parameter is flag. 
 			}
-			fqs += key + eq + encodeURIComponent(fragment.pairs[key])
-			if (i > 0) {
-				fqs += "&" // Add separator on everything except the last.  
+
+			// Always use flag style on Bools. 
+			if (fp.type === "bool") {
+				if (fragment.pairs[key] === "false") {
+				//console.log("negative value");
+				key = "-" + key
+				value = ""
+			} else {
+				value = ""
 			}
 		}
-	}
 
-	// Extras (still in middle)
-	let j = Object.keys(fragment.extras).length
-	if (Object.keys(fragment.pairs).length && j > 0) {
-		fqs += "&" // Prepend extras with ampersand if fragment is populated. 
-	}
-	// Append extras back in query params
-	if (j > 0 && !formOptions.cleanURL) {
-		for (let e in fragment.extras) {
-			j--
-			fqs += e + "=" + encodeURIComponent(fragment.extras[e])
-			if (j > 0) {
-				fqs += "&"
-			}
+		fqs += key + value
+		if (i > 0) {
+			fqs += "&" // Add separator on everything except the last.  
 		}
 	}
+}
+//console.log(fqs);
 
-	// After.
-	fqs += fragment.after
-	if (fqs == "#") { // Return empty string if fragment is empty.  
-		return ""
+// Extras (still in middle)
+let j = Object.keys(fragment.extras).length
+if (Object.keys(fragment.pairs).length && j > 0) {
+	fqs += "&" // Prepend extras with ampersand if fragment is populated. 
+}
+// Append extras back in query params
+if (j > 0 && !formOptions.cleanURL) {
+	for (let e in fragment.extras) {
+		j--
+		fqs += e + "=" + encodeURIComponent(fragment.extras[e])
+		if (j > 0) {
+			fqs += "&"
+		}
 	}
-	return fqs
+}
+
+// After.
+fqs += fragment.after
+if (fqs == "#") { // Return empty string if fragment is empty.  
+	return ""
+}
+return fqs
 }
 
 
@@ -771,6 +756,12 @@ function getPairs(s) {
 		let kv = parts[i].split('=')
 		let key = kv[0]
 		let value = kv[1]
+
+		if (key.at(0) === "-") { // Sanitize for negative flags.
+			key = removeNegativeFlag(key)
+			value = "false";
+		}
+
 		// If the string begins/ends with "&", there will be an empty element. 
 		if (isEmpty(key)) {
 			continue
@@ -858,9 +849,11 @@ function GetQuagParts(formOptions) {
 	for (let p of formOptions.FormParameters) {
 		formParams.push(p.name)
 	}
+	//console.log(formParams);
 
 	// Extra query pairs.
 	for (let key of Object.keys(qp.query.pairs)) {
+		key = removeNegativeFlag(key); // Sanitize for negative flags.  
 		if (!formParams.includes(key)) {
 			qp.query.extras[key] = qp.query.pairs[key]
 			delete qp.query.pairs[key]
@@ -868,13 +861,22 @@ function GetQuagParts(formOptions) {
 	}
 	// Extra frag pairs.
 	for (let key of Object.keys(qp.fragment.pairs)) {
+		key = removeNegativeFlag(key); // Sanitize for negative flags.  
 		if (!formParams.includes(key)) {
 			qp.fragment.extras[key] = qp.fragment.pairs[key]
 			delete qp.fragment.pairs[key]
 		}
 	}
-
+	//console.log(qp);
 	return qp
+}
+
+// Removes the string with a beginning "-" removed if present.  
+function removeNegativeFlag(key) {
+	if (key.at(0) === "-") {
+		return key.substring(1)
+	}
+	return key
 }
 
 /**
@@ -1004,6 +1006,69 @@ function GetFormElements(formOptions) {
 }
 
 
+
+
+/**
+ * getFragmentString returns URL fragment as a string, not including '#'.
+ * See notes in function.
+ *
+ * @returns {Fragment.string}
+ */
+function getFragmentString() {
+	let fParts = window.location.hash.split("#") // May not work in chrome, see note below.
+
+	// Chrome removes ':~:' (fragment directives (for text fragments)), and
+	// anything after the text fragment. Thus, calling 'window.location.hash' with
+	// a URL of:
+	// https://localhost:8082/#:~:text=hello?first_name=asdf&last_name=hello
+	// will result: '#a'. And calling 'window.location.hash' with a URL of:
+	// https://localhost:8082/#?first_name=asdf&last_name=hello:~:text=hello
+	// will result: '#?first_name=asdf&last_name=hello'.
+	// Firefox sees and preserves the text fragment. See:
+	// https://stackoverflow.com/a/73366996/1923095
+	// and
+	// https://github.com/WICG/scroll-to-text-fragment/issues/193#issuecomment-1219640246
+	//
+	// FireFox's way of handling the text fragment using 'window.location'is
+	// correct and the following performs a secondary check for other browsers
+	// (Chrome) that have changed the behavior of 'window.location'.
+	//
+	// Use 'performance' API for browsers other than 'Firefox', to
+	// properly handle text fragments MDN recommends never using user agent or
+	// browsers to determine logic, but this is the only way in Chrome to
+	// guaranteed to be given the full URL now that Chrome may remove parts of
+	// the URL. (WTF).
+	//
+	// When running files locally, calling
+	// `performance.getEntriesByType('navigation')[0].name`
+	// will return an empty string. Thus, running a file locally that uses
+	// URLFormJS, and using Chrome, will have no way of preserving fragment
+	// directives in the URL, since they cannot be interpreted by the browser.
+	// Another problem under this circumstance is that if the fragment
+	// directive comes before the fragment query, the fragment query will not
+	// be interpreted either.
+	// TODO Implement Chrome API for directives when supported:
+	// https://github.com/WICG/scroll-to-text-fragment/blob/main/fragment-directive-api.md
+
+	// See issues for not retrieving full URL (with fragment directives) when
+	// using 'file://' protocol:
+	// https://github.com/mozilla/standards-positions/issues/194#issuecomment-1224592766
+	// https://github.com/WICG/scroll-to-text-fragment/issues/196#issue-1348444072
+
+	// Can't use 'name' in performance when running locally.
+	if (window.location.protocol !== "file:" && !navigator.userAgent.includes('Firefox')) {
+		fParts = performance.getEntriesByType('navigation')[0].name.split("#")
+	}
+
+	if (fParts.length == 1) { // only "#"
+		return ""
+	}
+	// Always decode URL, even if not URL encoded.
+	return decodeURIComponent(fParts[1])
+}
+
+
+
 /**
  * Clear clears out a form.
  *
@@ -1056,16 +1121,6 @@ function Clear(formOptions) {
 	setShareURL(u.href, formOptions)
 }
 
-/**
- * IsEmpty returns whether or not the initialized form is empty.
- * 
- * @param   {FormOptions}   formOptions
- * @returns {Boolean}  Whether or not the form is empty.
- * @throws  {Error}    Fails if form is not of type HTMLFormElement.
- */
-function IsEmpty(formOptions) {
-	return isEmpty(GetForm(formOptions))
-}
 
 /**
  * GetDefaultFormOptions returns the Initialized default form options.
@@ -1076,6 +1131,28 @@ function IsEmpty(formOptions) {
  */
 function GetDefaultFormOptions() {
 	return DefaultFormOptions
+}
+
+/**
+ * SetURLNoReload sets the full URL, without reloading. Helper function for both
+ * explicitly setting a URL without reloading, and syntax. This function also
+ * serves as code as documentation.
+ * @param   {String}    url   Full URL
+ * @returns {void}
+ */
+function SetURLNoReload(url) {
+	window.history.pushState({}, '', url)
+}
+
+/**
+ * IsEmpty returns whether or not the initialized form is empty.
+ * 
+ * @param   {FormOptions}   formOptions
+ * @returns {Boolean}  Whether or not the form is empty.
+ * @throws  {Error}    Fails if form is not of type HTMLFormElement.
+ */
+function IsEmpty(formOptions) {
+	return isEmpty(GetForm(formOptions))
 }
 
 
@@ -1156,11 +1233,11 @@ function isBool(bool) {
 
 //////////////////////////////Regex_match_for_truncation_for_umd
 // UMD export see https://github.com/Cyphrme/UMD_tutorial
-(function (global, factory) {
+(function(global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 		typeof define === 'function' && define.amd ? define(['exports'], factory) :
 		(global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.URLForm = {}))
-})(this, (function (exports) {
+})(this, (function(exports) {
 	exports.Init = Init
 	exports.SetURLNoReload = SetURLNoReload
 	exports.PopulateFromValues = PopulateFromValues
