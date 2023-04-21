@@ -8,25 +8,25 @@ const FormOptions = {
 	"clearBtn": "#CustomClearBtnID",
 
 	"FormParameters": [
-		{
-			"name": "first_name",
-			"queryLocation":"query",
-		},
-		{
-			"name": "middle_name",
-		},
-		{
-			"name": "last_name",
-		},
-		{
-			"name": "email_address",
-		},
-		{
-			"name": "phone_number",
-		},
-		{
-			"name": "country_select",
-		},
+		// {
+		// 	"name": "first_name",
+		// 	"queryLocation":"query",
+		// },
+		// {
+		// 	"name": "middle_name",
+		// },
+		// {
+		// 	"name": "last_name",
+		// },
+		// {
+		// 	"name": "email_address",
+		// },
+		// {
+		// 	"name": "phone_number",
+		// },
+		// {
+		// 	"name": "country_select",
+		// },
 
 		/////////////////
 		// Bools

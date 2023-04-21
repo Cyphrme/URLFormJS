@@ -87,11 +87,13 @@ The quag includes `?` and `#`.
                                                   | 
                                                  quag
 
+See notes on [FileVer][FileVer] and in the future package "Cyphrme/URIPath".  
+
 
 # `FormOptions` and `FormParameters`
-URLFormJS is configured by two configuration objects.  
-
-See `index.js` for an example of `FormParameters`.  The docs are in `urlform.js`.
+URLFormJS uses two configuration objects, `FormOptions` and `FormParameters`
+which are documented in `urlform.js`.. See `index.js` for an example of
+`FormParameters`.  
 
 
 # Install
@@ -162,8 +164,13 @@ Then go to `localhost:8082` for the results.
 Tests are also [Github hosted](https://cyphrme.github.io/URLFormJS/browsertestjs/browsertest.html).
 
 
+# More Notes
+## URI Encoding
+Only URLFormJS defined parameter values are URI encoded.  Keys and existing URI
+components ("extras") are left untouched.  
 
-#### Demonstration that fragment is not sent to the server from the browser.  
+
+## Demonstration that fragment is not sent to the server from the browser.  
 The test server logs requests and can be used to demonstrated that
 fragment is not sent to the server by the browser by visiting
 `https://localhost:8082?name=bob#test` or using curl:
@@ -174,7 +181,7 @@ curl -k https://localhost:8082?name=bob#test
 
 Note that `?name=bob` appears in the log but `#test` does not.  
 
-# Fragment Directive/Text Fragment Chrome bugs
+## Fragment Directive/Text Fragment Chrome bugs
 Chrome and potentially other browsers are removing anything after fragment
 directives from the URL when using 'window.location'.  This library gracefully
 handles this bug except when the protocol is `file://`.  See notes on
@@ -187,7 +194,7 @@ character URL escaped.
 breaking](https://cyphrme.github.io/URLFormJS/fragment_text_demonstration.html)
 
 
-# Probably out of scope for this library:
+## Probably out of scope for this library:
 - JSON Schema validation. 
 - Form validation.  
 - Field requirements/limitations. 
@@ -201,3 +208,7 @@ URLFormJS is released under The 3-Clause BSD License.
 
 "Cyphr.me" is a trademark of Cypherpunk, LLC. The Cyphr.me logo is all rights
 reserved Cypherpunk, LLC and may not be used without permission.
+
+
+
+[FileVer]: https://github.com/Cyphrme/FileVer

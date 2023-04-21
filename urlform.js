@@ -2,243 +2,242 @@
 'use strict'
 
 /**
- * FormParameter are the options for a form's field/parameter.
- *
- * Example:
- * {
- *  "name": "send_news_and_updates",
- *  "id":   "input_send_news_and_updates',
- *  "type": "bool",
- *  "funcTrue": ()=> ToggleVisible(document.querySelector("#advancedOptions"))
- * }
- *
- * name           Parameter name in the URI.  Is used as the default value for
- *                  id.
- *
- * id             Id of the HTML element if it differs from the name. Example,
- *                  URI parameter "retrieve" and HTML id "Retrieve".
- *
- * type           Type of the parameter (bool/string/number). Defaults to
- *                  `string`. 
- *                  For `bool`, if the parameter is present in the URL
- *                  and has a function set in 'funcTrue', the function will be
- *                  executed.  
- *                  Bool negative flags specify an explicit value and are only
- *                  supported on bool types. e.g. `&-foo which denotes a value
- *                  of `false`.  Negative flags are only used when default value
- *                  is `true` and form value is `false`.  See README.  
- *
- *
- * func           Called if set on each call to SetForm
- *                  (Populate and PopulateFromValues).
- *
- * funcTrue       Execute if param is true. e.g. `"funcTrue": () => {
- *                  ToggleVisible(document.querySelector("#advancedOptions"))}`
- *
- * queryLocation  Option for overriding the param in the URL link to either
- *                  be a query parameter, or a fragment query. Defaults to empty
- *                  string, which will inherit the 'defaultQueryLocation' from
- *                  the form wide options.
- * 
- * nonFormValue   Values that do not appear in the form, but may appear in the
- *                 URL.  URL non-form values will be sticky, e.g. they must be
- *                 manually removed from the URL if already set in the URL.
- *                 Otherwise, ShareURL will preserve all set non-form values.  
- * 
- * saveSetting    Save and use this setting from local storage.  Will be
- *                  overwritten by URL flag values if present.
- * 
- * defaultValue   Element is populated with the specified default value on page
- *                  loads (unless otherwise specified).  Bools support defaults,
- *                  e.g. a url with no URL params and a form parameter `foo`
- *                  having a default value of `true` will populate the element
- *                  with `true`.
- * @typedef  {Object}        FormParameter
- * @property {String}        name
- * @property {String}        [id]
- * @property {ParamType}     [type=string]
- * @property {Function}      [func]
- * @property {Function}      [funcTrue]
- * @property {QueryLocation} [queryLocation=""]
- * @property {NonFormValue}  [nonFormValue]
- * @property {Boolean}       [saveSetting=false]
- * @property {Boolean}       [defaultValue=false]
- * 
+FormParameter are the options for a form's field/parameter.
+
+Example:
+{
+ "name": "send_news_and_updates",
+ "id":   "input_send_news_and_updates',
+ "type": "bool",
+ "funcTrue": ()=> ToggleVisible(document.querySelector("#advancedOptions"))
+}
+
+name           Parameter name in the URI.  Is used as the default value for
+                 id.
+
+id             Id of the HTML element if it differs from the name. Example,
+                 URI parameter "retrieve" and HTML id "Retrieve".
+
+type           Type of the parameter (bool/string/number). Defaults to
+                 `string`. 
+                 For `bool`, if the parameter is present in the URL
+                 and has a function set in 'funcTrue', the function will be
+                 executed.  
+                 Bool negative flags specify an explicit value and are only
+                 supported on bool types. e.g. `&-foo which denotes a value
+                 of `false`.  Negative flags are only used when default value
+                 is `true` and form value is `false`.  See README.  
+
+func           Called if set on each call to SetForm
+                 (Populate and PopulateFromValues).
+
+funcTrue       Execute if param is true. e.g. `"funcTrue": () => {
+                 ToggleVisible(document.querySelector("#advancedOptions"))}`
+
+queryLocation  Option for overriding the param in the URL link to either
+                 be a query parameter, or a fragment query. Defaults to empty
+                 string, which will inherit the 'defaultQueryLocation' from
+                 the form wide options.
+
+nonFormValue   Values that do not appear in the form, but may appear in the
+                URL.  URL non-form values are sticky, e.g. they must be
+                manually removed from the URL if already set in the URL.
+                Otherwise, ShareURL will preserve all set non-form values.  
+
+saveSetting    Save and use this setting from local storage.  Overwritten by URL
+                flag values if present.
+
+defaultValue   Element is populated with the specified default value on page
+                 loads (unless otherwise specified).  Bools support defaults,
+                 e.g. a url with no URL params and a form parameter `foo`
+                 having a default value of `true` will populate the element
+                 with `true`.
+@typedef  {Object}        FormParameter
+@property {String}        name
+@property {String}        [id]
+@property {ParamType}     [type=string]
+@property {Function}      [func]
+@property {Function}      [funcTrue]
+@property {QueryLocation} [queryLocation=""]
+@property {NonFormValue}  [nonFormValue]
+@property {Boolean}       [saveSetting=false]
+@property {Boolean}       [defaultValue=false]
+
  */
 
 /**
- * ParamType is the type for a given FormParameter.
- *
- * A ParamType may be one of the following:
- * - "string":  String and default type.
- * - "bool":    Boolean used for checkboxes.
- * - "number":  Number will convert text values to number and sanitize NaN.
- * - "":        Uses the default.
- * @typedef {"string" | "bool" | "number" | ""} ParamType
+ParamType is the type for a given FormParameter.
+
+A ParamType may be one of the following:
+- "string":  String and default type.
+- "bool":    Boolean used for checkboxes.
+- "number":  Number will convert text values to number and sanitize NaN.
+- "":        Uses the default.
+@typedef {"string" | "bool" | "number" | ""} ParamType
  */
 
 /**
- * QueryLocation is the option for what kind of query a form and/or form
- * parameter will be.
- *
- * A QueryLocation may be one of the following:
- * - "fragment": The query is preceded by '#' and '?'.
- * - "query":    The query is preceded by '?'.
- * - "":         Empty will inherit the form wide option for 'queryLocation'.
- * @typedef {"fragment" | "query" | ""} QueryLocation
+QueryLocation is the option for what kind of query a form and/or form
+parameter will be.
+
+A QueryLocation may be one of the following:
+- "fragment": The query is preceded by '#' and '?'.
+- "query":    The query is preceded by '?'.
+- "":         Empty will inherit the form wide option for 'queryLocation'.
+@typedef {"fragment" | "query" | ""} QueryLocation
  */
 
 /**
- * FormParameters is the main form object (Array) that holds the different
- * `FormParameter` field objects.
- * @typedef {Array<FormParameter>} FormParameters
+FormParameters is the main form object (Array) that holds the different
+`FormParameter` field objects.
+@typedef {Array<FormParameter>} FormParameters
  */
 
 /**
- * FormOptions are the optional fields for the initialized form. The FormOptions
- * object itself is not optional, and requires the 'id' of the initialized form.
- * The 'id' should match the 'id' of the HTMLFormElement on the page.
- * 
- * FormOptions are in this form:
- * {
- * "id":"ExampleUserForm",
- * "prefix": "input_"
- * }
- * 
- * Fields:
- * - prefix:               Form input prefix which will be prepended to name.
- * 
- * - clearBtn:             Button element for clearing the form and
- *                         queries/fragments in the URL.
- * 
- * - shareURL:             Element ID of <a> for share link.
- * 
- * - shareURLBtn:          Button element triggers generating share link.
- * 
- * - shareURLArea:         Element ID of text area for share link.
- * 
- * - defaultQueryLocation: Link sets parameter in query or fragment query.
- *                         Defaults to fragment query (recommended).
- * 
- * - callback:             Function that's executed each time the form is
- *                         processed.
- * 
- * - cleanURL:             If set to `true`, does not preserve any extra
- *                         information from the URL that is not in the
- *                         initialized form. Defaults to false.
- * 
- * Read only:
- * - FormParameters           Set by Init(). (Allows FormOptions to encapsulate
- *                            FormParameters.) See docs on FormParameter. 
- * - Sanitized:               Whether 'FormOptions' has been sanitized.
- * - Inited:                  Whether URLFormJS module was initialized.
- * - ShareURLBtnElement:      Share URL button element in GUI.
- * - ClearBtnElement:         Clear the `shareURL` and form in GUI.
- * 
- * "Form mode" parameters:
- * - formID:               HTMLFormElement ID of <form>. Sets `formMode` to true
- *                         if populated. 
- * 
- * // TODO test "FormMode" where FormParameters are known from Form and not set.  
- * Form Mode read only
- * - FormMode:          Use `<form>` mode.  FormOptions must include a form
- *                      'id' found in the GUI.
- * - FormElement:       Form element in GUI, specified by 'id' in 'FormOptions'.
- * @typedef  {Object}               FormOptions
- * @property {FormParameters}       FormParameters
- * @property {String}               [prefix]
- * @property {String}               [clearBtn]
- * @property {String}               [shareURLBtn] 
- * @property {String}               [shareURL]
- * @property {String}               [shareURLArea]
- * @property {QueryLocation}        [defaultQueryLocation="fragment"]
- * @property {Function}             [callback]
- * @property {Boolean}              [cleanURL=false]
- * 
- * // Read only Values (Set internally by library)
- * @property {Boolean}              Sanitized=false
- * @property {Boolean}              Inited=false
- * @property {HTMLButtonElement}    ShareURLBtnElement
- * @property {HTMLButtonElement}    ClearBtnElement
- * 
- * // Form Mode
- * @property {String}               [formID]
- * // Form Mode Read Only
- * @property {Boolean}              FormMode=false
- * @property {HTMLFormElement}      FormElement
+FormOptions are the optional fields for the initialized form. The FormOptions
+object itself is not optional, and requires the 'id' of the initialized form.
+The 'id' should match the 'id' of the HTMLFormElement on the page.
+
+FormOptions are in this form:
+{
+"id":"ExampleUserForm",
+"prefix": "input_"
+}
+
+Fields:
+- prefix:               Form input prefix which will be prepended to name.
+
+- clearBtn:             Button element for clearing the form and
+                        queries/fragments in the URL.
+
+- shareURL:             Element ID of <a> for share link.
+
+- shareURLBtn:          Button element triggers generating share link.
+
+- shareURLArea:         Element ID of text area for share link.
+
+- defaultQueryLocation: Link sets parameter in query or fragment query.
+                        Defaults to fragment query (recommended).
+
+- callback:             Function that's executed each time the form is
+                        processed.
+
+- cleanURL:             If set to `true`, does not preserve any extra
+                        information from the URL that is not in the
+                        initialized form. Defaults to false.
+
+Read only:
+- FormParameters           Set by Init(). (Allows FormOptions to encapsulate
+                           FormParameters.) See docs on FormParameter. 
+- Sanitized:               Whether 'FormOptions' has been sanitized.
+- Inited:                  Whether URLFormJS module was initialized.
+- ShareURLBtnElement:      Share URL button element in GUI.
+- ClearBtnElement:         Clear the `shareURL` and form in GUI.
+
+"Form mode" parameters:
+- formID:               HTMLFormElement ID of <form>. Sets `formMode` to true
+                        if populated. 
+
+// TODO test "FormMode" where FormParameters are known from Form and not set.  
+Form Mode read only
+- FormMode:          Use `<form>` mode.  FormOptions must include a form
+                     'id' found in the GUI.
+- FormElement:       Form element in GUI, specified by 'id' in 'FormOptions'.
+@typedef  {Object}               FormOptions
+@property {FormParameters}       FormParameters
+@property {String}               [prefix]
+@property {String}               [clearBtn]
+@property {String}               [shareURLBtn] 
+@property {String}               [shareURL]
+@property {String}               [shareURLArea]
+@property {QueryLocation}        [defaultQueryLocation="fragment"]
+@property {Function}             [callback]
+@property {Boolean}              [cleanURL=false]
+
+// Read only Values (Set internally by library)
+@property {Boolean}              Sanitized=false
+@property {Boolean}              Inited=false
+@property {HTMLButtonElement}    ShareURLBtnElement
+@property {HTMLButtonElement}    ClearBtnElement
+
+// Form Mode
+@property {String}               [formID]
+// Form Mode Read Only
+@property {Boolean}              FormMode=false
+@property {HTMLFormElement}      FormElement
  */
 
 /**
- * Query is the Query string.  Everything after first ? and before first #.
- * @typedef {String}    QueryString
+Query is the Query string.  Everything after first ? and before first #.
+@typedef {String}    QueryString
  */
 
 /**
- * Fragment is the Fragment string without `#`.  Everything after the first #.
- * @typedef {String}    FragmentString
+Fragment is the Fragment string without `#`.  Everything after the first #.
+@typedef {String}    FragmentString
  */
 
 /**
- * QuagPairs is an Object of key:value pairs for both Query Parameters and
- * Fragment Query Parameters. `quag` is the superset of `query` and `fragment`.
- * 'object' is diluted in meaning by JSDoc, and using '{}' will denote a key:val
- * object. See:
- * https://github.com/microsoft/TypeScript/issues/50321#issuecomment-1217224937
- * @typedef {{}}   QuagPairs
+QuagPairs is an Object of key:value pairs for both Query Parameters and
+Fragment Query Parameters. `quag` is the superset of `query` and `fragment`.
+'object' is diluted in meaning by JSDoc, and using '{}' will denote a key:val
+object. See:
+https://github.com/microsoft/TypeScript/issues/50321#issuecomment-1217224937
+@typedef {{}}   QuagPairs
  */
 
 /**
- * Fragment holds the fragment parts from the URL. All parts may be nil.
- * Includes extras.
- * 
- * TODO future: support other scheme starting delimiters and perhaps `?` for
- * fragment queries.
- * 
- * - fragment:   The whole fragment string (everything included).
- * - pairs:      key:value object containing the fragment queries. Does not
- *               include extras.
- * - extras:     key:value that appear in fragment query but not in form.
- * - before:     Everything after '#' and if exists everything before the first
- *               '?'.
- * - query:      Everything after `before` and before the next fragment scheme
- *               delimiter, i.e. ':~:'. This is the "middle part".  This is the
- *               fragment query.
- * - after:      Everything after `query`.
- * @typedef  {Object}         Fragment
- * @property {FragmentString} string  
- * @property {QuagPairs}      pairs
- * @property {QuagPairs}      extras
- * @property {String}         before
- * @property {String}         query
- * @property {String}         after
+Fragment holds the fragment parts from the URL. All parts may be nil.
+Includes extras.
+
+TODO future: support other scheme starting delimiters and perhaps `?` for
+fragment queries.
+
+- string:     The whole fragment string (everything included except starting `#`).
+- pairs:      key:value object containing the fragment queries. Does not
+              include extras.
+- extras:     key:value that appear in fragment query but not in form.
+- before:     Everything after '#' and if exists everything before the first
+              '?'.
+- query:      Everything after `before` and before the next fragment scheme
+              delimiter, i.e. ':~:'. This is the "middle part".  This is the
+              fragment query.
+- after:      Everything after `query`.
+@typedef  {Object}         Fragment
+@property {FragmentString} string  
+@property {QuagPairs}      pairs
+@property {QuagPairs}      extras
+@property {String}         before
+@property {String}         query
+@property {String}         after
  */
 
 
 /**
- * Query holds the fragment parts from the URL. All parts may be nil.
- * Includes extras.
- * 
- * - string:     The string URL query component. Does not contain any fragment.
- * - pairs:      key:value object containing the queries. Includes extras.
- * - extras:     Extra query parameters given in the URL.
- * @typedef  {Object}       Query
- * @property {String}       string
- * @property {QuagPairs}    pairs
- * @property {QuagPairs}    extra
+Query holds the fragment parts from the URL. All parts may be nil.
+Includes extras.
+
+- string:     The string URL query component. Does not contain any fragment.
+- pairs:      key:value object containing the queries. Includes extras.
+- extras:     Extra query parameters given in the URL.
+@typedef  {Object}       Query
+@property {String}       string
+@property {QuagPairs}    pairs
+@property {QuagPairs}    extra
  */
 
 /**
- * QuagParts holds the query and fragment from the existing URL.  See README on
- * `quag`.
- *
- * - pairs:      All pairs.  key:value object containing `query.pairs` and
- *               `fragment.pairs`.
- * - fragment:   Fragment object.
- * - query:      Query Object.
- * @typedef  {Object}    QuagParts
- * @property {QuagPairs} pairs
- * @property {Query}     query
- * @property {Fragment}  fragment
+QuagParts holds the query and fragment from the existing URL.  See README on
+`quag`.
+
+- pairs:      All pairs.  key:value object containing `query.pairs` and
+              `fragment.pairs`.
+- fragment:   Fragment object.
+- query:      Query Object.
+@typedef  {Object}    QuagParts
+@property {QuagPairs} pairs
+@property {Query}     query
+@property {Fragment}  fragment
  */
 
 /** @type {QueryLocation} */
@@ -248,8 +247,8 @@ const QueryLocationQuery = "query"
 const QueryLocationFragment = "fragment"
 
 /**
- * DefaultFormOptions where all options are set to their default case.
- * @type {FormOptions} 
+DefaultFormOptions where all options are set to their default case.
+@type {FormOptions} 
  */
 const DefaultFormOptions = {
 	FormParameters: [],
@@ -275,11 +274,11 @@ const DefaultFormOptions = {
 
 
 /**
- * Initializes the globals and event listeners for the URLFormJS module.
- * If 'formOptions' is empty, defaults are used.
- * 
- * @param   {FormOptions}    formOptions
- * @returns {FormOptions} 
+Initializes the globals and event listeners for the URLFormJS module.
+If 'formOptions' is empty, defaults are used.
+
+@param   {FormOptions}    formOptions
+@returns {FormOptions} 
  */
 function Init(formOptions) {
 	console.log("Initializing URLFormJS: ", formOptions);
@@ -320,14 +319,14 @@ function Init(formOptions) {
 
 
 /**
- * Populate populates the GUI (form and share links) from the URI and saved
- * setting.
- * @param   {FormOptions}    formOptions
- * @returns {void}
- * @throws  {Error}           If Init() has not been called.
+Populate populates the GUI (form and share links) from the URI and saved
+setting.
+@param   {FormOptions}    formOptions
+@returns {void}
+@throws  {Error}           If Init() has not been called.
  */
 function Populate(formOptions) {
-	//console.log("Populate");
+	//console.log("Populate")
 	// Get local storage settings.  If set, URI should overwrite.  
 	let savedPairs = {}
 	for (let fp of formOptions.FormParameters) {
@@ -346,11 +345,11 @@ function Populate(formOptions) {
 }
 
 /**
- * Populates the GUI (form and share links) using the given key:value pairs. 
- * @param   {QuagPairs}   quagPairs
- * @param   {FormOptions} formOptions
- * @returns {void}
- * @throws  {Error} Fails if Init() has not been called for the URLFormJS module.
+Populates the GUI (form and share links) using the given key:value pairs. 
+@param   {QuagPairs}   quagPairs
+@param   {FormOptions} formOptions
+@returns {void}
+@throws  {Error} Fails if Init() has not been called for the URLFormJS module.
  */
 function PopulateFromValues(quagPairs, formOptions) {
 	if (!formOptions.Inited) {
@@ -362,13 +361,12 @@ function PopulateFromValues(quagPairs, formOptions) {
 
 
 /**
- * SetForm sets GUI for each parameter and executes funcTrue() per parameter.
- * See docs in 'FormOptions'. Form wide options are also executed (e.g.
- * 'callback' in 'FormOptions').
- *
- * @param   {QuagPairs}    kv
- * @param   {FormOptions}  formOptions
- * @returns {void}
+SetForm sets GUI for each parameter and executes funcTrue() per parameter.
+See docs in 'FormOptions'. Form wide options are also executed (e.g.
+'callback' in 'FormOptions').
+@param   {QuagPairs}    kv
+@param   {FormOptions}  formOptions
+@returns {void}
  */
 function SetForm(kv, formOptions) {
 	//console.log("SetForm:", kv, formOptions);
@@ -457,21 +455,21 @@ function SetForm(kv, formOptions) {
 }
 
 /**
- * Gets the setting. 
- * @param   {string}       name
- * @param   {FormOptions}  formOptions
- * @returns {void}
+Gets the setting. 
+@param   {string}       name
+@param   {FormOptions}  formOptions
+@returns {void}
  */
 function getSavedSetting(name, formOptions) {
 	return localStorage.getItem(formOptions.localStorageNamespace + formOptions.prefix + name)
 }
 
 /**
- * Sets the setting. 
- * @param   {string}       name
- * @param   {string}       value
- * @param   {FormOptions}  formOptions
- * @returns {void}
+Sets the setting.
+@param   {string}       name
+@param   {string}       value
+@param   {FormOptions}  formOptions
+@returns {void}
  */
 function setSavedSetting(name, value, formOptions) {
 	//console.log("URLFormJS - Saving setting:", name, value)
@@ -479,16 +477,16 @@ function setSavedSetting(name, value, formOptions) {
 }
 
 /**
- * Sanitizes a formOptions object, and sets all of the options values to
- * their default value if not set.
- * 
- * Modifies "in place" as well as returns the object.
- * 
- * For new options/setting FormOptions, Init() must be re-called.
- * 
- * @param   {FormOptions} formOptions
- * @returns {FormOptions}
- * @throws  {Error}        Fails if FormOptions or 'id' in options is empty.
+Sanitizes a formOptions object, and sets all of the options values to
+their default value if not set.
+
+Modifies "in place" as well as returns the object.
+
+For new options/setting FormOptions, Init() must be re-called.
+
+@param   {FormOptions} formOptions
+@returns {FormOptions}
+@throws  {Error}        Fails if FormOptions or 'id' in options is empty.
  */
 function sanitizeFormOptions(formOptions) {
 	// Not making a copy will modify the original, even though it's a const.
@@ -554,102 +552,14 @@ function sanitizeFormOptions(formOptions) {
 	return foc
 }
 
-/**
- * ShareURI 
- * 1. Generates a share URL from the current URL and form, 
- * 2. Populates the GUI share links, 
- * 3. Returns URL.
- *
- * Fragment query parameters take precedence over query parameters.
- *
- * @param   {FormOptions}   formOptions
- * @returns {URL}           Javascript URL object.
- */
-async function ShareURI(formOptions) {
-	//console.log("ShareURI", await JSON.stringify(formOptions));
-	let formPairs = GetForm(formOptions) // Current form values.
-	let q = GetQuagParts(formOptions) // Current URL values.
-	var u = new URL(window.location.origin + window.location.pathname) // Current URL.  
-
-	//console.log("formPairs:", formPairs, "\nq:", q, "\nURL:", u);
-
-	// Build fragment.pairs which is then used to generate a new URL.  
-	for (let fp of formOptions.FormParameters) {
-		//console.log(fp);
-
-		let value = encodeURIComponent(formPairs[fp.name])
-		if (value == "undefined") {
-			value = ""
-		}
-		//console.log("q.pairs.hasOwnProperty: ", q.pairs.hasOwnProperty(fp.name), "\nvalue:", value)
-
-
-		if (fp.type == "bool") {
-			if (value === false) {
-				value = "false"
-			}
-			// "Negative" flag for default true (Bools with default "true" values).
-			if (fp.defaultValue === true && value == "") {
-				//console.log("Negative flag");
-				value = "false"
-			}
-		}
-
-		// TODO WTF first check, but second part is checking if value is already in URL and does not
-		// "re-add" the value.  
-		if (fp.nonFormValue && q.pairs.hasOwnProperty(fp.name)) { // WTF
-			break
-		}
-
-		// If empty, remove from fragment.pairs and the URL. 
-		if (value == "") {
-			//console.log("Deleting: " + fp.name)
-			u.searchParams.delete(fp.name)
-			delete q.fragment.pairs[fp.name]
-			continue
-		}
-
-
-		//console.log("Not Empty:", fp.name, value)
-
-		// Set to Fragment
-		if (fp.queryLocation === QueryLocationFragment) {
-			u.searchParams.delete(fp.name)
-			q.fragment.pairs[fp.name] = value
-			continue
-		}
-
-
-		// Set to Query
-		u.searchParams.set(fp.name, value)
-		delete q.fragment.pairs[fp.name]
-	}
-
-	//console.log("Out of loop");
-
-	// Query extras
-	if (!isEmpty(q.query.extras) && !formOptions.cleanURL) {
-		for (let e in q.query.extras) {
-			u.searchParams.set(e, q.query.extras[e])
-		}
-	}
-
-	//console.log(await JSON.stringify(q.fragment));
-
-	// Rebuild fragment query in case new form fields were set.
-	u.hash = quagPartsToURLHash(q.fragment, formOptions)
-	setShareURL(u.href, formOptions)
-
-	return u
-}
-
 
 /**
- * Sets the URL on share link and share area.  
- * @param   {String}       href
- * @returns voice
+Sets the URL on share link and share area.  
+@param   {String}       href
+@returns voice
  */
 function setShareURL(href, formOptions) {
+	console.log("setShareURL", href)
 	// URI Link
 	let shareUrl = document.querySelector(formOptions.shareURL)
 	if (shareUrl !== null) {
@@ -665,85 +575,155 @@ function setShareURL(href, formOptions) {
 
 
 /**
- * Generates a URL encoded fragment string from Fragment.
- * 
- * Returns empty string when fragment is empty.
- * 
- * @param   {Fragment}      fragment
- * @param   {FormOptions}   formOptions
- * @returns {String}        Fragment string (#<before>?<middle(fromForm?extras)>[delimiter]<after>).
+ShareURI 
+1. Generates a share URL from the current URL and form, 
+2. Populates the GUI share links, 
+3. Returns URL.
+
+Fragment query parameters take precedence over query parameters.
+
+@param   {FormOptions}   formOptions
+@returns {URL}           Javascript URL object.
  */
-function quagPartsToURLHash(fragment, formOptions) {
-	// URL Fragment has three parts: 
-	//  1. before fragment query, 
-	//  2. fragment query, 
-	//  3. after fragment query.  
+async function ShareURI(formOptions) {
+	console.log("ShareURI", await JSON.stringify(formOptions));
+	let formPairs = GetForm(formOptions) // Current form values.
+	let q = GetQuagParts(formOptions) // Current URL values.
+	var u = getURIBase()
 
-	// Concatenate fragment ("#") and before.
-	let fqs = "#" + fragment.before
-	//console.log(fragment.pairs)
+	console.log(formPairs)
+	console.log("formPairs:", formPairs, "\nq:", q, "\nURL:", u, "\nformOptions.FormParameters", formOptions.FormParameters);
 
-	// Middle.  Build the fragment query.  (Query is the middle).
-	var i = Object.keys(fragment.pairs).length
-	if (i != 0) {
-		fqs += "?" //start fragment query delimiter ("?")
-		for (let key in fragment.pairs) {
-			i--
-			let value = "=" + fragment.pairs[key] // Value includes "="
-			let fp = formOptions.FormParameters.find(a => a.name == key)
-			if (fragment.pairs[key] == "" && fp.type == "bool") {
-				value = "" // flag style.  No "=" in string if parameter is flag. 
+	// Put the form values into query or fragment.  
+	for (let fp of formOptions.FormParameters) {
+		let value = encodeURIComponent(formPairs[fp.name])
+		if (value == "undefined") {
+			value = ""
+		}
+		if (fp.type == "bool") { // Enure bools are set to "true", "false, or "".  Checked will already be "true".   
+			// "Negative" flag for default true (Bools with default "true" values).
+			if (fp.defaultValue === true && value == "") {
+				console.log("Negative flag")
+				value = "false"
 			}
-
-			// Always use flag style on Bools. 
-			if (fp.type === "bool") {
-				if (fragment.pairs[key] === "false") {
-				//console.log("negative value");
-				key = "-" + key
-				value = ""
-			} else {
-				value = ""
+			// Non-form flag in URI. Non-form URI parameters are sticky.  
+			if (fp.nonFormValue === true && fp.name in q.pairs){ 
+				value = "true"
 			}
 		}
 
-		fqs += key + value
-		if (i > 0) {
-			fqs += "&" // Add separator on everything except the last.  
+		console.log(fp.name, value, fp.queryLocation)
+		if (fp.queryLocation === QueryLocationFragment) { // Set to Fragment
+			u.searchParams.delete(fp.name) // In case it is currently set in query.  
+			q.fragment.pairs[fp.name] = value
+		} else {
+			q.query.pairs[fp.name] = value
 		}
 	}
-}
-//console.log(fqs);
+	console.log(q.query.pairs)
+	u.search = buildQueryString(q.query.pairs, q.query.extras, formOptions)
+	u.hash = fragmentToString(q.fragment, formOptions)
 
-// Extras (still in middle)
-let j = Object.keys(fragment.extras).length
-if (Object.keys(fragment.pairs).length && j > 0) {
-	fqs += "&" // Prepend extras with ampersand if fragment is populated. 
-}
-// Append extras back in query params
-if (j > 0 && !formOptions.cleanURL) {
-	for (let e in fragment.extras) {
-		j--
-		fqs += e + "=" + encodeURIComponent(fragment.extras[e])
-		if (j > 0) {
-			fqs += "&"
-		}
-	}
-}
-
-// After.
-fqs += fragment.after
-if (fqs == "#") { // Return empty string if fragment is empty.  
-	return ""
-}
-return fqs
+	setShareURL(u.href, formOptions) // TODO fix this it needs to be root URL + query string + hash string
+	return u
 }
 
 
 /**
- * Helper that returns a `k:v,k:v` object from a `k=v&k=v` string.
- * 
- * @param   {String}      s   e.g. `key=value&key=value`.
- * @returns {QuagPairs}       {key:value}
+getURIBase returns the URI Base (see package Cyphrme/URIPath)
+
+// TODO Add this function to the Cyphrme/URIPath_js
+@returns {URL}           Javascript URL object.
+*/
+function getURIBase() {
+	// `u` is the current URL. `window.location.pathname` incorrectly includes query but will be
+	// replaced by `u.search = ""`.  Ideally, Javascript would provide an way to get
+	// the URI base which does not include any quag component. (See package `Cyphrme/URIPath`)
+	var u = new URL(window.location.origin + window.location.pathname)
+	u.search = ""
+	return u
+}
+
+
+/**
+Generates a URL encoded fragment string from Fragment.
+
+Returns empty string when fragment is empty.
+@param   {Fragment}      fragment
+@param   {FormOptions}   formOptions
+@returns {String}        Fragment string (#<before>?<middle(fromForm?extras)>[delimiter]<after>).
+ */
+function fragmentToString(fragment, formOptions) {
+	// URL Fragment has three parts: 
+	//  1. Before fragment query, 
+	//  2. Middle, the fragment query itself (with extras)
+	//  3. After fragment query.
+
+	let fqs = "#" + fragment.before
+	fqs += buildQueryString(fragment.pairs, fragment.extras, formOptions)
+	fqs += fragment.after
+	if (fqs == "#") { // Return empty string if fragment is empty.  
+		return ""
+	}
+	return fqs
+}
+
+
+/**
+Build query string (for either query or fragment query) including adding extras
+back to the string.  Bools are converted to flag style and must be given with
+value=true or value=false, otherwise empty (`value=""`) are omitted. 
+@param   {QuagPairs}     kv
+@param   {QuagPairs}     extrasKV
+@param   {FormOptions}   formOptions
+@returns {String}        Query string including "?" if kv length is non-zero.
+*/
+function buildQueryString(kv, extrasKV, formOptions) {
+	console.log("buildQueryString", kv)
+	let qs = ""
+	let firstParam = true;
+	// kv
+	if (Object.keys(kv).length !== 0) {
+		qs += "?" //start fragment query delimiter ("?")
+		for (let key in kv) {
+			let value = kv[key]
+			if (value === "") {
+				continue // Omit empty parameter.  
+			}
+			firstParam ? firstParam = false : qs += "&"  // Bookend separator (not on first).  
+
+			let equal = "="
+			let fp = formOptions.FormParameters.find(a => a.name == key)
+			if (fp.type === "bool") {
+				// Encode bools as flag style.  (No "=value" for flags.) 
+				value = ""
+				equal = ""
+				if (kv[key] === "false") { // Negative flag
+					key = "-" + key
+				}
+			}
+
+			qs += key + equal + encodeURIComponent(value) // Key is not URI escaped 
+		}
+	}
+
+	// Extras. 
+	if (Object.keys(extrasKV).length > 0 && !formOptions.cleanURL) {
+		for (let e in extrasKV) {
+			firstParam ? firstParam = false : qs += "&"  // Bookend separator (not on first).  
+			qs += e + "=" + extrasKV[e]
+		}
+	}
+	return qs
+}
+
+
+
+/**
+Helper that returns a `k:v,k:v` object from a `k=v&k=v` string.
+
+@param   {String}      s   e.g. `key=value&key=value`.
+@returns {QuagPairs}       {key:value}
  */
 function getPairs(s) {
 	if (isEmpty(s)) {
@@ -759,7 +739,7 @@ function getPairs(s) {
 
 		if (key.at(0) === "-") { // Sanitize for negative flags.
 			key = removeNegativeFlag(key)
-			value = "false";
+			value = "false"
 		}
 
 		// If the string begins/ends with "&", there will be an empty element. 
@@ -780,21 +760,21 @@ function getPairs(s) {
 
 
 /**
- * GetQuagParts returns QuagParts generated from the current URL, not the
- * form, and puts values into the correct object based on formOptions.
- * Includes extras.  See docs on `QuagParts`.
- * 
- *  On duplicate the default behavior overwrites query pairs with fragment pairs.
- * 
- * @param   {FormOptions}   formOptions
- * @returns {QuagParts}
+GetQuagParts returns QuagParts generated from the current URL, not the
+form, and puts values into the correct object based on formOptions.
+Includes extras.  See docs on `QuagParts`.
+
+ On duplicate the default behavior overwrites query pairs with fragment pairs.
+
+@param   {FormOptions}   formOptions
+@returns {QuagParts}
  */
 function GetQuagParts(formOptions) {
 	/**
-	 * getFragment returns (fragment,pairs,before,query,after) from the URL
-	 * fragment, but not (extras). Warning: Puts all pairs, including extras, into
-	 * pairs.
-	 * @returns {Fragment}
+	getFragment returns (fragment,pairs,before,query,after) from the URL
+	fragment, but not (extras). Warning: Puts all pairs, including extras, into
+	pairs.
+	@returns {Fragment}
 	 */
 	function getFragment() {
 		let frag = {
@@ -880,12 +860,12 @@ function removeNegativeFlag(key) {
 }
 
 /**
- * GetURLKeyValue is a helper that returns k:v from the current URL. 
- *
- * On duplicate the default behavior overwrites query pairs with fragment pairs.
- *
- * @param   {FormOptions}     [formOptions]
- * @returns {QuagParts.pairs}
+GetURLKeyValue is a helper that returns k:v from the current URL. 
+
+On duplicate the default behavior overwrites query pairs with fragment pairs.
+
+@param   {FormOptions}     [formOptions]
+@returns {QuagParts.pairs}
  */
 function GetURLKeyValue(formOptions) {
 	if (isEmpty(formOptions)) {
@@ -897,11 +877,11 @@ function GetURLKeyValue(formOptions) {
 
 
 /**
- * Serialize serializes the initialized FormParameters that are populated in the
- * GUI into a JSON string.
- * 
- * @param   {FormOptions}   formOptions
- * @returns {String}
+Serialize serializes the initialized FormParameters that are populated in the
+GUI into a JSON string.
+
+@param   {FormOptions}   formOptions
+@returns {String}
  */
 function Serialize(formOptions) {
 	return JSON.stringify(GetForm(formOptions))
@@ -909,14 +889,14 @@ function Serialize(formOptions) {
 
 
 /**
- * GetForm gets current form values from the GUI into {key:value,key:value}.
- *
- * ReturnPairOnZero: Whether all pairs from 'GetForm' will always be returned.
- * Otherwise, on zero value, the pair will not be returned in the pairs object.
- * 
- * @param   {FormOptions}   formOptions
- * @param   {Boolean}       [ReturnPairOnZero]
- * @returns {QuagPairs}     key/value
+GetForm gets current form values from the GUI into {key:value,key:value}.
+
+ReturnPairOnZero: Whether all pairs from 'GetForm' will always be returned.
+Otherwise, on zero value, the pair will not be returned in the pairs object.
+
+@param   {FormOptions}   formOptions
+@param   {Boolean}       [ReturnPairOnZero]
+@returns {QuagPairs}     key/value
  */
 function GetForm(formOptions, ReturnPairOnZero) {
 	if (!formOptions.Inited) {
@@ -990,12 +970,12 @@ function GetForm(formOptions, ReturnPairOnZero) {
 }
 
 /**
- * GetFormElements will return a key:value object from teh GUI form using form
- * parameters, and the values are the elements that hold the form parameters'
- * values.
- * 
- * @param   {FormOptions}   formOptions
- * @returns {QuagPairs}     key/value (where value is an HTML Element)
+GetFormElements will return a key:value object from teh GUI form using form
+parameters, and the values are the elements that hold the form parameters'
+values.
+
+@param   {FormOptions}   formOptions
+@returns {QuagPairs}     key/value (where value is an HTML Element)
  */
 function GetFormElements(formOptions) {
 	let kv = {}
@@ -1009,10 +989,9 @@ function GetFormElements(formOptions) {
 
 
 /**
- * getFragmentString returns URL fragment as a string, not including '#'.
- * See notes in function.
- *
- * @returns {Fragment.string}
+getFragmentString returns URL fragment as a string, not including '#'.
+See notes in function.
+@returns {Fragment.string}
  */
 function getFragmentString() {
 	let fParts = window.location.hash.split("#") // May not work in chrome, see note below.
@@ -1070,10 +1049,9 @@ function getFragmentString() {
 
 
 /**
- * Clear clears out a form.
- *
- * @param   {FormOptions}   formOptions
- * @returns {void}
+Clear clears out a form.
+@param   {FormOptions}   formOptions
+@returns {void}
  */
 function Clear(formOptions) {
 	if (!formOptions.Inited) {
@@ -1123,33 +1101,33 @@ function Clear(formOptions) {
 
 
 /**
- * GetDefaultFormOptions returns the Initialized default form options.
- * NOTE: Exporting DefaultFormOptions directly will make it to where the
- * UMD format block needs to be at the bottom of the file, after initialization.
- * 
- * @returns {FormOptions}
+GetDefaultFormOptions returns the Initialized default form options.
+NOTE: Exporting DefaultFormOptions directly will make it to where the
+UMD format block needs to be at the bottom of the file, after initialization.
+
+@returns {FormOptions}
  */
 function GetDefaultFormOptions() {
 	return DefaultFormOptions
 }
 
 /**
- * SetURLNoReload sets the full URL, without reloading. Helper function for both
- * explicitly setting a URL without reloading, and syntax. This function also
- * serves as code as documentation.
- * @param   {String}    url   Full URL
- * @returns {void}
+SetURLNoReload sets the full URL, without reloading. Helper function for both
+explicitly setting a URL without reloading, and syntax. This function also
+serves as code as documentation.
+@param   {String}    url   Full URL
+@returns {void}
  */
 function SetURLNoReload(url) {
 	window.history.pushState({}, '', url)
 }
 
 /**
- * IsEmpty returns whether or not the initialized form is empty.
- * 
- * @param   {FormOptions}   formOptions
- * @returns {Boolean}  Whether or not the form is empty.
- * @throws  {Error}    Fails if form is not of type HTMLFormElement.
+IsEmpty returns whether or not the initialized form is empty.
+
+@param   {FormOptions}   formOptions
+@returns {Boolean}  Whether or not the form is empty.
+@throws  {Error}    Fails if form is not of type HTMLFormElement.
  */
 function IsEmpty(formOptions) {
 	return isEmpty(GetForm(formOptions))
@@ -1157,24 +1135,24 @@ function IsEmpty(formOptions) {
 
 
 /**
- * isEmpty is a helper function to determine if thing is empty. 
- * 
- * Functions are considered always not empty. 
- * 
- * Arrays are checked for the number of elements, and recursively calls isEmpty.  
- * 
- * Objects are empty if they have no keys. (Returns len === 0 of object keys.)
- * 
- * NaN returns true.  (NaN === NaN is always false, as NaN is never equal to
- * anything. NaN is the only JavaScript value unequal to itself.)
- *
- * Don't use on HTMl elements. For HTML elements, use the !== equality check
- * (element !== null). 
- *
- * Cannot use CryptoKey with this function since (len === 0) always. 
- *
- * @param   {any}     thing    Thing you wish was empty.  
- * @returns {Boolean}          Boolean.  
+isEmpty is a helper function to determine if thing is empty. 
+
+Functions are considered always not empty. 
+
+Arrays are checked for the number of elements, and recursively calls isEmpty.  
+
+Objects are empty if they have no keys. (Returns len === 0 of object keys.)
+
+NaN returns true.  (NaN === NaN is always false, as NaN is never equal to
+anything. NaN is the only JavaScript value unequal to itself.)
+
+Don't use on HTMl elements. For HTML elements, use the !== equality check
+(element !== null). 
+
+Cannot use CryptoKey with this function since (len === 0) always. 
+
+@param   {any}     thing    Thing you wish was empty.  
+@returns {Boolean}          Boolean.  
  */
 function isEmpty(thing) {
 	if (typeof thing === 'function') {
@@ -1199,15 +1177,14 @@ function isEmpty(thing) {
 }
 
 /**
- * Helper function to determine boolean.  
- *
- * Javascript, instead of considering everything false except a few key words,
- * decided everything is true instead of a few key words.  Why?  Because
- * Javascript.  This function inverts that assumption, so that everything can be
- * considered false unless true. 
- *
- * @param   {any}      bool   Thing that you wish was a boolean.  
- * @returns {Boolean}         An actual boolean.
+Helper function to determine boolean.  
+
+Javascript, instead of considering everything false except a few key words,
+decided everything is true instead of a few key words.  Why?  Because
+Javascript.  This function inverts that assumption, so that everything can be
+considered false unless true. 
+@param   {any}      bool   Thing that you wish was a boolean.  
+@returns {Boolean}         An actual boolean.
  */
 function isBool(bool) {
 	if (
