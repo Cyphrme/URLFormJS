@@ -559,7 +559,7 @@ Sets the URL on share link and share area.
 @returns voice
  */
 function setShareURL(href, formOptions) {
-	console.log("setShareURL", href)
+	//console.log("setShareURL", href)
 	// URI Link
 	let shareUrl = document.querySelector(formOptions.shareURL)
 	if (shareUrl !== null) {
@@ -586,13 +586,12 @@ Fragment query parameters take precedence over query parameters.
 @returns {URL}           Javascript URL object.
  */
 async function ShareURI(formOptions) {
-	console.log("ShareURI", await JSON.stringify(formOptions));
+	//console.log("ShareURI", await JSON.stringify(formOptions));
 	let formPairs = GetForm(formOptions) // Current form values.
 	let q = GetQuagParts(formOptions) // Current URL values.
 	var u = getURIBase()
 
-	console.log(formPairs)
-	console.log("formPairs:", formPairs, "\nq:", q, "\nURL:", u, "\nformOptions.FormParameters", formOptions.FormParameters);
+	//console.log("formPairs:", formPairs, "\nq:", q, "\nURL:", u, "\nformOptions.FormParameters", formOptions.FormParameters);
 
 	// Put the form values into query or fragment.  
 	for (let fp of formOptions.FormParameters) {
@@ -603,7 +602,7 @@ async function ShareURI(formOptions) {
 		if (fp.type == "bool") { // Enure bools are set to "true", "false, or "".  Checked will already be "true".   
 			// "Negative" flag for default true (Bools with default "true" values).
 			if (fp.defaultValue === true && value == "") {
-				console.log("Negative flag")
+				//console.log("Negative flag")
 				value = "false"
 			}
 			// Non-form flag in URI. Non-form URI parameters are sticky.  
@@ -612,7 +611,7 @@ async function ShareURI(formOptions) {
 			}
 		}
 
-		console.log(fp.name, value, fp.queryLocation)
+		//console.log(fp.name, value, fp.queryLocation)
 		if (fp.queryLocation === QueryLocationFragment) { // Set to Fragment
 			u.searchParams.delete(fp.name) // In case it is currently set in query.  
 			q.fragment.pairs[fp.name] = value
@@ -620,7 +619,7 @@ async function ShareURI(formOptions) {
 			q.query.pairs[fp.name] = value
 		}
 	}
-	console.log(q.query.pairs)
+	//console.log(q.query.pairs)
 	u.search = buildQueryString(q.query.pairs, q.query.extras, formOptions)
 	u.hash = fragmentToString(q.fragment, formOptions)
 
@@ -679,7 +678,7 @@ value=true or value=false, otherwise empty (`value=""`) are omitted.
 @returns {String}        Query string including "?" if kv length is non-zero.
 */
 function buildQueryString(kv, extrasKV, formOptions) {
-	console.log("buildQueryString", kv)
+	//console.log("buildQueryString", kv)
 	let qs = ""
 	let firstParam = true;
 	// kv
@@ -918,8 +917,7 @@ function GetForm(formOptions, ReturnPairOnZero) {
 				switch (fp.type) {
 					default: // String
 						value = elem.value
-						// Sanitize undefined
-						if (isEmpty(value)) {
+						if (isEmpty(value)) { // Sanitize undefined
 							value = ""
 						}
 						break
@@ -928,8 +926,7 @@ function GetForm(formOptions, ReturnPairOnZero) {
 						break
 					case "number":
 						value = Number(elem.value)
-						// Sanitize NaN
-						if (isEmpty(value)) {
+						if (isEmpty(value)) { // Sanitize NaN
 							value = 0
 						}
 						break
