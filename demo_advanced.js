@@ -26,6 +26,7 @@ const FormOptions = {
 		},
 		{
 			"name": "country_select",
+			"defaultValue":1,
 		},
 
 		/////////////////

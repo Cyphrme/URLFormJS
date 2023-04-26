@@ -28,11 +28,18 @@ type           Type of the parameter (bool/string/number). Defaults to
                  of `false`.  Negative flags are only used when default value
                  is `true` and form value is `false`.  See README.  
 
-func           Called if set on each call to SetForm
-                 (Populate and PopulateFromValues).
+func           Called if set on each call to SetForm (Populate and
+                 PopulateFromValues).  Value is passed as the first parameter to
+                 the input function, e.g.
+                 ```{
+                 "name": "Name",
+                 "func": function(value){console.log(value)},
+                 }```
 
-funcTrue       Execute if param is true. e.g. `"funcTrue": () => {
-                 ToggleVisible(document.querySelector("#advancedOptions"))}`
+funcTrue       Execute if param is true. e.g. `"funcTrue": function(value) {
+                 ToggleVisible(document.querySelector("#advancedOptions"))}`.
+                 Like func, value is passed as the first parameter to the input
+                 function.  
 
 queryLocation  Option for overriding the param in the URL link to either
                  be a query parameter, or a fragment query. Defaults to empty
@@ -384,7 +391,6 @@ function SetForm(kv, formOptions) {
 			// "undefined" does not need to be a string as long as fp itself is
 			// defined.  `defaultValue` will be `undefined` (not a string) if not set.
 			if (fp.defaultValue !== undefined) { // TODO consider using typeof on undefined. 
-				//console.log("Default value is set.");
 				value = fp.defaultValue
 			}
 			let hasNegative = (kv["-" + name] !== undefined) // Don't use `isEmpty`. // TODO test `!== undefined`
@@ -406,43 +412,38 @@ function SetForm(kv, formOptions) {
 			if (fp.type === "bool" && value === "" && kv[name] !== undefined) {
 				value = "true"
 			}
-
-			// Run func if set
-			if (!isEmpty(fp.func)) {
-				fp.func()
-			}
-			// Run `funcTrue`.
-			if (fp.type == "bool" && value === "true") {
-				if (!isEmpty(fp.funcTrue)) {
-					fp.funcTrue()
-				}
-			}
 			//console.log("Before set GUI", fp.type, name, value)
 
-			// Finally Set Gui
+			// Finally,set Gui and run funcs
 			let e = document.getElementById(id)
-			if (e == null) {
-				continue
+			if (e !== null) {
+				if (fp.type == "bool" && value == "true") {
+					e.checked = true
+				}
+	
+				// Set GUI Non-bool inputs.
+				if (!isEmpty(value) && fp.type !== "bool") {
+					e.value = value
+				}
+	
+				if (fp.saveSetting) { // Set Action listener for savables.
+					e.addEventListener("input", (e) => {
+						if (fp.type == "bool") {
+							setSavedSetting(name, e.target.checked, formOptions)
+						} else {
+							setSavedSetting(name, e.target.value, formOptions)
+						}
+					})
+				}
 			}
-			if (fp.type == "bool" && value == "true") {
-				e.checked = true
+			if (!isEmpty(fp.func)) { // Run func if set
+				fp.func(value)
 			}
-
-			// Set GUI Non-bool inputs.
-			if (!isEmpty(value) && fp.type !== "bool") {
-				e.value = value
+			if (fp.type == "bool" && value === "true") {// Run `funcTrue` if set.
+				if (!isEmpty(fp.funcTrue)) {
+					fp.funcTrue(value)
+				}
 			}
-
-			if (fp.saveSetting) { // Set Action listener for savables.
-				e.addEventListener("input", (e) => {
-					if (fp.type == "bool") {
-						setSavedSetting(name, e.target.checked, formOptions)
-					} else {
-						setSavedSetting(name, e.target.value, formOptions)
-					}
-				})
-			}
-
 		}
 	} finally {
 		//// Form wide options
