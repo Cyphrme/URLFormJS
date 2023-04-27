@@ -62,7 +62,9 @@ eventually standardize through an RFC or other means.
 See docs on the Javascript FormParameter and FormOptions
 
 An application may use a prefix, "input_" here, to namespace fields.
-// A custom id for the share button, share link, and clear button are set.
+
+URLFormJS defines a default id for the share button, share link, and clear
+button, and may be overwritten by form options.  
 
 
 # Booleans and Boolean Flags

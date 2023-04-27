@@ -127,7 +127,7 @@ Fields:
                         Defaults to fragment query (recommended).
 
 - callback:             Function that's executed each time the form is
-                        processed.
+                        processed/set, as the last operation.  
 
 - cleanURL:             If set to `true`, does not preserve any extra
                         information from the URL that is not in the
@@ -154,8 +154,8 @@ Form Mode read only
 @property {FormParameters}       FormParameters
 @property {String}               [prefix]
 @property {String}               [clearBtn]
+@property {String}               [shareURL] 
 @property {String}               [shareURLBtn] 
-@property {String}               [shareURL]
 @property {String}               [shareURLArea]
 @property {QueryLocation}        [defaultQueryLocation="fragment"]
 @property {Function}             [callback]
@@ -260,14 +260,15 @@ DefaultFormOptions where all options are set to their default case.
 const DefaultFormOptions = {
 	FormParameters: [],
 	prefix: "",
-	shareURLBtn: "#shareURLBtn",
 	shareURL: "#shareURL",
+	shareURLBtn: "#shareURLBtn",
 	shareURLArea: "#shareURLArea",
 	defaultQueryLocation: QueryLocationFragment,
 	callback: null,
 	cleanURL: false,
 	localStorageNamespace: "URLFormJS_",
-	// Module fields not settable externally.  
+
+	// Not externally settable module fields.  
 	Sanitized: false,
 	Inited: false,
 	ShareURLBtnElement: HTMLButtonElement,
@@ -375,8 +376,8 @@ See docs in 'FormOptions'. Form wide options are also executed (e.g.
 @param   {FormOptions}  formOptions
 @returns {void}
  */
-function SetForm(kv, formOptions) {
-	//console.log("SetForm:", kv, formOptions);
+async function SetForm(kv, formOptions) {
+	console.log("SetForm:", kv, formOptions);
 	try {
 		for (let fp of formOptions.FormParameters) {
 			// Set as vars to avoid mutability.
@@ -414,7 +415,8 @@ function SetForm(kv, formOptions) {
 			}
 			//console.log("Before set GUI", fp.type, name, value)
 
-			// Finally,set Gui and run funcs
+			// Finally,set Gui and run funcs.  Funcs are done last so applications
+			// can do custom GUI setting after URLFormJS is done setting the GUI.  
 			let e = document.getElementById(id)
 			if (e !== null) {
 				if (fp.type == "bool" && value == "true") {
@@ -437,11 +439,11 @@ function SetForm(kv, formOptions) {
 				}
 			}
 			if (!isEmpty(fp.func)) { // Run func if set
-				fp.func(value)
+				await fp.func(value)
 			}
 			if (fp.type == "bool" && value === "true") {// Run `funcTrue` if set.
 				if (!isEmpty(fp.funcTrue)) {
-					fp.funcTrue(value)
+					await fp.funcTrue(value)
 				}
 			}
 		}
@@ -591,15 +593,15 @@ async function ShareURI(formOptions) {
 	let formPairs = GetForm(formOptions) // Current form values.
 	let q = GetQuagParts(formOptions) // Current URL values.
 	var u = getURIBase()
-
-	//console.log("formPairs:", formPairs, "\nq:", q, "\nURL:", u, "\nformOptions.FormParameters", formOptions.FormParameters);
+	// console.log("formPairs:", formPairs, "\nq:", q, "\nURL:", u, "\nformOptions.FormParameters", formOptions.FormParameters);
 
 	// Put the form values into query or fragment.  
 	for (let fp of formOptions.FormParameters) {
-		let value = encodeURIComponent(formPairs[fp.name])
-		if (value == "undefined") {
+		let value = formPairs[fp.name]
+		if (value === undefined ) {
 			value = ""
 		}
+		// console.log(fp, value);
 		if (fp.type == "bool") { // Enure bools are set to "true", "false, or "".  Checked will already be "true".   
 			// "Negative" flag for default true (Bools with default "true" values).
 			if (fp.defaultValue === true && value == "") {
@@ -620,9 +622,9 @@ async function ShareURI(formOptions) {
 			q.query.pairs[fp.name] = value
 		}
 	}
-	//console.log(q.query.pairs)
-	u.search = buildQueryString(q.query.pairs, q.query.extras, formOptions)
-	u.hash = fragmentToString(q.fragment, formOptions)
+	u.search = buildQueryString(q.query.pairs, q.query.extras, formOptions) // Escapes values (like encodeURIComponent)
+	u.hash = fragmentToString(q.fragment, formOptions) // Escapes values (like encodeURIComponent)
+	// console.log(q.query.pairs, q.fragment, u.href);
 
 	setShareURL(u.href, formOptions) // TODO fix this it needs to be root URL + query string + hash string
 	return u
@@ -702,8 +704,7 @@ function buildQueryString(kv, extrasKV, formOptions) {
 					key = "-" + key
 				}
 			}
-
-			qs += key + equal + encodeURIComponent(value) // Key is not URI escaped 
+			qs += key + equal + value
 		}
 	}
 
