@@ -263,6 +263,7 @@ const DefaultFormOptions = {
 	shareURL: "#shareURL",
 	shareURLBtn: "#shareURLBtn",
 	shareURLArea: "#shareURLArea",
+	clearBtn: "#clearBtn",
 	defaultQueryLocation: QueryLocationFragment,
 	callback: null,
 	cleanURL: false,
