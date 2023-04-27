@@ -378,7 +378,7 @@ See docs in 'FormOptions'. Form wide options are also executed (e.g.
 @returns {void}
  */
 async function SetForm(kv, formOptions) {
-	console.log("SetForm:", kv, formOptions);
+	//console.log("SetForm:", kv, formOptions);
 	try {
 		for (let fp of formOptions.FormParameters) {
 			// Set as vars to avoid mutability.
