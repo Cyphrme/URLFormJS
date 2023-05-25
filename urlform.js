@@ -623,6 +623,7 @@ async function ShareURI(formOptions) {
 			q.query.pairs[fp.name] = value
 		}
 	}
+
 	u.search = buildQueryString(q.query.pairs, q.query.extras, formOptions) // Escapes values (like encodeURIComponent)
 	u.hash = fragmentToString(q.fragment, formOptions) // Escapes values (like encodeURIComponent)
 	// console.log(q.query.pairs, q.fragment, u.href);
@@ -639,11 +640,14 @@ getURIBase returns the URI Base (see package Cyphrme/URIPath)
 @returns {URL}           Javascript URL object.
 */
 function getURIBase() {
-	// `u` is the current URL. `window.location.pathname` incorrectly includes query but will be
-	// replaced by `u.search = ""`.  Ideally, Javascript would provide an way to get
-	// the URI base which does not include any quag component. (See package `Cyphrme/URIPath`)
+	// `u` is the current URL. `window.location.pathname` _incorrectly_ includes
+	// query but will be replaced by `u.search = ""`.  This is done also for hash
+	// to follow the same form.  Ideally, Javascript would provide an way to get
+	// the URI base which does not include any quag component. (See package
+	// `Cyphrme/URIPath`)
 	var u = new URL(window.location.origin + window.location.pathname)
 	u.search = ""
+	u.hash = ""
 	return u
 }
 
@@ -665,7 +669,7 @@ function fragmentToString(fragment, formOptions) {
 	let fqs = "#" + fragment.before
 	fqs += buildQueryString(fragment.pairs, fragment.extras, formOptions)
 	fqs += fragment.after
-	if (fqs == "#") { // Return empty string if fragment is empty.  
+	if (fqs == "#" || fqs == "#?") { // Return empty string if fragment is empty.  
 		return ""
 	}
 	return fqs
@@ -683,11 +687,11 @@ value=true or value=false, otherwise empty (`value=""`) are omitted.
 */
 function buildQueryString(kv, extrasKV, formOptions) {
 	//console.log("buildQueryString", kv)
-	let qs = ""
+	let qs = "?"
 	let firstParam = true;
+	
 	// kv
 	if (Object.keys(kv).length !== 0) {
-		qs += "?" //start fragment query delimiter ("?")
 		for (let key in kv) {
 			let value = kv[key]
 			if (value === "") {
@@ -715,6 +719,10 @@ function buildQueryString(kv, extrasKV, formOptions) {
 			firstParam ? firstParam = false : qs += "&"  // Bookend separator (not on first).  
 			qs += e + "=" + extrasKV[e]
 		}
+	}
+
+	if ( qs == "?") { // Return empty string if fragment is empty.  
+		return ""
 	}
 	return qs
 }

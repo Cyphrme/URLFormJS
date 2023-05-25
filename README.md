@@ -44,6 +44,9 @@ Parts of the URL:
 Where `nose?name=bob` is the **fragment**, `nose` is the **fragment anchor**,
 and `?name=bob` is the **fragment query**.  
 
+For more complete naming of URI's see [FileVer][FileVer] (and in the future
+package "Cyphrme/URIPath").  
+
 In this example, since the query parameter and the fragment query parameter have
 the same key name of "name", the value of "bob" will take precedence over
 the value "ferret".  
