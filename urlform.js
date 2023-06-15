@@ -59,9 +59,9 @@ defaultValue   Element is populated with the specified default value on page
                  e.g. a url with no URL params and a form parameter `foo`
                  having a default value of `true` will populate the element
                  with `true`.
-@typedef  {Object}        FormParameter
-@property {String}        name
-@property {String}        [id]
+@typedef  {object}        FormParameter
+@property {string}        name
+@property {string}        [id]
 @property {ParamType}     [type=string]
 @property {Function}      [func]
 @property {Function}      [funcTrue]
@@ -150,13 +150,13 @@ Form Mode read only
 - FormMode:          Use `<form>` mode.  FormOptions must include a form
                      'id' found in the GUI.
 - FormElement:       Form element in GUI, specified by 'id' in 'FormOptions'.
-@typedef  {Object}               FormOptions
+@typedef  {object}               FormOptions
 @property {FormParameters}       FormParameters
-@property {String}               [prefix]
-@property {String}               [clearBtn]
-@property {String}               [shareURL] 
-@property {String}               [shareURLBtn] 
-@property {String}               [shareURLArea]
+@property {string}               [prefix]
+@property {string}               [clearBtn]
+@property {string}               [shareURL] 
+@property {string}               [shareURLBtn] 
+@property {string}               [shareURLArea]
 @property {QueryLocation}        [defaultQueryLocation="fragment"]
 @property {Function}             [callback]
 @property {Boolean}              [cleanURL=false]
@@ -168,7 +168,7 @@ Form Mode read only
 @property {HTMLButtonElement}    ClearBtnElement
 
 // Form Mode
-@property {String}               [formID]
+@property {string}               [formID]
 // Form Mode Read Only
 @property {Boolean}              FormMode=false
 @property {HTMLFormElement}      FormElement
@@ -176,12 +176,12 @@ Form Mode read only
 
 /**
 Query is the Query string.  Everything after first ? and before first #.
-@typedef {String}    QueryString
+@typedef {string}    QueryString
  */
 
 /**
 Fragment is the Fragment string without `#`.  Everything after the first #.
-@typedef {String}    FragmentString
+@typedef {string}    FragmentString
  */
 
 /**
@@ -190,7 +190,7 @@ Fragment Query Parameters. `quag` is the superset of `query` and `fragment`.
 'object' is diluted in meaning by JSDoc, and using '{}' will denote a key:val
 object. See:
 https://github.com/microsoft/TypeScript/issues/50321#issuecomment-1217224937
-@typedef {{}}   QuagPairs
+@typedef {object}   QuagPairs
  */
 
 /**
@@ -210,13 +210,13 @@ fragment queries.
               delimiter, i.e. ':~:'. This is the "middle part".  This is the
               fragment query.
 - after:      Everything after `query`.
-@typedef  {Object}         Fragment
+@typedef  {object}         Fragment
 @property {FragmentString} string  
 @property {QuagPairs}      pairs
 @property {QuagPairs}      extras
-@property {String}         before
-@property {String}         query
-@property {String}         after
+@property {string}         before
+@property {string}         query
+@property {string}         after
  */
 
 
@@ -227,8 +227,8 @@ Includes extras.
 - string:     The string URL query component. Does not contain any fragment.
 - pairs:      key:value object containing the queries. Includes extras.
 - extras:     Extra query parameters given in the URL.
-@typedef  {Object}       Query
-@property {String}       string
+@typedef  {object}       Query
+@property {string}       string
 @property {QuagPairs}    pairs
 @property {QuagPairs}    extra
  */
@@ -241,7 +241,7 @@ QuagParts holds the query and fragment from the existing URL.  See README on
               `fragment.pairs`.
 - fragment:   Fragment object.
 - query:      Query Object.
-@typedef  {Object}    QuagParts
+@typedef  {object}    QuagParts
 @property {QuagPairs} pairs
 @property {Query}     query
 @property {Fragment}  fragment
@@ -559,7 +559,7 @@ function sanitizeFormOptions(formOptions) {
 
 /**
 Sets the URL on share link and share area.  
-@param   {String}       href
+@param   {string}       href
 @returns voice
  */
 function setShareURL(href, formOptions) {
@@ -658,7 +658,7 @@ Generates a URL encoded fragment string from Fragment.
 Returns empty string when fragment is empty.
 @param   {Fragment}      fragment
 @param   {FormOptions}   formOptions
-@returns {String}        Fragment string (#<before>?<middle(fromForm?extras)>[delimiter]<after>).
+@returns {string}        Fragment string (#<before>?<middle(fromForm?extras)>[delimiter]<after>).
  */
 function fragmentToString(fragment, formOptions) {
 	// URL Fragment has three parts: 
@@ -683,7 +683,7 @@ value=true or value=false, otherwise empty (`value=""`) are omitted.
 @param   {QuagPairs}     kv
 @param   {QuagPairs}     extrasKV
 @param   {FormOptions}   formOptions
-@returns {String}        Query string including "?" if kv length is non-zero.
+@returns {string}        Query string including "?" if kv length is non-zero.
 */
 function buildQueryString(kv, extrasKV, formOptions) {
 	//console.log("buildQueryString", kv)
@@ -732,7 +732,7 @@ function buildQueryString(kv, extrasKV, formOptions) {
 /**
 Helper that returns a `k:v,k:v` object from a `k=v&k=v` string.
 
-@param   {String}      s   e.g. `key=value&key=value`.
+@param   {string}      s   e.g. `key=value&key=value`.
 @returns {QuagPairs}       {key:value}
  */
 function getPairs(s) {
@@ -891,7 +891,7 @@ Serialize serializes the initialized FormParameters that are populated in the
 GUI into a JSON string.
 
 @param   {FormOptions}   formOptions
-@returns {String}
+@returns {string}
  */
 function Serialize(formOptions) {
 	return JSON.stringify(GetForm(formOptions))
@@ -1123,7 +1123,7 @@ function GetDefaultFormOptions() {
 SetURLNoReload sets the full URL, without reloading. Helper function for both
 explicitly setting a URL without reloading, and syntax. This function also
 serves as code as documentation.
-@param   {String}    url   Full URL
+@param   {string}    url   Full URL
 @returns {void}
  */
 function SetURLNoReload(url) {
@@ -1142,12 +1142,17 @@ function IsEmpty(formOptions) {
 }
 
 
+///////////////////////////////////
+// Helpers - Taken from Cyphr.me
+///////////////////////////////////
+
 /**
 isEmpty is a helper function to determine if thing is empty. 
 
 Functions are considered always not empty. 
 
-Arrays are checked for the number of elements, and recursively calls isEmpty.  
+Arrays: Only if an array has no elements it is empty.  isEmpty does not check
+element contents.  (For item contents, do: `isEmpty(array[0])`)
 
 Objects are empty if they have no keys. (Returns len === 0 of object keys.)
 
@@ -1155,20 +1160,22 @@ NaN returns true.  (NaN === NaN is always false, as NaN is never equal to
 anything. NaN is the only JavaScript value unequal to itself.)
 
 Don't use on HTMl elements. For HTML elements, use the !== equality check
-(element !== null). 
+(element !== null). TODO fix this
 
 Cannot use CryptoKey with this function since (len === 0) always. 
 
 @param   {any}     thing    Thing you wish was empty.  
-@returns {Boolean}          Boolean.  
- */
+@returns {boolean}          Boolean.  
+*/
 function isEmpty(thing) {
 	if (typeof thing === 'function') {
 		return false
 	}
 
 	if (Array.isArray(thing)) {
-		return isEmpty(thing[0])
+		if(thing.length == 0){
+			return true
+		}
 	}
 
 	if (thing === Object(thing)) {
@@ -1184,6 +1191,7 @@ function isEmpty(thing) {
 	return false
 }
 
+
 /**
 Helper function to determine boolean.  
 
@@ -1192,8 +1200,8 @@ decided everything is true instead of a few key words.  Why?  Because
 Javascript.  This function inverts that assumption, so that everything can be
 considered false unless true. 
 @param   {any}      bool   Thing that you wish was a boolean.  
-@returns {Boolean}         An actual boolean.
- */
+@returns {boolean}         An actual boolean.
+*/
 function isBool(bool) {
 	if (
 		bool === false ||
@@ -1213,7 +1221,6 @@ function isBool(bool) {
 	}
 	return true
 }
-
 
 
 //////////////////////////////Regex_match_for_truncation_for_umd
