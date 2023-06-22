@@ -97,7 +97,7 @@ A QueryLocation may be one of the following:
 /**
 FormParameters is the main form object (Array) that holds the different
 `FormParameter` field objects.
-@typedef {Array<FormParameter>} FormParameters
+@typedef {FormParameter[]} FormParameters
  */
 
 /**
