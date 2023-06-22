@@ -285,7 +285,6 @@ const DefaultFormOptions = {
 /**
 Initializes the globals and event listeners for the URLFormJS module.
 If 'formOptions' is empty, defaults are used.
-
 @param   {FormOptions}    formOptions
 @returns {FormOptions} 
  */
@@ -487,7 +486,6 @@ their default value if not set.
 Modifies "in place" as well as returns the object.
 
 For new options/setting FormOptions, Init() must be re-called.
-
 @param   {FormOptions} formOptions
 @returns {FormOptions}
 @throws  {Error}        Fails if FormOptions or 'id' in options is empty.
@@ -585,7 +583,6 @@ ShareURI
 3. Returns URL.
 
 Fragment query parameters take precedence over query parameters.
-
 @param   {FormOptions}   formOptions
 @returns {URL}           Javascript URL object.
  */
@@ -634,9 +631,7 @@ async function ShareURI(formOptions) {
 
 
 /**
-getURIBase returns the URI Base (see package Cyphrme/URIPath)
-
-// TODO Add this function to the Cyphrme/URIPath_js
+getURIBase returns the URI Base (see package Cyphrme/Path)
 @returns {URL}           Javascript URL object.
 */
 function getURIBase() {
@@ -731,7 +726,6 @@ function buildQueryString(kv, extrasKV, formOptions) {
 
 /**
 Helper that returns a `k:v,k:v` object from a `k=v&k=v` string.
-
 @param   {string}      s   e.g. `key=value&key=value`.
 @returns {QuagPairs}       {key:value}
  */
@@ -774,8 +768,7 @@ GetQuagParts returns QuagParts generated from the current URL, not the
 form, and puts values into the correct object based on formOptions.
 Includes extras.  See docs on `QuagParts`.
 
- On duplicate the default behavior overwrites query pairs with fragment pairs.
-
+On duplicate the default behavior overwrites query pairs with fragment pairs.
 @param   {FormOptions}   formOptions
 @returns {QuagParts}
  */
@@ -873,7 +866,6 @@ function removeNegativeFlag(key) {
 GetURLKeyValue is a helper that returns k:v from the current URL. 
 
 On duplicate the default behavior overwrites query pairs with fragment pairs.
-
 @param   {FormOptions}     [formOptions]
 @returns {QuagParts.pairs}
  */
@@ -889,7 +881,6 @@ function GetURLKeyValue(formOptions) {
 /**
 Serialize serializes the initialized FormParameters that are populated in the
 GUI into a JSON string.
-
 @param   {FormOptions}   formOptions
 @returns {string}
  */
@@ -903,7 +894,6 @@ GetForm gets current form values from the GUI into {key:value,key:value}.
 
 ReturnPairOnZero: Whether all pairs from 'GetForm' will always be returned.
 Otherwise, on zero value, the pair will not be returned in the pairs object.
-
 @param   {FormOptions}   formOptions
 @param   {Boolean}       [ReturnPairOnZero]
 @returns {QuagPairs}     key/value
@@ -981,7 +971,6 @@ function GetForm(formOptions, ReturnPairOnZero) {
 GetFormElements will return a key:value object from teh GUI form using form
 parameters, and the values are the elements that hold the form parameters'
 values.
-
 @param   {FormOptions}   formOptions
 @returns {QuagPairs}     key/value (where value is an HTML Element)
  */
@@ -1163,7 +1152,6 @@ Don't use on HTMl elements. For HTML elements, use the !== equality check
 (element !== null). TODO fix this
 
 Cannot use CryptoKey with this function since (len === 0) always. 
-
 @param   {any}     thing    Thing you wish was empty.  
 @returns {boolean}          Boolean.  
 */
