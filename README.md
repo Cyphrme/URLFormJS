@@ -62,12 +62,17 @@ Fragment query parameters are "non-standard", but we hope it is useful enough to
 eventually standardize through an RFC or other means.  
 
 # Form Options
-See docs on the Javascript FormParameter and FormOptions
+Form options defines all the configuration settings for URLFormJS.  See docs on
+the Javascript FormParameter and FormOptions.  Form options does not need a HTML
+form.  
 
-An application may use a prefix, "input_" here, to namespace fields.
+An application may use a prefix, i.e. "input_", to "namespace" fields.
 
 URLFormJS defines a default id for the share button, share link, and clear
-button, and may be overwritten by form options.  
+button.  These defaults may be overwritten by setting the appropriate form
+option setting.  
+
+
 
 
 # Booleans and Boolean Flags
