@@ -78,12 +78,23 @@ option setting.
 # Booleans and Boolean Flags
 Boolean parameters are encoded as "flag style" where the value is known by key
 presence and the value is not explicitly given.  For example, parameter
-`subscribe=true` will be encoded in the URL as simply "subscribe".  Negative
+`subscribe=true` is encoded in the URL as simply "subscribe".  Negative
 values `subscribe=false` are dropped since the negative value is the implicit
 default.  As a special case, where a boolean parameter has a default value of
 "true", negative flags are used, e.g. `-subscribe` to explicitly denote that the
-value is false. 
-
+value is false. Using `checked` in HTML as a method of setting default values
+causes conlflict when using URLFormJS. It is recommended that `checked` is not
+used for any fields being handled by URLFormJS, and `defaultValue` is used instead
+in the form parameters.
+E.g. replace `<input id="unique" type="checkbox" checked>` with
+`<input id="unique"type="checkbox">`
+and 
+`{
+	"name": "unique",
+	"type": "bool",
+	"defaultValue": true,
+}
+`
 # Quag
 
 We found it useful to name a super set of query and fragment, dubbed `quag`.
